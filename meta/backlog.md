@@ -4,6 +4,7 @@ Things to ship before / around launch. Roughly priority-ordered within sections.
 
 ## Blockers for launch
 
+- [ ] **Register `pouk.ai` at Porkbun.** The Vercel deploy is live on its `*.vercel.app` preview URL but the canonical domain doesn't exist yet. Until registered: meta tags (canonical, OG, Twitter, JSON-LD) all reference `https://pouk.ai/` and will be wrong if shared anywhere. Priced at ~$10–15/yr with WHOIS privacy.
 - [ ] **Generate `og.png`** (1200×630). Spec: `#FFFFFF` bg, full POUKAI logo (feather isotype + letterforms from `brand/avatar svg.svg`) in `#1D1D1F` centered, tagline in Instrument Serif italic 56px `#6E6E73` below. ≤80KB. Referenced by `<meta property="og:image">` and Twitter card.
 - [ ] **Generate `apple-touch-icon.png`** (180×180). Feather isotype `#1D1D1F` on `#FFFFFF` bg. Source: extract from `brand/avatar svg.svg` or convert `brand/avatar-isotype.png` (which is already isotype-only) to 180×180. Referenced by `<link rel="apple-touch-icon">`.
 - [ ] **Update favicon** to the feather isotype (currently still the 3-stroke placeholder altimeter from the original spec). The header now uses the real brand logo, so the favicon should match. Inline data-URI SVG using just the two isotype paths from `brand/avatar svg.svg`, with a `prefers-color-scheme: dark` rule to flip to `#F5F5F7` for dark browser-tab UIs.

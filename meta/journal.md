@@ -2,6 +2,12 @@
 
 Reverse-chronological. Newest entry on top.
 
+## 2026-05-08 — deployed to Vercel (preview URL only)
+
+Deployed `Pouk-AI-INC/pouk.ai` `main` to Vercel — the page is reachable on its `*.vercel.app` preview URL. The `pouk.ai` apex isn't pointing anywhere yet because the domain hasn't been registered. Custom-domain wiring (Porkbun → `cname.vercel-dns.com`, Vercel → Settings → Domains) is **deferred until the domain is purchased**.
+
+Meta tags (`<title>`, `canonical`, OG, Twitter, JSON-LD) all still reference `https://pouk.ai/` — left intentionally so they'll be correct the moment the domain lands. Treating the Vercel preview as exactly that: a preview.
+
 ## 2026-05-08 — repo flatten: site/ contents moved to repo root
 
 After the initial push to `Pouk-AI-INC/pouk.ai`, decided the repo should represent only what's deployed — not the working folder. Flattened:
