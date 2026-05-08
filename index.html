@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#FFFFFF">
+
+  <title>pouk.ai — Technical consulting for teams shipping with AI</title>
+  <meta name="description" content="Custom AI builds, automations, and advisory for teams that need to ship. Founded by a frontend engineer. Currently taking Q3 conversations.">
+
+  <link rel="canonical" href="https://pouk.ai/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pouk.ai/">
+  <meta property="og:title" content="pouk.ai">
+  <meta property="og:description" content="Technical consulting for teams shipping with AI. Custom builds, automations, and advisory.">
+  <meta property="og:image" content="https://pouk.ai/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@pouk_ai">
+  <meta name="twitter:title" content="pouk.ai">
+  <meta name="twitter:description" content="Technical consulting for teams shipping with AI.">
+  <meta name="twitter:image" content="https://pouk.ai/og.png">
+
+  <meta name="robots" content="index,follow">
+
+  <!-- Favicon (inline SVG via data URI) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke-width='1.5' stroke-linecap='round'%3E%3Cstyle%3Eline%7Bstroke:%231D1D1F%7D%40media(prefers-color-scheme:dark)%7Bline%7Bstroke:%23F5F5F7%7D%7D%3C/style%3E%3Cline x1='4' y1='8' x2='20' y2='8'/%3E%3Cline x1='12' y1='8' x2='12' y2='19'/%3E%3Cline x1='9' y1='19.5' x2='15' y2='19.5'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;display=swap">
+
+  <style>
+    /* ---------- Tokens ---------- */
+    :root {
+      --bg: #FFFFFF;
+      --surface: #F5F5F7;
+      --fg: #1D1D1F;
+      --fg-muted: #6E6E73;
+      --hairline: #D2D2D7;
+      --accent: #0071E3;
+      --accent-glow: rgba(0, 113, 227, 0.18);
+
+      --fs-wordmark: clamp(1.0625rem, 0.95rem + 0.6vw, 1.25rem);
+      --fs-tagline: clamp(2.25rem, 1.5rem + 3.5vw, 4.25rem);
+      --fs-body: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+      --fs-meta: 0.875rem;
+      --fs-micro: 0.75rem;
+
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-24: 6rem;
+      --space-32: 8rem;
+
+      --page-pad: clamp(1.5rem, 2vw + 1rem, 3rem);
+      --content-max: 64rem;
+      --hero-max: 38rem;
+
+      --easing: cubic-bezier(0.16, 1, 0.3, 1);
+      --easing-link: cubic-bezier(0.2, 0, 0, 1);
+
+      --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+    }
+
+    /* ---------- Reset ---------- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    svg {
+      display: block;
+    }
+
+    /* ---------- Base ---------- */
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+      font-size: var(--fs-body);
+      line-height: 1.55;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      padding: var(--page-pad);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* ---------- Layout ---------- */
+    main {
+      flex: 1 0 auto;
+      width: 100%;
+      max-width: var(--content-max);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero {
+      max-width: 100%;
+      margin-top: var(--space-16);
+    }
+
+    @media (min-width: 768px) {
+      .hero {
+        max-width: var(--hero-max);
+        margin-top: var(--space-24);
+      }
+    }
+
+    /* ---------- Header / Wordmark ---------- */
+    header {
+      margin: 0;
+    }
+
+    .wordmark {
+      display: inline-flex;
+      margin: 0;
+      color: var(--fg);
+    }
+
+    .wordmark svg {
+      display: block;
+      height: clamp(3.5rem, 2.5rem + 2vw, 4.5rem);
+      width: auto;
+      flex-shrink: 0;
+    }
+
+    .visuallyhidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero h1 {
+      margin: 0 0 var(--space-6);
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: var(--fs-tagline);
+      line-height: 1.05;
+      color: var(--fg);
+      text-wrap: balance;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+    }
+
+    .hero .lede {
+      margin: 0 0 var(--space-8);
+      color: var(--fg-muted);
+      max-width: 36rem;
+    }
+
+    .hero .status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: 0 0 var(--space-4);
+      font-size: var(--fs-meta);
+      color: var(--fg);
+    }
+
+    .hero .contact {
+      margin: 0;
+      font-size: var(--fs-body);
+    }
+
+    @media (min-width: 768px) {
+      .hero h1 {
+        margin-bottom: var(--space-8);
+      }
+
+      .hero .lede {
+        margin-bottom: var(--space-12);
+      }
+
+      .hero .status {
+        margin-bottom: var(--space-6);
+      }
+    }
+
+    /* ---------- Status dot ---------- */
+    .status-dot {
+      position: relative;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .status-dot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      animation: status-pulse 2400ms ease-in-out infinite;
+    }
+
+    @keyframes status-pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    /* ---------- Email link ---------- */
+    .contact a {
+      display: inline-block;
+      color: var(--fg);
+      background-image: linear-gradient(var(--accent), var(--accent));
+      background-repeat: no-repeat;
+      background-position: 0 100%;
+      background-size: 0% 1px;
+      padding-bottom: 2px;
+      transition: background-size 240ms var(--easing-link);
+    }
+
+    @media (hover: hover) {
+      .contact a:hover {
+        background-size: 100% 1px;
+      }
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-4);
+      margin-top: var(--space-16);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--hairline);
+      color: var(--fg-muted);
+      font-size: var(--fs-meta);
+    }
+
+    footer p {
+      margin: 0;
+    }
+
+    footer nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-6);
+    }
+
+    footer a {
+      color: var(--fg-muted);
+      transition: color 180ms ease;
+    }
+
+    @media (hover: hover) {
+      footer a:hover {
+        color: var(--fg);
+      }
+    }
+
+    /* ---------- Focus ---------- */
+    a:focus {
+      outline: none;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    /* ---------- Entrance animation ---------- */
+    .reveal {
+      animation-timing-function: var(--easing);
+      animation-fill-mode: both;
+    }
+
+    .reveal-1 {
+      animation-name: rise-8;
+      animation-duration: 600ms;
+      animation-delay: 0ms;
+    }
+
+    .reveal-2 {
+      animation-name: rise-12;
+      animation-duration: 700ms;
+      animation-delay: 150ms;
+    }
+
+    .reveal-3 {
+      animation-name: rise-8;
+      animation-duration: 600ms;
+      animation-delay: 300ms;
+    }
+
+    .reveal-4 {
+      animation-name: rise-8;
+      animation-duration: 600ms;
+      animation-delay: 450ms;
+    }
+
+    .reveal-5 {
+      animation-name: fade-in;
+      animation-duration: 500ms;
+      animation-delay: 600ms;
+    }
+
+    @keyframes rise-8 {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes rise-12 {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ---------- Reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "pouk.ai",
+    "url": "https://pouk.ai",
+    "email": "hello@pouk.ai",
+    "description": "Technical consulting for teams shipping with AI.",
+    "sameAs": [
+      "https://linkedin.com/company/poukai",
+      "https://x.com/pouk_ai",
+      "https://instagram.com/pouk.ai",
+      "https://github.com/pouk-ai"
+    ]
+  }
+  </script>
+</head>
+<body>
+  <main>
+    <header class="reveal reveal-1">
+      <p class="wordmark">
+        <svg viewBox="0 0 518.67 274.41" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true">
+          <g transform="matrix(1.704562 0 0 1.70873 264.309397 90.56269) translate(-177.88 -152)">
+            <path d="M 184.44 165.00 C 185.66 163.16 186.83 161.44 187.84 160.01 C 187.29 161.16 187.00 162.39 187.00 163.65 C 187.00 166.33 186.60 167.00 185.01 167.00 C 183.78 167.00 181.99 168.60 180.27 171.25 C 178.76 173.59 177.29 175.73 177.01 176.00 C 174.82 178.15 177.41 182.55 180.23 181.47 C 180.94 181.19 182.73 179.16 184.99 176.19 C 181.52 180.97 178.42 184.99 178.06 184.97 C 177.61 184.94 172.21 177.83 168.79 173.00 C 170.61 174.95 172.87 176.20 173.96 175.53 C 175.83 174.37 175.14 170.97 171.89 165.30 C 175.02 170.10 177.71 173.99 178.01 174.00 C 178.29 174.00 181.19 169.95 184.44 165.00 z M 173.00 143.99 L 173.00 141.49 C 173.00 136.59 170.43 131.41 165.73 126.85 L 165.15 126.29 C 168.67 129.47 171.69 133.93 172.52 137.20 C 173.11 139.56 173.51 139.74 177.08 139.26 C 180.58 138.79 181.00 138.97 181.00 140.87 C 181.00 142.97 179.41 143.53 174.75 143.05 C 173.79 142.95 173.00 143.38 173.00 143.99 z M 183.69 198.84 C 186.76 195.01 190.04 190.48 190.78 188.75 C 191.43 187.24 192.57 186.00 193.32 186.00 C 193.97 186.00 195.94 184.32 197.94 182.10 L 190.82 190.55 C 188.22 193.63 185.76 196.49 183.69 198.84 z M 158.85 134.13 C 158.95 133.59 159.00 133.07 159.00 132.62 C 159.00 127.86 160.97 128.95 166.97 137.04 L 169.29 140.18 C 168.96 139.74 168.60 139.29 168.24 138.81 C 163.11 132.00 160.63 130.64 158.85 134.13 z M 179.90 100.45 C 182.71 103.70 188.06 111.70 190.80 117.06 L 192.98 121.31 L 190.19 116.00 C 187.71 111.28 185.28 108.02 183.63 107.20 C 181.92 106.35 181.00 105.08 181.00 103.57 C 181.00 102.54 180.54 101.29 179.90 100.45 z M 173.73 154.13 C 175.57 156.57 177.78 159.00 178.45 159.00 C 179.04 159.00 180.15 157.95 181.18 156.49 C 180.93 156.93 180.68 157.35 180.45 157.75 C 179.41 159.54 178.30 161.00 177.97 161.00 C 177.64 161.00 176.61 159.54 175.69 157.75 C 175.10 156.60 174.43 155.38 173.73 154.13 z M 200.51 179.06 C 202.97 175.95 203.00 174.81 203.00 168.14 L 203.00 176.10 z M 163.52 119.95 C 166.04 115.09 170.36 108.43 173.71 103.94 C 170.32 108.76 165.20 116.74 163.52 119.95 z M 157.33 138.38 C 155.43 144.58 154.31 151.01 153.68 159.34 C 154.39 149.84 155.70 142.28 157.33 138.38 z M 166.89 143.09 C 168.98 145.98 170.94 148.93 171.00 149.50 C 169.61 147.22 168.19 145.01 166.89 143.09 z M 183.74 152.30 C 187.50 146.11 192.24 139.04 193.75 137.38 C 192.31 139.06 187.60 146.10 183.74 152.30 z M 165.54 155.27 C 160.17 146.78 159.97 145.39 160.57 141.37 C 160.06 144.88 160.43 146.44 162.74 150.54 C 163.47 151.84 164.44 153.47 165.54 155.27 z M 158.78 161.46 C 158.81 161.33 158.84 161.21 158.87 161.10 C 159.51 158.80 159.66 158.89 162.51 163.10 C 162.54 163.14 162.56 163.18 162.59 163.22 C 159.68 159.11 159.46 159.02 158.85 161.17 C 158.83 161.26 158.80 161.36 158.78 161.46 z M 177.67 99.30 C 177.92 99.11 178.12 99.00 178.25 99.00 C 178.48 99.00 178.93 99.38 179.54 100.04 C 179.49 100.00 179.45 99.96 179.41 99.92 C 178.69 99.33 178.21 99.09 177.67 99.30 z M 193.21 152.13 C 193.44 151.62 193.67 151.08 193.91 150.51 C 194.18 149.84 194.43 149.22 194.64 148.64 C 194.26 149.81 193.78 150.99 193.21 152.13 z M 175.15 201.75 C 176.22 203.48 177.44 204.91 177.92 205.00 C 177.91 205.00 177.91 205.00 177.90 205.00 C 177.50 205.00 176.26 203.54 175.15 201.75 z M 166.00 168.69 C 166.27 169.15 166.51 169.57 166.70 169.93 C 166.29 169.29 166.03 168.85 166.00 168.69 z M 192.65 165.15 C 192.94 164.69 193.24 164.22 193.53 163.75 C 195.13 161.19 196.77 159.09 197.22 159.00 C 196.77 159.09 195.14 161.19 193.54 163.75 C 193.27 164.19 192.97 164.66 192.65 165.15 z M 194.21 137.01 C 194.43 137.05 194.72 137.70 194.98 138.68 C 194.71 137.74 194.43 137.10 194.21 137.01 z M 160.99 139.20 C 161.31 137.89 161.66 137.00 161.92 137.00 L 161.93 137.00 C 161.66 137.04 161.30 137.92 160.99 139.20 z M 184.89 135.10 C 183.47 138.01 182.83 140.85 183.19 143.14 C 182.83 140.85 183.47 138.00 184.89 135.10 z"/>
+            <path d="M 175.15 201.75 C 174.04 199.96 171.53 196.95 169.57 195.05 C 167.60 193.16 166.00 191.21 166.00 190.72 C 166.00 190.23 163.02 186.83 159.38 183.17 L 152.76 176.50 L 153.39 164.00 C 154.00 152.02 155.38 143.87 158.19 135.71 C 160.03 130.38 162.45 131.13 168.24 138.81 C 170.86 142.28 173.00 144.61 173.00 143.99 C 173.00 143.38 173.11 139.56 172.52 137.20 C 171.66 133.80 168.43 129.12 164.74 125.93 L 161.76 123.36 L 163.49 120.02 C 165.52 116.09 173.04 104.54 175.84 101.05 C 177.52 98.96 178.05 98.79 179.41 99.92 C 180.28 100.65 181.00 102.29 181.00 103.57 C 181.00 105.08 181.92 106.35 183.63 107.20 C 185.28 108.02 187.71 111.28 190.19 116.00 L 194.13 123.50 L 189.57 128.39 C 185.08 133.19 182.55 139.04 183.19 143.14 C 183.44 144.74 184.29 144.09 187.50 139.83 C 189.70 136.91 192.28 133.28 193.24 131.76 C 194.19 130.24 195.38 129.00 195.88 129.00 C 198.37 129.00 203.00 154.46 203.00 168.14 C 203.00 176.07 202.96 176.19 198.84 181.07 C 196.56 183.78 194.07 186.00 193.32 186.00 C 192.57 186.00 191.43 187.24 190.78 188.75 C 189.40 191.99 179.14 205.00 177.97 205.00 C 177.53 205.00 176.26 203.54 175.15 201.75 z M 180.26 194.05 C 181.01 192.97 183.51 189.93 185.82 187.30 C 197.06 174.45 198.00 172.78 198.00 165.61 C 198.00 161.97 197.66 159.00 197.25 159.00 C 196.84 159.00 195.16 161.14 193.53 163.75 C 188.18 172.31 181.74 180.89 180.23 181.47 C 177.41 182.55 174.82 178.15 177.01 176.00 C 177.29 175.73 178.76 173.59 180.27 171.25 C 181.99 168.60 183.78 167.00 185.01 167.00 C 186.60 167.00 187.00 166.33 187.00 163.65 C 187.00 161.47 187.86 159.36 189.45 157.64 C 193.62 153.15 196.22 146.10 195.50 141.25 C 195.16 138.91 194.57 137.01 194.19 137.01 C 193.52 137.03 186.33 147.76 181.98 155.25 C 180.78 157.31 179.19 159.00 178.45 159.00 C 177.24 159.00 171.00 151.06 171.00 149.52 C 171.00 148.50 162.66 137.00 161.92 137.00 C 161.54 137.00 160.93 138.97 160.57 141.37 C 159.84 146.24 160.29 147.25 169.68 161.70 C 174.78 169.55 176.20 174.14 173.96 175.53 C 172.43 176.47 168.55 173.61 166.91 170.34 C 166.12 168.78 164.14 165.52 162.51 163.10 C 159.66 158.89 159.51 158.80 158.87 161.10 C 158.50 162.42 158.15 165.33 158.10 167.56 C 158.01 171.25 158.88 172.71 167.75 183.81 C 173.11 190.51 177.81 196.00 178.19 196.00 C 178.57 196.00 179.50 195.12 180.26 194.05 z"/>
+          </g>
+          <path transform="translate(824.18 -1446.333866)" d="M -824.18 1668.40 L -802.87 1668.40 C -797.44 1668.40 -793.36 1669.89 -790.63 1672.86 C -788.23 1675.45 -787.03 1679.01 -787.03 1683.52 C -787.03 1688.08 -788.49 1691.70 -791.42 1694.39 C -794.11 1696.89 -797.44 1698.13 -801.43 1698.13 L -817.63 1698.13 L -817.63 1719.95 L -824.18 1719.95 z M -803.88 1692.30 C -800.76 1692.30 -798.31 1691.51 -796.53 1689.93 C -794.76 1688.34 -793.87 1686.11 -793.87 1683.23 C -793.87 1680.40 -794.76 1678.19 -796.53 1676.61 C -798.31 1675.02 -800.76 1674.23 -803.88 1674.23 L -817.63 1674.23 L -817.63 1692.30 z"/>
+          <path transform="translate(821.840895 -1446.333866)" d="M -699.23 1720.74 C -707.24 1720.74 -713.56 1717.98 -718.16 1712.46 C -722.15 1707.66 -724.14 1701.57 -724.14 1694.17 C -724.14 1685.68 -721.55 1678.96 -716.36 1674.01 C -711.90 1669.74 -706.19 1667.61 -699.23 1667.61 C -691.26 1667.61 -684.97 1670.37 -680.36 1675.89 C -676.38 1680.69 -674.39 1686.78 -674.39 1694.17 C -674.39 1702.67 -676.96 1709.39 -682.09 1714.33 C -686.60 1718.61 -692.32 1720.74 -699.23 1720.74 z M -699.30 1714.91 C -693.40 1714.91 -688.74 1712.77 -685.33 1708.50 C -682.40 1704.76 -680.94 1699.98 -680.94 1694.17 C -680.94 1687.50 -682.84 1682.25 -686.63 1678.41 C -689.94 1675.09 -694.16 1673.44 -699.30 1673.44 C -705.16 1673.44 -709.79 1675.57 -713.20 1679.85 C -716.12 1683.59 -717.59 1688.37 -717.59 1694.17 C -717.59 1700.85 -715.69 1706.10 -711.90 1709.94 C -708.59 1713.25 -704.39 1714.91 -699.30 1714.91 z"/>
+          <path transform="translate(830.042085 -1446.333866)" d="M -602.54 1720.74 C -609.07 1720.74 -614.11 1719.04 -617.66 1715.63 C -620.73 1712.61 -622.27 1708.65 -622.27 1703.75 L -622.27 1668.40 L -615.71 1668.40 L -615.71 1703.75 C -615.71 1707.30 -614.56 1710.05 -612.26 1711.99 C -609.95 1713.94 -606.71 1714.91 -602.54 1714.91 C -598.12 1714.91 -594.71 1713.81 -592.31 1711.60 C -590.25 1709.63 -589.22 1707.01 -589.22 1703.75 L -589.22 1668.40 L -582.67 1668.40 L -582.67 1703.75 C -582.67 1709.32 -584.71 1713.64 -588.79 1716.71 C -592.29 1719.40 -596.87 1720.74 -602.54 1720.74 z"/>
+          <path transform="translate(833.393735 -1446.333866)" d="M -526.27 1668.40 L -519.71 1668.40 L -519.71 1694.46 L -494.01 1668.40 L -485.51 1668.40 L -506.61 1689.42 L -485.37 1719.95 L -493.15 1719.95 L -511.29 1693.53 L -519.71 1701.88 L -519.71 1719.95 L -526.27 1719.95 z"/>
+          <path transform="translate(838.23495 -1447.125866)" d="M -386.16 1719.95 L -393.22 1719.95 L -408.41 1676.32 L -422.66 1719.95 L -429.65 1719.95 L -411.79 1668.40 L -404.66 1668.40 z"/>
+          <path transform="translate(845.690706 -1447.125866)" d="M -333.72 1668.40 L -327.02 1668.40 L -327.02 1719.95 L -333.72 1719.95 z"/>
+        </svg>
+        <span class="visuallyhidden">POUKAI</span>
+      </p>
+    </header>
+
+    <section class="hero" aria-label="Introduction">
+      <h1 class="reveal reveal-2">Technical consulting for teams shipping with <em>AI</em>.</h1>
+
+      <p class="lede reveal reveal-3">pouk.ai builds custom AI systems, automations, and advisory engagements for operators who&rsquo;d rather ship than speculate. Named for Pou&#257;kai &mdash; the largest eagle that ever flew, hunting by stooping from height.</p>
+
+      <p class="status reveal reveal-4">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>Currently taking conversations for Q3.</span>
+      </p>
+
+      <p class="contact reveal reveal-4"><a href="mailto:hello@pouk.ai">hello@pouk.ai</a></p>
+    </section>
+  </main>
+
+  <footer class="reveal reveal-5">
+    <p>&copy; 2026 pouk.ai</p>
+    <nav aria-label="Social media">
+      <ul>
+        <li><a href="https://linkedin.com/company/poukai" rel="me noopener">LinkedIn</a></li>
+        <li><a href="https://x.com/pouk_ai" rel="me noopener">X</a></li>
+        <li><a href="https://instagram.com/pouk.ai" rel="me noopener">Instagram</a></li>
+        <li><a href="https://github.com/pouk-ai" rel="me noopener">GitHub</a></li>
+      </ul>
+    </nav>
+  </footer>
+</body>
+</html>
