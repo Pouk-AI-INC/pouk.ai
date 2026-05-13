@@ -4,6 +4,8 @@ This directory holds product specs authored by `pouk-ai-pm` for the pouk.ai mark
 
 This file is the running, prioritized list of every spec authored under `meta/specs/`. Distinct from the parent `meta/backlog.md`, which tracks launch blockers, DNS, and approved verbatim copy — **this file tracks specs only**: what's drafted, what's approved, what's blocked, what's next. The agent updates it whenever a spec is added, moved in priority, or moves through `Draft → In review → Approved → Built → Live`.
 
+> **2026-05-13 — Decisions D-01 through D-13 resolved.** All spec-side decisions tracked in `meta/decisions/launch-readiness.md` were closed on 2026-05-13. Every spec listed below has had its `Status` field flipped from `Draft` to `Approved`. The remaining dependencies are now framed as **Dependencies blocking `Built`**, primarily DS molecule availability in `@poukai/ui@0.1.0` and a handful of Arian-owned final copy lifts. See each spec's "Decisions log" line for the IDs that touched it.
+
 ---
 
 ## Status legend
@@ -20,45 +22,49 @@ This file is the running, prioritized list of every spec authored under `meta/sp
 
 ### Page specs — the four routes
 
-1. **`pages/why-ai.md`** — `Draft`
+1. **`pages/why-ai.md`** — `Approved`
    - Why this priority: Top-of-funnel thesis page. The biggest content lift; the page that frames why anyone hires pouk.ai. Per the funnel order (Why AI → Roles → Principles → contact) this is the most leveraged page to ship first.
-   - Dependencies blocking `Approved`: DS `FailureMode` molecule + `Stat` atom shipped in `@poukai/ui@0.1.0`; Arian's calls on (a) sticky-TOC desktop affordance, (b) citation style, (c) dataset-vintage footer, (d) discovery-questions callout treatment.
-   - Dependencies blocking `Built`: `content/failure-modes.json.md` spec also `Approved` (same content lifecycle).
+   - Decisions applied: D-01 (citation style), D-02 (sticky desktop TOC), D-03 (dataset-vintage footer), D-04 (discovery-questions callout), D-05 (stats extraction).
+   - Dependencies blocking `Built`: DS `FailureMode` molecule + `Stat` atom shipped in `@poukai/ui@0.1.0`; `content/failure-modes.json.md` spec also `Approved` (same content lifecycle — now satisfied); Arian-owned rewrite of the 500%/61% sentences post-extraction; final copy on end CTA.
 
-2. **`pages/roles.md`** — `Draft`
+2. **`pages/roles.md`** — `Approved`
    - Why this priority: Self-identification page. Once a prospect agrees with `/why-ai`, they need to match their problem to a service shape. Single page with anchor links recommended (`#builder`, `#automator`, etc.) over four sub-routes — defended in the spec.
-   - Dependencies blocking `Approved`: DS `RoleCard` molecule shipped; Arian's calls on (a) Lucide glyph picks for the four roles, (b) eyebrow convention ("The Builder" vs. "01"), (c) per-role CTA vs. universal end CTA.
-   - Dependencies blocking `Built`: `content/roles.json.md` spec also `Approved`.
+   - Decisions applied: D-06 (Lucide picks: hammer / workflow / graduation-cap / clapperboard), D-07 (eyebrow "The <Role>"; title bare role name), D-08 (universal end CTA only).
+   - Dependencies blocking `Built`: DS `RoleCard` molecule shipped (with no required CTA slot); `content/roles.json.md` spec also `Approved` — now satisfied; verbatim copy lift from `meta/backlog.md`.
 
-3. **`pages/principles.md`** — `Draft`
+3. **`pages/principles.md`** — `Approved`
    - Why this priority: Trust closer. Once a prospect has self-identified, they triangulate whether pouk.ai is the operator they want in the room. Single long-scroll page with anchor IDs recommended over per-principle routes — defended in the spec.
-   - Dependencies blocking `Approved`: DS `Principle` molecule shipped; Arian's calls on (a) page-heading wording ("Principles" vs. "Operating Principles"), (b) bookend voice treatment (Instrument Serif italic recommended), (c) any cross-surface pull-out.
-   - Dependencies blocking `Built`: `content/principles.json.md` spec also `Approved`.
+   - Decisions applied: D-09 (page heading "Principles"), D-10 (Instrument Serif italic bookends; sans for the ten principles).
+   - Dependencies blocking `Built`: DS `Principle` molecule shipped; bookend typography mapping accessible from site CSS; `content/principles.json.md` spec also `Approved` — now satisfied; verbatim copy lift from `meta/backlog.md`.
 
-4. **`pages/home.md`** — `Draft`
+4. **`pages/home.md`** — `Approved`
    - Why this priority: The post-cutover homepage. Defines the doorway behavior — preserves the holding page's restraint while adding the `/why-ai` lede hand-off. Ships last because it depends on the other three pages existing for its links to mean anything.
-   - Dependencies blocking `Approved`: DS `Hero` molecule + `SiteShell` organism shipped; Arian's call on (a) lede-extension treatment (integrated link sentence vs. tertiary line), (b) status-line copy at cutover, (c) `SiteShell` current-route handling on `/`.
-   - Dependencies blocking `Built`: visual-parity gate per masterplan section 6.1 (screenshot diff vs. current `index.html`).
+   - Decisions applied: D-11 (integrated lede-extension link sentence), D-12 (status-line copy verbatim from current `index.html` at cutover).
+   - Dependencies blocking `Built`: DS `Hero` molecule + `SiteShell` organism shipped; `SiteShell` current-route handling on `/`; visual-parity gate per masterplan section 6.1 (screenshot diff vs. current `index.html`, including byte-identical status-line text); brand assets (`og.png`, `apple-touch-icon.png`, favicon, robots.txt, sitemap.xml).
 
 ### Content data specs
 
-5. **`content/roles.json.md`** — `Draft`
-   - Why this priority: Required for `pages/roles.md` to ship. Schema is small and stable; can be Approved early.
-   - Dependencies blocking `Approved`: Arian's call on Lucide picks (the `icon` field's allowed values).
+5. **`content/roles.json.md`** — `Approved`
+   - Why this priority: Required for `pages/roles.md` to ship. Schema is small and stable.
+   - Decisions applied: D-06 (`icon` allowed values locked to four kebab-case Lucide identifiers), D-07 (`eyebrow` shape locked to "The <Role>"; `title` is the bare role name), D-08 (no `cta` field permitted).
+   - Dependencies blocking `Built`: DS `RoleCard.icon` slot resolution pattern confirmed with engineer; verbatim copy lift from `meta/backlog.md`.
 
-6. **`content/principles.json.md`** — `Draft`
+6. **`content/principles.json.md`** — `Approved`
    - Why this priority: Required for `pages/principles.md` to ship. Schema includes the editorial bookends as top-level fields alongside the principles array — opinionated call defended in the spec.
-   - Dependencies blocking `Approved`: None on the schema side; Arian's review of the validation constraints.
+   - Decisions applied: D-09 / D-10 confirm `intro` and `conclusion` as top-level fields and the `numeral` field for the ten principles — schema unchanged.
+   - Dependencies blocking `Built`: DS `Principle` molecule shipped; verbatim copy lift from `meta/backlog.md`.
 
-7. **`content/failure-modes.json.md`** — `Draft`
+7. **`content/failure-modes.json.md`** — `Approved`
    - Why this priority: Required for `pages/why-ai.md` to ship. Schema includes a per-failure-mode `stats` array (default `[]`) so the 500% and 61% figures render as `Stat` atoms rather than inline bold — opinionated call defended in the spec.
-   - Dependencies blocking `Approved`: Arian's approval of the stat-prose extraction (pulling 500%/61% out of body text into `stats`) and of the canonical attribution string for each stat's `source` field.
+   - Decisions applied: D-05 (typed `stats` array locked; 500% extracted from Failure Mode 2 body, 61% extracted from Failure Mode 5 body).
+   - Dependencies blocking `Built`: DS `FailureMode` molecule + `Stat` atom shipped; Arian-approved rewrite of the body sentences from which 500% and 61% were extracted; Arian-picked canonical attribution strings for `stats[].source`.
 
 ### Flow specs
 
-8. **`flows/visitor-to-conversation.md`** — `Draft`
+8. **`flows/visitor-to-conversation.md`** — `Approved`
    - Why this priority: Connective tissue across the four page specs. Locks the nav order (Why AI → Roles → Principles), the inter-page hand-offs, and the conversion definition. Without it, each page spec is independently sensible but the funnel is theoretical.
-   - Dependencies blocking `Approved`: DS `SiteShell` shipped; Arian's call on nav order (recommendation: funnel order, defended in the spec).
+   - Decisions applied: D-13 (nav order: Why AI · Roles · Principles, with cascade to sitemap and footer).
+   - Dependencies blocking `Built`: DS `SiteShell` shipped; engineer wires sitemap and footer ordering consistent with nav.
 
 ---
 

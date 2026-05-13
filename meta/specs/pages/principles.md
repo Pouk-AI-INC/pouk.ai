@@ -1,10 +1,11 @@
 # Spec: Principles
 
 **Route**: `/principles`
-**Status**: Draft
+**Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
 **Last updated**: 2026-05-13
 **Masterplan reference**: Sections 2A (shape vs. substance), 4.1 (site layout), 4.4 (long-form content as data)
+**Decisions log**: D-09 (page heading), D-10 (bookend voice) — both resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
 ---
 
@@ -27,13 +28,13 @@
 
 **Opinionated call: single long-scroll page with anchor IDs (`#ownership`, `#integrity`, etc.), not per-principle routes.** Defended in one paragraph: the introduction and conclusion are editorial bookends that explicitly frame the principles as one piece — pulling them apart breaks the manifesto. Per-principle routes also create ten thin pages (Lighthouse anti-pattern) and ten chances for the nav to misrepresent. Long-scroll keeps the work coherent; anchor IDs give us the same shareability (`pouk.ai/principles#momentum`) without fragmentation. If a future post-launch insight says a single principle deserves a full essay, we promote it to a route then.
 
-**Opinionated call: introduction and conclusion render in a distinct editorial voice from the ten principles.** Recommendation per the backlog's open design questions: Instrument Serif italic (the brand's serif token) for the bookend prose, sans for the principles themselves. The serif italic carries the "compass / framing" voice; the sans carries the "principle / discipline" voice. Same DS tokens, different mappings inside the page template.
+**Locked call: introduction and conclusion render in Instrument Serif italic; the ten principles themselves render in sans (per D-10).** The serif italic carries the "compass / framing" voice; the sans carries the "principle / discipline" voice. Same DS tokens, different mappings inside the page template.
 
 1. `SiteShell` — top nav (Principles marked current) + hairline footer.
-2. `Hero` — eyebrow ("Principles" or "Operating Principles" — see open question), title, lede framing the ten principles as the brand's compass.
-3. **Introduction** — three to four sentences in the bookend voice (Instrument Serif italic recommended). Sets the frame: the tools matter; what matters more is how you think and operate.
-4. **Ten `Principle` molecules** — each rendered with margin numeral (lowercase Roman: `i.` through `x.`), title, body. Anchor IDs derived from title slugs: `#ownership`, `#integrity`, `#reliability`, `#systems-thinking`, `#intellectual-curiosity`, `#obsession`, `#range`, `#momentum`, `#willingness-to-fail`, `#good-nature`.
-5. **Conclusion** — two to three sentences in the bookend voice. Closes the loop: these are built, not faked.
+2. `Hero` — eyebrow (optional, "Principles"), `<h1>` title: **"Principles"** (per D-09 — terser, matches the URL). Lede framing the ten principles as the brand's compass.
+3. **Introduction** — three to four sentences rendered in **Instrument Serif italic** (per D-10). Sets the frame: the tools matter; what matters more is how you think and operate.
+4. **Ten `Principle` molecules** — each rendered in sans (per D-10) with margin numeral (lowercase Roman: `i.` through `x.`), title, body. Anchor IDs derived from title slugs: `#ownership`, `#integrity`, `#reliability`, `#systems-thinking`, `#intellectual-curiosity`, `#obsession`, `#range`, `#momentum`, `#willingness-to-fail`, `#good-nature`.
+5. **Conclusion** — two to three sentences rendered in **Instrument Serif italic** (per D-10). Closes the loop: these are built, not faked.
 6. **End CTA — minimal.** A single muted line: "If this is the kind of partner you want, [hello@pouk.ai](mailto:hello@pouk.ai)." No button, no marketing flourish. Restraint here is the brand.
 
 ## 5. Content requirements
@@ -42,10 +43,11 @@ The substance lives verbatim in `meta/backlog.md` under the "Operating Principle
 
 Outcomes the copy must hit:
 
-- The introduction must establish the principles as **a working compass, not a marketing list**. The phrase "Learn them. Practice them. Build from them." (from the verbatim copy) carries the imperative voice that distinguishes this page from a values slide.
-- Each of the ten principles must read as **a specific operating discipline**, not an abstract virtue. "Reliability" is right because the body describes showing up prepared, meeting deadlines, communicating early. "Be excellent" would be wrong.
+- **The page heading is "Principles"** (per D-09). The URL says what the page is; the heading does not repeat the modifier. "Operating Principles" is rejected for launch.
+- The introduction must establish the principles as **a working compass, not a marketing list**. The phrase "Learn them. Practice them. Build from them." (from the verbatim copy) carries the imperative voice that distinguishes this page from a values slide. The introduction renders in **Instrument Serif italic** (per D-10) — the editorial framing voice.
+- Each of the ten principles must read as **a specific operating discipline**, not an abstract virtue. "Reliability" is right because the body describes showing up prepared, meeting deadlines, communicating early. "Be excellent" would be wrong. The ten principles render in **sans** (per D-10) — the enumerated discipline voice.
 - The principles must read as **the founder's personal compass**, not a brand-team manifesto. First-person isn't required, but the voice should feel like Arian wrote it after a hard quarter, not after a positioning workshop.
-- The conclusion must commit to **the principles being built, not faked** — i.e., the brand vulnerability is "this is what we're trying to be," not "this is who we are." That nuance is the difference between trustworthy and grandiose.
+- The conclusion must commit to **the principles being built, not faked** — i.e., the brand vulnerability is "this is what we're trying to be," not "this is who we are." That nuance is the difference between trustworthy and grandiose. The conclusion renders in **Instrument Serif italic** (per D-10), bookending the introduction.
 - The ten titles must work as **standalone vocabulary** — a reader should be able to repeat all ten without re-reading the page, because the words are concrete and the order has rhythm. The verbatim copy already satisfies this.
 
 `Draft:` Hero lede direction: "Ten operating principles. Built one project at a time. The compass we work from." Direction only — Arian writes the final.
@@ -70,7 +72,9 @@ The Roman numeral is **stored, not computed** — the source-of-truth roman stri
 - [ ] Each `Principle` receives `numeral`, `title`, and body content matching the JSON entry.
 - [ ] Numerals render in lowercase Roman (`i.` through `x.`) and match the `numeral` field in JSON exactly — no computed Roman numerals.
 - [ ] Anchor IDs are present on each principle: `#ownership`, `#integrity`, `#reliability`, `#systems-thinking`, `#intellectual-curiosity`, `#obsession`, `#range`, `#momentum`, `#willingness-to-fail`, `#good-nature`.
-- [ ] Introduction and conclusion render in a typographically distinct voice from the principles (recommendation: Instrument Serif italic — final treatment is the engineer's call, brand-aligned by Arian).
+- [ ] Page `<h1>` reads "Principles" (per D-09) — not "Operating Principles" and not "How we operate".
+- [ ] Introduction and conclusion render in **Instrument Serif italic** (per D-10), distinct from the sans treatment of the ten principles.
+- [ ] The ten `Principle` molecules render in **sans** (per D-10), distinct from the bookend serif italic.
 - [ ] End CTA renders an `<a href="mailto:hello@pouk.ai">` with a single muted line of copy.
 - [ ] Top nav `SiteShell` highlights Principles as current.
 - [ ] Lighthouse mobile: 100/100/100/100.
@@ -81,12 +85,15 @@ The Roman numeral is **stored, not computed** — the source-of-truth roman stri
 
 ## 9. Open questions / dependencies
 
+The original draft's open questions (page heading wording, bookend voice) were resolved via `meta/decisions/launch-readiness.md` on 2026-05-13. See decisions D-09 and D-10.
+
+Remaining dependencies blocking `Built`:
+
 - **DS dependency — `Principle` molecule.** Required and listed as in scope for DS Phase 1.2 (`@poukai/ui@0.1.0-alpha.1`). Confirm props match: `numeral`, `title`, `children` (body). Tracked in `meta/masterplan.md` section 3.2.
-- **Page title — Arian's call.** Backlog flags candidates: `/principles`, `/operating-principles`, `/manifesto`. Recommendation: `/principles` (shortest, most direct, matches masterplan). The page heading can read "Operating Principles" while the route stays `/principles`.
-- **Numeral treatment — Arian's call.** Backlog flags lowercase Roman vs. display numerals ("01 / 02 / ...") vs. inline numbered headings. Recommendation: lowercase Roman in the margin per `Principle` molecule's existing API. It reads as editorial / typographic rather than as a marketing checklist.
-- **Bookend voice treatment — Arian's call.** Recommendation: Instrument Serif italic for intro + conclusion, sans for principles. The DS tokens already support both faces; mapping is a site-CSS decision. If Arian prefers visual consistency, drop the serif and keep a typographic hierarchy distinction (size + spacing) instead.
-- **Nav order — coordinated with `flows/visitor-to-conversation.md`.** Backlog flags: Roles first (commercial) or Principles first (character)? Recommendation: nav order matches funnel — Why AI → Roles → Principles → contact. Locked in the flow spec.
-- **Cross-surface pullout — decision pending Arian.** Backlog asks whether any principle gets pulled forward onto `/` as a quote treatment. Recommendation: no for launch. The homepage stays restrained. Re-open if Arian wants a single quote treatment as a hand-off teaser.
+- **Bookend typography mapping — site-side.** Per D-10 the introduction and conclusion render in Instrument Serif italic. The DS tokens for Instrument Serif italic must be accessible from the page template (i.e., the page CSS can apply the brand serif token to the intro/conclusion blocks). If `@poukai/ui` exposes a serif-italic token directly, prefer that; otherwise the page applies the token from DS CSS variables.
+- **Numeral treatment — locked.** Lowercase Roman in the margin per `Principle` molecule's existing API. It reads as editorial / typographic rather than as a marketing checklist.
+- **Nav order — coordinated with `flows/visitor-to-conversation.md`.** Locked per D-13: Why AI → Roles → Principles.
+- **Cross-surface pullout — out of scope at launch.** No principle is pulled forward onto `/` as a quote treatment. The homepage stays restrained. Re-open post-launch if needed.
 - **Content lift — Arian-owned.** Verbatim copy in `meta/backlog.md` is approved as the source. Any edits to that copy are Arian's, not the engineer's.
 
 ## 10. Out of scope

@@ -20,6 +20,10 @@ Things to ship before / around launch. Roughly priority-ordered within sections.
 - [ ] Pick email host (Fastmail / Google Workspace) for `hello@pouk.ai`
 - [ ] Add MX, SPF, DKIM, DMARC, CAA records — must be live before first prospect email goes out
 
+## Security hygiene (once email lands)
+
+- [ ] **Add `/.well-known/security.txt`** — RFC 9116 disclosure file. Contact: `security@pouk.ai` (alias to `hello@`) or `hello@pouk.ai` directly. Include `Expires:` (rotate annually) and an optional `Preferred-Languages: en` field. Decision: `meta/decisions/2026-05-13-launch-readiness-closed.md` D-21. Tracked as Technical Requirements R-081 (SOFT today; HARD once `hello@pouk.ai` is live).
+
 ## Brand assets in `/brand/` — status
 
 `/brand/` contains: `avatar.png`, `avatar-isotype.png`, `banner.png`, `isotype svg.png`, `logo svg.png`, `avatar svg.svg`.

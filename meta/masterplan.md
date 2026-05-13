@@ -262,11 +262,29 @@ Pouk-AI-INC/pouk.ai
 - `@astrojs/check` -- typecheck on build.
 - `astro-compress` -- gzip/brotli HTML+CSS at build.
 
-### 4.3 The zero-JS contract
+### 4.2A CI shape
 
-For each page, components render through Astro's server-renderer (`<Hero client:none />` is the default -- no hydration directive). The shipped HTML contains the rendered DOM and the imported CSS. No React runtime is sent to the browser.
+The Astro build is the easy part. The CI pipeline that fronts every PR (and every merge to `main` before the Vercel domain alias is touched) has four gates:
 
-`StatusBadge`'s pulse is CSS keyframes, not state -- already JS-free. If a future component genuinely needs interactivity (e.g. a `<Dialog>`), it gets `client:visible` and we pay the hydration cost only on that island.
+- **Build & typecheck** -- `pnpm build` + `astro check`. Green or the PR doesn't merge.
+- **Lighthouse-CI** -- `lighthouse-ci` runs against every route on the Vercel preview URL, mobile profile. Thresholds per `meta/standards/technical-requirements.md` R-013 (Performance ≥ 95, Accessibility = 100, Best Practices = 100, SEO = 100).
+- **Axe accessibility** -- `@axe-core/playwright` runs against every route. 0 violations required (HARD per R-NNN in the standards doc).
+- **Content-schema validation** -- every file under `src/content/*.json` validates against its Zod schema at build time. Schema drift fails the build.
+
+The Lighthouse + Axe gates run against the Vercel preview, not against `pnpm dev`, because the preview is what Vercel actually serves. CI calls the Vercel API to grab the preview URL for the current commit before running the audit. If `lighthouse-ci` is configured locally, the engineer can dry-run before pushing.
+
+### 4.3 Client-JS posture
+
+`@poukai/ui` components render through Astro's server-renderer (`<Hero client:none />` is the default -- no hydration directive). The shipped HTML contains the rendered DOM and the imported CSS. No React runtime is sent to the browser for the DS layer.
+
+Two pieces of first-party client JS run on every page (decision recorded in `meta/decisions/launch-readiness.md` D-15 / D-16, 2026-05-13):
+
+- **Matomo** -- privacy-respecting first-party analytics, JS tracker on every route including `/`. Cookieless mode; loaded `defer`.
+- **Bugsink** -- Sentry-compatible self-hostable error reporter; client SDK on every route including `/`. Loaded `defer`.
+
+The combined budget is ≤ 75 KB gzipped per page (R-010). Any third script -- third-party hydration, a `<Dialog>` island, a Stripe checkout, anything -- requires an inline `// hydration: <reason>` comment and counts against the budget. The earlier "zero JS on `/`" formulation has been retired; the practical bar now is "no JS that isn't first-party (Matomo / Bugsink / explicitly justified `@poukai/ui` island)."
+
+`StatusBadge`'s pulse is CSS keyframes, not state -- it remains JS-free regardless of the budget conversation.
 
 ### 4.4 Long-form content as data
 
@@ -330,14 +348,14 @@ Versioned deploys; reproducible builds; no source-level coupling.
 
 Before any DNS / Vercel domain swap, every page in the new build has to pass:
 
-| Check                             | Tool                   | Pass bar                   |
-| --------------------------------- | ---------------------- | -------------------------- |
-| Visual diff vs. current `pouk.ai` | screenshot, manual     | "indistinguishable" on `/` |
-| Lighthouse mobile                 | `lighthouse-ci` in CI  | 100 / 100 / 100 / 100      |
-| Axe a11y                          | `@axe-core/playwright` | 0 violations               |
-| JSON-LD                           | manual JSON validate   | identical to current page  |
-| HTML weight (`/`)                 | `wc -c` on built file  | <= current page +10%       |
-| `prefers-reduced-motion`          | manual                 | all animation off          |
+| Check                             | Tool                                | Pass bar                                                 |
+| --------------------------------- | ----------------------------------- | -------------------------------------------------------- |
+| Visual diff vs. current `pouk.ai` | screenshot, manual                  | "indistinguishable" on `/`                               |
+| Lighthouse mobile                 | `lighthouse-ci` in CI               | Perf ≥ 95 · A11y = 100 · BP = 100 · SEO = 100 (per R-013) |
+| Axe a11y                          | `@axe-core/playwright`              | 0 violations                                             |
+| JSON-LD                           | manual JSON validate                | identical to current page                                |
+| HTML weight (`/`)                 | `gzip -c built.html \| wc -c`        | gzipped bytes ≤ current page + 10% (per R-015)           |
+| `prefers-reduced-motion`          | manual                              | all animation off                                        |
 
 ### 6.2 Switch order
 
@@ -354,7 +372,7 @@ No DNS changes. No downtime.
 
 These don't block the plan but should be resolved before launch:
 
-1. **`og.png`** -- still on the backlog. Until we have it, ship `banner.png` as the OG image. (Lighthouse SEO 100 needs _an_ OG image.)
+1. **`og.png`** -- still on the backlog. Required at **1200×630, ≤ 80 KB** per `meta/standards/technical-requirements.md` R-037. The earlier "ship `banner.png` as the fallback" position has been retired: `banner.png`'s dimensions are not guaranteed to match the 1200×630 contract, and a misshaped OG card degrades the share preview on every social surface. If `og.png` isn't ready at cutover, omit the OG image rather than ship the wrong dimensions; Lighthouse SEO will flag it, the engineer fixes it before promoting the preview to the canonical domain.
 2. **Icon library** -- **decided:** Lucide is the icon system. The DS lists `lucide-react` as a peer dep; the site imports directly. Branded glyphs or anything Lucide can't cover get hand-built into a DS atom on demand. `RoleCard.icon` stays a slot so each consumer picks its own.
 3. **Imagery** -- **decided:** illustrations are the visual direction for the SaaS stage. They live in the site repo (per-page marketing material, not brand primitives). Real photography lands later, only via a Customer Story page (founder-approved per case). `Hero` still exposes no image slot -- imagery sits in page templates around the hero, not inside it.
 4. **Other internal clients** -- once the DS pattern proves out here, the obvious next consumer is whatever ships under `Pouk-AI-INC/*-app`. The taxonomy in section 2 is set up so that's a config change in the new repo's `.npmrc`, not a DS rewrite.

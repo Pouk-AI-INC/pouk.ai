@@ -1,10 +1,11 @@
 # Spec: Home
 
 **Route**: `/`
-**Status**: Draft
+**Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
 **Last updated**: 2026-05-13
 **Masterplan reference**: Sections 4.1 (site layout), 4.3 (zero-JS contract), 6 (cutover)
+**Decisions log**: D-11 (lede-extension), D-12 (status line) — both resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
 ---
 
@@ -30,7 +31,7 @@ This spec describes the **post-cutover** homepage, not the current `index.html`.
 The homepage is intentionally short — a single hero block, a status line, a hairline footer. Adding sections is a brand violation, not a feature improvement. The post-cutover version uses DS components in place of the current hand-tuned `index.html` markup; visual output should be indistinguishable per the masterplan section 6.1 parity matrix.
 
 1. `SiteShell` — top nav (Home is the canonical / no-current state, or marked current depending on `SiteShell` API) + hairline footer.
-2. `Hero` — eyebrow (none, or `Wordmark` from the SiteShell carrying the role), title (the brand tagline), lede (two sentences ending in the `/why-ai` link), status (`StatusBadge` with pulse — "shipping" or equivalent state copy), CTA (the email link).
+2. `Hero` — eyebrow (none, or `Wordmark` from the SiteShell carrying the role), title (the brand tagline), lede (ending in a single **integrated** link sentence — per D-11 the final structural line is "Most AI projects fail to deliver. Here's why →" with `Here's why →` as the anchor to `/why-ai`, integrated into the lede prose itself, not a tertiary line under the CTA), status (`StatusBadge` carrying the verbatim status-line copy from the current `index.html` — per D-12, byte-identical at cutover), CTA (the email link).
 3. **End — no further sections.** The hairline footer from `SiteShell` closes the page. No "About," no "Services," no testimonial block, no logo bar.
 
 ## 5. Content requirements
@@ -40,13 +41,13 @@ The tagline + body lede + status text + email link carry over from the current h
 Outcomes the copy must hit:
 
 - The tagline must continue to read as **the brand mark itself** — restrained, serif-led, refined. The current treatment (Instrument Serif `<h1>` clamp 36–68px) is the credential.
-- The lede must communicate (a) pouk.ai is technical consulting that ships with AI, (b) the audience is teams who already build, (c) the next sentence is "and here's the gap we exist to close — read why →." This last clause is the **only structural change** from the current holding page.
-- The status line must continue to read as a live, human signal — "currently shipping for X" or "next intake Y." The pulse dot reinforces it. Avoid "we're hiring," "join the waitlist," or any marketing flourish.
+- The lede must communicate (a) pouk.ai is technical consulting that ships with AI, (b) the audience is teams who already build, (c) the gap pouk.ai exists to close — surfaced as **the final integrated sentence of the lede** (per D-11). The structural lock is: a single integrated link sentence at the end of the lede, not a tertiary line under the CTA.
+- **Per D-12, the status line copy carries over verbatim from the current `index.html`** at cutover. The pulse dot reinforces it. The status line is part of the page's restraint — changing it risks signalling "now a real site" instead of "an operator." Avoid "we're hiring," "join the waitlist," or any marketing flourish. Re-evaluation post-cutover is fine; cutover-day copy is byte-identical.
 - The email link must remain the primary conversion path. No form, no widget, no scheduling embed at launch.
 
-`Draft:` Post-cutover lede direction: "[Current lede sentence carries over.] Most AI projects fail to deliver. [Here's why →](/why-ai)." The bracketed link sentence is the only new copy. Arian writes the final.
+`Draft:` Post-cutover lede-extension wording: "Most AI projects fail to deliver. [Here's why →](/why-ai)." This is the structural lock per D-11 — a single integrated link sentence at the end of the lede. The exact wording is a `Draft:` example; Arian approves final copy.
 
-`Draft:` Alternative — keep the current lede unchanged, and add a separate tertiary line below the email CTA: "Why AI projects fail →" linking to `/why-ai`. Lower-emphasis hand-off, preserves the holding page's exact visual rhythm. Decision pending Arian.
+Rejected alternatives (do not implement): a tertiary line below the email CTA; an inline `<a>` from one of the existing lede words.
 
 ## 6. Content data shape
 
@@ -64,7 +65,9 @@ The homepage is hardcoded prose in the page template — no JSON file. The four 
 - [ ] All sections in the IA (1–3) are present.
 - [ ] `Hero` molecule renders with title, lede, status, and CTA slots populated.
 - [ ] `StatusBadge` renders with the pulse animation (CSS keyframes, no JS) and matches the current holding page's behavior.
-- [ ] Lede contains a link with `href="/why-ai"` whose anchor text matches the approved copy direction (final wording: Arian).
+- [ ] **Status-line text is byte-identical** to the pre-cutover `index.html` status-line copy (per D-12 — parity AC).
+- [ ] Lede ends in **a single integrated link sentence** with `href="/why-ai"` (per D-11). The hand-off is part of the lede prose, not a separate line under the CTA. Final wording: Arian.
+- [ ] No separate tertiary "Read why AI projects fail →" line exists below the email CTA (rejected alternative).
 - [ ] Email link renders as `<a href="mailto:hello@pouk.ai">`.
 - [ ] No additional sections (services, about, testimonials, logo bar) are present.
 - [ ] Visual parity with the current `index.html` on `/` confirmed per masterplan section 6.1: "indistinguishable" on screenshot diff.
@@ -78,11 +81,13 @@ The homepage is hardcoded prose in the page template — no JSON file. The four 
 
 ## 9. Open questions / dependencies
 
+The original draft's open questions (lede-extension treatment, status-line copy) were resolved via `meta/decisions/launch-readiness.md` on 2026-05-13. See decisions D-11 and D-12.
+
+Remaining dependencies blocking `Built`:
+
 - **DS dependency — `Hero` molecule, `SiteShell` organism, `StatusBadge` atom.** `Hero` and `SiteShell` are in scope for DS Phases 1.2 and 1.3 respectively. `StatusBadge` already exists. Confirm `Hero` API exposes `status` and `cta` slots, and that `SiteShell` accepts a route list and `currentRoute`. Tracked in `meta/masterplan.md` section 3.2.
-- **Lede treatment — decision pending Arian (recommendation in section 5).** Recommended: extend the current lede with the hand-off sentence ending in "Here's why →". Alternative: tertiary line below the email CTA. Recommendation favors A — the integrated lede preserves a single typographic block.
-- **Status line copy — Arian-owned.** Current holding page status text needs Arian's call on whether it stays unchanged at cutover or gets updated for "shipping the four-route site" / next phase.
 - **`SiteShell` current-route handling.** Confirm with Claude Design whether `currentRoute="/"` is a valid current state, or whether the home is the canonical no-current state. Affects nav visual on `/`.
-- **Visual-parity gate — masterplan section 6.1.** This spec's success is bound to a screenshot-diff parity check before any DNS swap. Coordinate with the engineer's cutover checklist.
+- **Visual-parity gate — masterplan section 6.1.** This spec's success is bound to a screenshot-diff parity check before any DNS swap. Coordinate with the engineer's cutover checklist. The status-line parity check (per D-12) is part of this gate.
 - **Brand assets — backlog blockers.** `og.png`, `apple-touch-icon.png`, favicon, robots.txt, sitemap.xml are launch-blockers per the existing `meta/backlog.md`. They must land before `/` ships under the canonical domain.
 
 ## 10. Out of scope

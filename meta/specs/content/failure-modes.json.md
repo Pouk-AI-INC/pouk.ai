@@ -2,10 +2,11 @@
 
 **File**: `src/content/failure-modes.json`
 **Consumed by**: `src/pages/why-ai.astro` (see `meta/specs/pages/why-ai.md`)
-**Status**: Draft
+**Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
 **Last updated**: 2026-05-13
 **Masterplan reference**: Section 4.1 (site layout), 4.4 (long-form content as data)
+**Decisions log**: D-05 (stats extraction — typed `stats` array per failure mode is the locked mechanism; 500% extracted from Failure Mode 2 body, 61% extracted from Failure Mode 5 body) — resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
 ---
 
@@ -86,9 +87,13 @@ Top-level shape: an **array of five failure-mode objects**, ordered 1 → 5. Ord
 
 ## 8. Open questions / dependencies
 
-- **Storage of stats — opinionated call locked in section 4.** Typed `stats` array, not inline markdown. Engineer renders each `stats[]` entry as a `Stat` atom inside or alongside the parent `FailureMode` body. Exact rendering position (between paragraphs vs. margin pull-out) is the engineer's call given DS molecule props.
+The stats-extraction decision (D-05) was resolved via `meta/decisions/launch-readiness.md` on 2026-05-13. The typed `stats` array per failure mode is the locked storage mechanism; the 500% figure (Failure Mode 2 — Wrong use case) and the 61% figure (Failure Mode 5 — Change management) are extracted from body prose into the `stats` array.
+
+Remaining dependencies blocking `Built`:
+
+- **Storage of stats — locked.** Typed `stats` array, not inline markdown. Engineer renders each `stats[]` entry as a `Stat` atom inside or alongside the parent `FailureMode` body. Exact rendering position (between paragraphs vs. margin pull-out) is the engineer's call given DS molecule props.
 - **DS dependency — `FailureMode` molecule, `Stat` atom.** Both in scope for DS Phase 1.3 and 1.2 respectively. Confirm `FailureMode.children` accepts mixed content (prose + `Stat` atom) or whether stats need a separate `stats` slot on the molecule. If the molecule doesn't expose a `stats` slot, the engineer composes `<FailureMode>` with `<Stat>` as a child — schema is unchanged either way.
-- **Stat-prose extraction — Arian-approved.** Pulling 500% and 61% out of the verbatim prose into `stats` does change how the body sentence reads. The engineer drafts the rewrite (e.g., dropping the figure and letting the adjacent `Stat` atom carry the number); Arian approves.
+- **Stat-prose extraction rewrite — Arian-approved in principle (per D-05); copy still Arian-owned.** Pulling 500% and 61% out of the verbatim prose into `stats` changes how the body sentence reads. The engineer drafts the rewrite (e.g., dropping the figure and letting the adjacent `Stat` atom carry the number); Arian approves the final words.
 - **Source field — Arian-owned.** The `stats[].source` is optional but recommended for credibility. For 500%, the source is the masterplan-aligned framing (sector-specific AI agents research). For 61%, it's the PwC / IBM / Gartner ecosystem. Arian picks the canonical attribution string for each.
 - **Headline-stat storage — out of scope here.** The four opener stats (12–18%, 85%, 15%, $300B) and three quartile stats (1.7×, 3.6×, 2.7×) on `/why-ai` are **not** stored in `failure-modes.json`. They are page-template prose because they only render on this one page and are editorially tied to the page's argument. Promote to JSON only when a second surface needs them.
 

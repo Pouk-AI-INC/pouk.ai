@@ -1,10 +1,11 @@
 # Spec: Why AI
 
 **Route**: `/why-ai`
-**Status**: Draft
+**Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
 **Last updated**: 2026-05-13
 **Masterplan reference**: Sections 2A (repo boundaries), 4.1 (site layout), 4.4 (long-form content as data), 6 (cutover)
+**Decisions log**: D-01 (citation style), D-02 (sticky desktop TOC), D-03 (dataset-vintage footer), D-04 (discovery-questions callout), D-05 (stats extraction) — all resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
 ---
 
@@ -25,21 +26,22 @@
 
 ## 4. Information architecture
 
-The page reads top-to-bottom as a single editorial argument. Sticky TOC is recommended on desktop given the length; mobile gets natural scroll. The DS `Hero` molecule frames the page header; `FailureMode` is the per-mode unit; `Stat` is the typographic treatment for headline numbers.
+The page reads top-to-bottom as a single editorial argument. A sticky right-rail TOC renders on desktop (≥ 1024px); mobile falls back to natural scroll. The DS `Hero` molecule frames the page header; `FailureMode` is the per-mode unit; `Stat` is the typographic treatment for headline numbers. Cited claims throughout the page carry footnote-style superscripts that link to the References block (item 12).
 
 1. `SiteShell` — top nav (Why AI marked current) + hairline footer.
 2. `Hero` — page eyebrow ("Why AI"), thesis-statement title, lede summarizing the deployment gap, no inline CTA (the page itself is the CTA).
-3. **Opening argument** — three to four short paragraphs establishing the headline stats (12–18%, 85%, 15%, $300B). Stats render as `Stat` atoms — large numeral, short caption, optional source — pulled out of body prose where the page lives or dies by typographic emphasis. Closes with the line "This is the gap your consulting practice lives in."
-4. **Section heading** — "Why projects fail — the five failure modes." Plain semantic `<h2>`, no DS molecule needed here.
-5. **Five failure modes** — five `FailureMode` molecules in sequence. Each contains: index numeral (1–5), title, body prose. The 500% and 61% stats inside the body of modes 2 and 5 render as `Stat` atoms inline within the failure-mode body, not as separate sections. Anchors: `#data-readiness`, `#wrong-use-case`, `#integration`, `#governance`, `#change-management`.
-6. **Section heading** — "What the leaders do differently."
-7. **Leaders pattern** — four bullets (top-down strategy / vertical specialization / measurement from day one / iterative rollout) rendered as a list, followed by the three quartile stats (1.7×, 3.6×, 2.7×) as `Stat` atoms in a row or grid.
-8. **Section heading** — "The consulting angle."
-9. **Consulting angle** — two paragraphs framing pouk.ai's position at the intersection of technical and operational fluency. Closes with "the questions to ask in a discovery conversation."
-10. **Discovery questions block** — the four discovery questions, numbered, in italic or otherwise visually distinct from body prose. <NEEDS: a treatment for a "discovery questions" callout — could be a styled `<ol>` inside a bounded card, or just an `<ol>` with editorial type. The DS doesn't have a "callout" molecule today and shouldn't need one; this lives in site CSS.>
-11. **End CTA** — single sentence + email link. The conversation-starter, not a separate marketing block.
-12. **References** — list of source links with publication names, plus the note about cleaned-from-tracker URLs. Type-de-emphasized (`--fg-muted`).
-13. **"Last reviewed" footer line** — date stamp committing to annual refresh (e.g., "Last reviewed: May 2026"). Lives inside the page content, above the global `SiteShell` footer.
+3. **Sticky right-rail TOC (desktop ≥ 1024px)** — anchored list linking to `#data-readiness`, `#wrong-use-case`, `#integration`, `#governance`, `#change-management`. CSS-only via `position: sticky` — no scroll-spy / hydration island. Hidden below the desktop breakpoint; mobile uses scroll. Per D-02.
+4. **Opening argument** — three to four short paragraphs establishing the headline stats (12–18%, 85%, 15%, $300B). Stats render as `Stat` atoms — large numeral, short caption, optional source — pulled out of body prose where the page lives or dies by typographic emphasis. Cited claims carry footnote-style superscripts (e.g., `¹`) that link to the corresponding entry in the References block (item 12). Closes with the line "This is the gap your consulting practice lives in."
+5. **Section heading** — "Why projects fail — the five failure modes." Plain semantic `<h2>`, no DS molecule needed here.
+6. **Five failure modes** — five `FailureMode` molecules in sequence. Each contains: index numeral (1–5), title, body prose, and (where present) a typed `stats` array rendered as `Stat` atoms inline within the failure-mode body. The 500% figure (Failure Mode 2 — Wrong use case) and the 61% figure (Failure Mode 5 — Change management) are stored in the `stats` array of their parent failure mode per D-05; they are not inline `<strong>` in the body prose. Anchors: `#data-readiness`, `#wrong-use-case`, `#integration`, `#governance`, `#change-management`.
+7. **Section heading** — "What the leaders do differently."
+8. **Leaders pattern** — four bullets (top-down strategy / vertical specialization / measurement from day one / iterative rollout) rendered as a list, followed by the three quartile stats (1.7×, 3.6×, 2.7×) as `Stat` atoms in a row or grid.
+9. **Section heading** — "The consulting angle."
+10. **Consulting angle** — two paragraphs framing pouk.ai's position at the intersection of technical and operational fluency. Closes with "the questions to ask in a discovery conversation."
+11. **Discovery questions block** — the four discovery questions rendered as an inline italic `<blockquote>` using the same body type as surrounding prose (no boxed surface, no card, no hero-typography pull-quote). Per D-04. Numbered list inside the blockquote is acceptable; the visual distinction is the italic body voice, not a containing surface.
+12. **End CTA** — single sentence + email link. The conversation-starter, not a separate marketing block.
+13. **References** — numbered list of source links with publication names; each entry is the target of a footnote-style superscript from the body. Plus the note about cleaned-from-tracker URLs. Type-de-emphasized (`--fg-muted`). Per D-01 this block is load-bearing: every superscript in the body must round-trip to a numbered entry here.
+14. **"Last reviewed" footer line** — `Last reviewed: 2026-05-13` plus a one-line commitment to annual refresh. Lives inside the page content, above the global `SiteShell` footer. Per D-03.
 
 ## 5. Content requirements
 
@@ -48,11 +50,14 @@ The substance lives verbatim in `meta/backlog.md` under the "Why AI page" block.
 Outcomes the copy must hit:
 
 - The opening paragraph must establish the deployment gap as **quantified, sourced, and current** — at least three of the four headline stats must appear in the first viewport on desktop. Without numbers, the page collapses into opinion.
+- **Every cited claim carries a footnote-style superscript** (e.g., `¹`, `²`) that links to the corresponding numbered entry in the References block (per D-01). Sources should not be inline parentheticals — keep body prose uncluttered, push attribution to References.
 - The five failure modes must read as **a taxonomy a reader can recall by name**, not as five paragraphs of similar texture. Each title should be a label a prospect can adopt ("We're a Failure Mode 1 — our data isn't ready").
+- The 500% figure (Failure Mode 2) and the 61% figure (Failure Mode 5) are **extracted from prose into the typed `stats` array** on their parent failure mode (per D-05). The surrounding body sentence must read cleanly with the figure removed — the adjacent `Stat` atom carries the number. Arian approves the rewritten sentences.
 - The "What the leaders do differently" section must imply that pouk.ai's engagement pattern *matches* what leaders do — without saying so explicitly. The reader connects the dots.
 - The "Consulting angle" section must position pouk.ai as the diagnostic partner ("let me understand your problem first") versus the vendor ("here's our AI product"). This sentence is load-bearing; every other section sets it up.
-- The four discovery questions must read as questions Arian would actually ask in a first call — they must survive being copy-pasted into a sales email.
+- The four discovery questions must read as questions Arian would actually ask in a first call — they must survive being copy-pasted into a sales email. They render as an inline italic `<blockquote>` in the same body type as surrounding prose (per D-04) — no boxed surface, no hero-typography pull-quote.
 - The end CTA must offer **a way to start the conversation**, not a "book a demo" button. The brand competes by being a person, not a funnel.
+- The "Last reviewed: 2026-05-13" footer line carries the annual-refresh commitment (per D-03). Wording is brief, single-line, type-de-emphasized.
 
 `Draft:` The page lede could read: "Only 12–18% of companies deploying AI are capturing meaningful ROI. The rest are stuck in one of five failure modes. Here they are — and what to do about each." This is a *direction*, not final copy. Arian writes or approves the final.
 
@@ -71,31 +76,34 @@ The four headline stats in the opening argument (12–18%, 85%, 15%, $300B) and 
 ## 8. Acceptance criteria
 
 - [ ] Route renders at `/why-ai`.
-- [ ] All sections in the IA (1–13) are present and ordered as specified.
+- [ ] All sections in the IA (1–14) are present and ordered as specified.
+- [ ] Sticky right-rail TOC renders on viewports ≥ 1024px, links to all five failure-mode anchors, and is hidden on mobile. Implemented CSS-only via `position: sticky` — no scroll-spy hydration island.
 - [ ] Five `FailureMode` molecules render in the correct order with anchors `#data-readiness`, `#wrong-use-case`, `#integration`, `#governance`, `#change-management`.
-- [ ] Seven headline stats (12–18%, 85%, 15%, $300B in the opener; 1.7×, 3.6×, 2.7× in the leaders section) render as `Stat` atoms — not inline emphasized prose. The 500% and 61% stats appear as `Stat` atoms within failure-mode bodies (modes 2 and 5).
-- [ ] The four discovery questions render as a numbered list inside a visually distinct callout block (per IA item 10).
-- [ ] References section lists all four sources with linked text matching the masterplan / backlog source — anchor text is the article title, surfacing the publication via trailing em-dash.
-- [ ] "Last reviewed: <month year>" footer line is present and matches the page's last content review date.
+- [ ] Seven headline stats (12–18%, 85%, 15%, $300B in the opener; 1.7×, 3.6×, 2.7× in the leaders section) render as `Stat` atoms — not inline emphasized prose. The 500% (Failure Mode 2) and 61% (Failure Mode 5) figures render as `Stat` atoms sourced from the `stats` array of their parent failure mode in `failure-modes.json` — not as inline `<strong>` in the body prose.
+- [ ] Every cited claim in the body carries a footnote-style superscript that links to a numbered entry in the References block. Every numbered References entry is the target of at least one superscript — the round-trip is complete (no orphaned superscripts, no orphaned References entries).
+- [ ] The four discovery questions render as an inline italic `<blockquote>` in the same body type as surrounding prose — no boxed surface, no `--surface` background, no card chrome (per D-04).
+- [ ] References section lists all sources numbered to match the body superscripts, with linked text — anchor text is the article title, surfacing the publication via trailing em-dash.
+- [ ] "Last reviewed: 2026-05-13" footer line is present, sits above the `SiteShell` footer, and carries the annual-refresh commitment.
 - [ ] End CTA renders an `<a href="mailto:hello@pouk.ai">` with copy that references the discovery conversation (final wording: Arian).
 - [ ] `<title>` and `<meta description>` reflect the deployment-gap framing and contain at least one quantified stat in the description.
 - [ ] Page is reachable from `SiteShell` top nav with the Why AI item marked current.
 - [ ] Page links to `/roles` at least once (footer-of-page next step) and to `mailto:hello@pouk.ai` at least once (end CTA).
 - [ ] Lighthouse mobile: 100/100/100/100.
-- [ ] No client-side JS shipped (sticky TOC, if implemented, is CSS-only via `position: sticky` — no scroll-spy hydration island in launch scope).
+- [ ] No client-side JS shipped (sticky TOC is CSS-only via `position: sticky` — no scroll-spy hydration island in launch scope).
 - [ ] All content in section 5 outcomes is met by the shipped copy (Arian-verified).
 - [ ] `prefers-reduced-motion` honored — no animation on stats or entrance.
 
 ## 9. Open questions / dependencies
 
+The original draft's open questions (citation style, sticky TOC, dataset vintage, discovery-questions callout, stats extraction) were resolved via `meta/decisions/launch-readiness.md` on 2026-05-13. See decisions D-01 through D-05.
+
+Remaining dependencies blocking `Built`:
+
 - **DS dependency — `FailureMode` molecule.** Required and listed as in scope for DS Phase 1.3. Cannot ship until the molecule is published in `@poukai/ui@0.1.0`. Tracked in `meta/masterplan.md` section 3.2.
 - **DS dependency — `Stat` atom.** Required and listed as in scope for DS Phase 1.2 (`@poukai/ui@0.1.0-alpha.1`). Site needs both `align="start"` (inline within `FailureMode` body) and the standalone large display variant. Confirm `Stat` supports both before this page can be built end-to-end.
-- **<NEEDS: a "callout" treatment for the four discovery questions.>** Not a DS primitive — this is site CSS sitting around an `<ol>`. Decision is the engineer's, with brand alignment by Arian.
-- **Sticky TOC — decision pending Arian.** Recommended for desktop given the length; mobile probably doesn't need it. If we commit to zero-JS, this is `position: sticky` only, no scroll-spy. Listed in the backlog's "Why AI page" open design questions.
-- **Citation style — decision pending Arian.** Backlog flags footnote superscripts vs. inline parentheticals. Recommendation: inline parentheticals on first mention (e.g., "(Gartner)"), then a consolidated References list at the bottom. Footnote superscripts add JS or complex CSS for one page's worth of content. Arian's call.
-- **Dataset vintage — decision pending Arian.** Recommendation: ship with a "Last reviewed: <month year>" footer line and an internal calendar reminder to refresh annually. The references' own dates carry the rest. Listed in the backlog's open design questions.
-- **Homepage hand-off — coordinated with `/` spec.** When `/why-ai` ships, the homepage lede must add "Most AI projects fail to deliver. Here's why →" pointing here. Coordinated in `meta/specs/pages/home.md`.
-- **Content lift — Arian-owned.** The verbatim copy in `meta/backlog.md` is approved as the source. Any edits to that copy are Arian's, not the engineer's. If the engineer hits a question while implementing, route via Arian.
+- **Footnote-superscript implementation — engineer's call.** D-01 locks the style; the engineer chooses the HTML mechanism (e.g., `<sup><a href="#ref-1">¹</a></sup>` round-tripped to a numbered References `<ol>`). No JS required.
+- **Homepage hand-off — coordinated with `/` spec.** When `/why-ai` ships, the homepage lede ends with "Most AI projects fail to deliver. Here's why →" pointing here. Locked in `meta/specs/pages/home.md` per D-11.
+- **Content lift — Arian-owned.** The verbatim copy in `meta/backlog.md` is approved as the source. The rewrite of the 500% and 61% sentences (post-extraction to `stats` array) is Arian-approved. Any edits to that copy are Arian's, not the engineer's. If the engineer hits a question while implementing, route via Arian.
 
 ## 10. Out of scope
 

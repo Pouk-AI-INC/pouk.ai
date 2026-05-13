@@ -1,5 +1,7 @@
 # pouk.ai — architecture
 
+> **Note (2026-05-13)**: This document describes the **pre-Astro holding-page reality** (single `index.html`, no JS, no build). It is **superseded by `meta/masterplan.md`** once the Astro migration lands and by `meta/standards/technical-requirements.md` for non-functional contracts. The "No JavaScript" constraint in particular no longer applies once Matomo and Bugsink ship (see `meta/decisions/2026-05-13-launch-readiness-closed.md` D-15, D-16). Kept as the historical record of how the holding page was built.
+
 How the page is built. For future-self when the codebase grows past one file.
 
 ## File layout

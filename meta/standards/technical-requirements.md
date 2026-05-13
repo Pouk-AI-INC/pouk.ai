@@ -1,9 +1,10 @@
 # Technical Requirements — pouk.ai marketing site
 
-**Status**: Draft
+**Status**: Approved
 **Last updated**: 2026-05-13
 **Author**: pouk-ai-reviewer
 **Decision authority**: Arian (founder)
+**Decisions resolved**: see `meta/decisions/launch-readiness.md` (D-14 through D-22, resolved 2026-05-13)
 **Supersedes**: nothing yet — first engineering standard for the repo.
 
 ---
@@ -14,7 +15,7 @@ This document is the catalog of testable, non-functional requirements that every
 
 The masterplan remains the strategic narrative — the *why*. This document is the operational checklist — the *what must be true*. Where the two overlap, the masterplan wins on intent and this document wins on test specificity. Where this document references a masterplan section, that section stays authoritative for the underlying decision.
 
-This is a Draft. Several calls below are reviewer defaults pending Arian's sign-off; those are listed explicitly in section 6 (Open questions). Treat anything in section 6 as provisional even if it appears as a numbered requirement.
+This document is Approved. The open questions O-001 through O-009 that gated promotion from Draft were resolved on 2026-05-13 via `meta/decisions/launch-readiness.md` (D-14 through D-22). Two new open questions (O-011, O-012) cover deployment shape for the tools that decision pass selected; those are infrastructure choices, not standards holes. Section 6 lists the resolved set and the new open questions.
 
 ---
 
@@ -61,23 +62,31 @@ Requirements are numbered consecutively across all sub-topics so a future review
 
 ---
 
-### 3.2 Zero-JS contract
+### 3.2 Client JS budget and discipline
 
-**R-009 (HARD)** — The holding page (`/`) ships zero client-side JavaScript. The built `index.html` must contain no `<script>` tags other than the JSON-LD block (`<script type="application/ld+json">`), and no inline event handlers. Verification: grep the built `dist/index.html` for `<script` — only `application/ld+json` may match; `lighthouse-ci` "uses-passive-event-listeners" and "no-unused-javascript" audits pass cleanly. Source: `meta/masterplan.md` section 0 (TL;DR), section 1, and section 4.3.
+The original posture (zero client JS on `/`) was relaxed on 2026-05-13 by decisions D-15 (Matomo on every page) and D-16 (Bugsink on every page). Zero-JS-on-`/` was a *means*, not the end. The end — fast, private, accessible — is preserved by the budget rules below. See section 5 (Rationale) for the full reasoning.
 
-**R-010 (HARD)** — Astro hydration directives (`client:load`, `client:idle`, `client:visible`, `client:media`, `client:only`) are forbidden by default across all four routes. Any introduction of a hydration directive requires an inline `// hydration: <reason>` comment on the same line or the line above, and the reviewer must independently verify the reason is load-bearing. Verification: grep of `src/**/*.astro` for `client:` matches — every match must have a justifying comment within 1 line. Source: `meta/masterplan.md` section 4.3 ("`<Hero client:none />` is the default — no hydration directive"); reviewer agent definition section 5 ("No hydration directives (`client:*`) added without a documented reason").
+**R-009 (HARD)** — Client JS on any page is limited to: (a) first-party analytics (Matomo tracker, per R-060); (b) first-party error reporting (Bugsink / Sentry-compatible browser SDK, per R-061); (c) `@poukai/ui` islands explicitly hydrated with an inline `// hydration: <reason>` comment on the same line or the line above. No other client JS — no third-party analytics SDKs, no chat widgets, no A/B testing, no marketing pixels, no embedded video players — ships without an explicit standards revision approved by Arian. Verification: grep the built HTML for `<script` tags and external `src=` attributes; every match must map to one of (a), (b), or (c). Source: `meta/decisions/launch-readiness.md` D-15 and D-16; `meta/masterplan.md` section 4.3 (hydration discipline carries over).
 
-**R-011 (HARD)** — Components imported from `@poukai/ui` are rendered through Astro's server renderer, not hydrated. Any animation in those components must be CSS-only (keyframes), not JS-driven. Verification: code review confirms no `useState` / `useEffect` is in scope at the leaf-render boundary on any page; the `StatusBadge` pulse is CSS keyframes, as documented. Source: `meta/masterplan.md` section 4.3 ("`StatusBadge`'s pulse is CSS keyframes, not state — already JS-free"); `meta/architecture.md` "Motion" section.
+**R-010 (HARD)** — Total third-party JS payload on any page is ≤ 75 kB gzipped. Matomo's tracker (~25 kB) plus Bugsink's browser SDK (~40 kB) together baseline at ~65 kB; the 75 kB ceiling leaves a small headroom and forces a hard conversation if a third tool is proposed. Verification: measure each external `<script src>` artifact's gzipped size on the preview deploy; sum across all third-party scripts on the page; fail the deploy if sum > 75 kB. Source: `meta/decisions/launch-readiness.md` D-15 and D-16 (tool picks); reviewer judgment on headroom calibration.
 
-**R-012 (HARD)** — No new third-party JS runtime is added to any page (analytics SDKs, chat widgets, A/B testing, marketing pixels) unless an approved spec exists and Arian has signed off in writing. Verification: grep of built HTML for third-party domains in `<script src=>`. Source: `meta/architecture.md` "Decision rules for future changes" ("No JS unless strictly necessary is a load-bearing constraint, not a preference"); `meta/masterplan.md` section 1 (Quality bar).
+**R-011 (HARD)** — Every third-party `<script>` tag is `defer`-ed (or has `async` where defer would re-order critical execution) and is loaded after the meaningful paint. Render-blocking third-party JS is forbidden. Inline `<script>` tags carrying third-party logic are forbidden — third-party logic loads from its own file, even if it lives on the same origin (self-hosted Matomo / Bugsink). Verification: parse every `<script>` tag in the built HTML; every external third-party script has `defer` or `async`; Lighthouse "render-blocking-resources" audit passes. Source: `meta/decisions/launch-readiness.md` D-15 and D-16; `meta/masterplan.md` section 1 (Quality bar implies critical-path discipline).
+
+**R-012 (HARD)** — In jurisdictions that require it, no third-party JS executes before user consent. Matomo's cookieless tracking mode is the launch configuration and is permitted to fire on page load. Bugsink's browser SDK is treated as essential operational telemetry and may also fire on page load, with PII scrubbing configured on the server side. If Matomo's cookie-mode is enabled in a future standards revision, this requirement must be tightened with a consent-gate flow — flagged as a future revision in section 6. Verification: confirm Matomo configuration on the preview deploy uses cookieless mode (no `_pk_*` cookies set); confirm Bugsink scrubs IP and form data on ingest. Source: `meta/decisions/launch-readiness.md` D-15 and D-16; [GDPR Art. 7 and ePrivacy Directive Art. 5(3)] as the upstream legal references; [Matomo cookieless tracking docs] as the configuration reference.
+
+**R-078 (HARD)** — Astro hydration directives (`client:load`, `client:idle`, `client:visible`, `client:media`, `client:only`) are forbidden by default across all four routes. Any introduction of a hydration directive requires an inline `// hydration: <reason>` comment on the same line or the line above, and the reviewer must independently verify the reason is load-bearing. The same inline-comment discipline applies to the two whitelisted first-party script tags: `// analytics: matomo` for the Matomo tracker tag in `BaseLayout.astro` and `// error-reporting: bugsink` for the Bugsink SDK tag in `BaseLayout.astro`. Verification: grep of `src/**/*.astro` for `client:` and for the analytics/error-reporting tag insertions — every match must have a justifying comment within 1 line. Source: `meta/masterplan.md` section 4.3 ("`<Hero client:none />` is the default — no hydration directive"); reviewer agent definition section 5; `meta/decisions/launch-readiness.md` D-15 and D-16. (Continues the hydration discipline formerly at R-010, restated here so the new section 3.2 numbering can host the client-JS budget rules; future review findings citing the old R-010 should reference R-078 instead.)
+
+**R-079 (HARD)** — Components imported from `@poukai/ui` are rendered through Astro's server renderer, not hydrated. Any animation in those components must be CSS-only (keyframes), not JS-driven. Verification: code review confirms no `useState` / `useEffect` is in scope at the leaf-render boundary on any page; the `StatusBadge` pulse is CSS keyframes, as documented. Source: `meta/masterplan.md` section 4.3 ("`StatusBadge`'s pulse is CSS keyframes, not state — already JS-free"); `meta/architecture.md` "Motion" section. (Preserves the rule formerly at R-011; future review findings citing R-011 should reference R-079 instead.)
+
+**R-080 (HARD)** — No service worker is registered. Static caching is handled by Vercel's edge CDN and the browser HTTP cache. A service worker would add a JS runtime that fights the budget rules in R-009/R-010 without an offsetting benefit for a four-page static site. Verification: grep the built JS for `navigator.serviceWorker.register` — zero matches; no `sw.js` or `service-worker.js` in `dist/`. Source: `meta/decisions/launch-readiness.md` D-18.
 
 ---
 
 ### 3.3 Performance
 
-**R-013 (HARD)** — Every page achieves Lighthouse mobile scores of 100 on Performance, Accessibility, Best Practices, and SEO. CI must run `lighthouse-ci` against each preview deploy and fail the deploy on any score below 100. Verification: `lighthouse-ci` configuration in `.lighthouserc.*` with thresholds set to 100/100/100/100 for the mobile preset; CI run output. Source: `meta/masterplan.md` section 1 (Quality bar) and section 6.1.
+**R-013 (HARD)** — Every page achieves Lighthouse mobile scores of: Performance ≥ 95, Accessibility = 100, Best Practices = 100, SEO = 100. CI must run `lighthouse-ci` against each preview deploy and fail the deploy on any per-category miss. Lighthouse flake (Performance fluctuating by 1–2 points run-to-run) is handled by re-running on flake, not by lowering the bar; any sustained per-category miss must be investigated and root-caused, not papered over. Verification: `lighthouse-ci` configuration in `.lighthouserc.*` with thresholds set to 95/100/100/100 for the mobile preset; CI run output. Source: `meta/masterplan.md` section 1 (Quality bar); `meta/decisions/launch-readiness.md` D-14 (Performance band relaxed from 100 to ≥ 95 to absorb the ~65 kB third-party JS baseline introduced by D-15 + D-16; A11y/BP/SEO stay at 100 because they're deterministic and unaffected by JS-budget churn).
 
-**R-014 (HARD)** — Core Web Vitals on mobile: LCP < 2.5s, CLS < 0.1, INP < 200ms, measured on the Lighthouse mobile preset (Moto G4 throttling, slow 4G network simulation). Verification: extracted from the `lighthouse-ci` JSON output in CI. Source: [web.dev/vitals](https://web.dev/articles/vitals) ("Good" thresholds for LCP, CLS, INP); aligns with Lighthouse 100 Performance bar in masterplan section 1.
+**R-014 (HARD)** — Core Web Vitals on mobile: LCP < 2.5s, CLS < 0.1, INP < 200ms, measured on the Lighthouse mobile preset (Moto G4 throttling, slow 4G network simulation). These thresholds remain HARD despite the Performance score being relaxed to ≥ 95 in R-013; the JS-budget shift in section 3.2 does not justify softening user-facing vitals. If meeting these vitals under the new client-JS budget proves hard, the engineer's response is to defer/optimize JS loading, not to seek a standards revision. Verification: extracted from the `lighthouse-ci` JSON output in CI. Source: [web.dev/vitals](https://web.dev/articles/vitals) ("Good" thresholds for LCP, CLS, INP).
 
 **R-015 (HARD)** — HTML weight on `/` after gzip is at most 110% of the current static `index.html`'s gzipped weight on `main` (the production holding page). Verification: `wc -c` (or `gzip -c | wc -c`) on the built `dist/index.html`, compared against the same measurement on the current `index.html` checked out from `main`; recorded in the preview-deploy comment thread per masterplan section 6.1. Source: `meta/masterplan.md` section 6.1 (parity matrix, "HTML weight `/` ≤ current page +10%").
 
@@ -153,7 +162,7 @@ Requirements are numbered consecutively across all sub-topics so a future review
 
 **R-045 (HARD)** — `vercel.json` ships `Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()` on every response. (Disables FLoC and confirms the site never asks for sensor/device permission.) Verification: `curl -I` check. Source: `meta/backlog.md` "Blockers for launch"; [permissionspolicy.com](https://www.permissionspolicy.com/) as the syntax reference.
 
-**R-046 (SOFT)** — Content-Security-Policy is opt-in. If a CSP header is added to `vercel.json`, any inline `<script type="application/ld+json">` block must be permitted via a SHA-256 hash directive (`script-src 'sha256-…'`), not via `'unsafe-inline'`. Verification: if `Content-Security-Policy` is present, decode the hash and confirm it matches the JSON-LD block's bytes. Source: `meta/backlog.md` "Blockers for launch" ("Resolve JSON-LD ↔ CSP only **if** you add `script-src 'none'`"); [W3C CSP Level 3](https://www.w3.org/TR/CSP3/).
+**R-046 (SOFT)** — No Content-Security-Policy header ships on launch. CSP is added the moment a form, third-party embed (beyond Matomo and Bugsink, which are self-hosted first-party tools), or other XSS surface enters the picture. When that day comes, any inline `<script type="application/ld+json">` block must be permitted via a SHA-256 hash directive (`script-src 'sha256-…'`), not via `'unsafe-inline'`; the Matomo and Bugsink script tags must be permitted via `script-src` referencing the first-party origin that serves them. Verification at launch: `curl -I https://pouk.ai/` returns no `Content-Security-Policy` header — and that absence is itself the verified state, not a gap. Source: `meta/backlog.md` "Blockers for launch" ("Resolve JSON-LD ↔ CSP only **if** you add `script-src 'none'`"); [W3C CSP Level 3](https://www.w3.org/TR/CSP3/); `meta/decisions/launch-readiness.md` D-17.
 
 **R-047 (HARD)** — DNS-level email authentication is configured before the first prospect email goes out: SPF, DKIM, DMARC records on `pouk.ai`, plus a CAA record limiting cert issuance to Let's Encrypt (or whoever Vercel uses). This is a deploy-blocking gate for the moment the domain alias swaps, not for individual PRs. Verification: `dig TXT pouk.ai` returns SPF + DMARC; DKIM selectors return TXT records; `dig CAA pouk.ai` returns a restricting set. Source: `meta/backlog.md` "DNS + email" ("Add MX, SPF, DKIM, DMARC, CAA records — must be live before first prospect email goes out"); RFC 7208 (SPF), RFC 6376 (DKIM), RFC 7489 (DMARC), RFC 8659 (CAA).
 
@@ -162,6 +171,8 @@ Requirements are numbered consecutively across all sub-topics so a future review
 **R-049 (HARD)** — `pnpm audit --prod` reports zero high or critical vulnerabilities at merge time. Moderate findings are allowed but must be acknowledged in the PR description. Verification: CI runs `pnpm audit --prod --audit-level=high` and fails on any output. Source: universal supply-chain hygiene; [npm audit docs](https://docs.npmjs.com/cli/v10/commands/npm-audit) as the model.
 
 **R-050 (HARD)** — No new third-party origin is contacted at runtime (analytics, fonts, embeds, CDN scripts) without a one-line rationale in the PR description and a corresponding update to this document. Verification: diff the Network panel between `main` and the PR's preview deploy. Source: reviewer agent definition section 5 ("Security: No new third-party domains hit at runtime without a documented reason").
+
+**R-081 (SOFT now; HARD once `hello@pouk.ai` (or equivalent) is live)** — A `.well-known/security.txt` file at `/.well-known/security.txt` advertises a security contact (`security@pouk.ai` or `hello@pouk.ai`), an optional PGP key, and a disclosure policy. Required fields per RFC 9116: `Contact:` (email or URL), `Expires:` (ISO 8601 date, ≤ 1 year out). Recommended fields: `Encryption:`, `Preferred-Languages:`, `Policy:`. While `hello@pouk.ai` is not yet live, this requirement is SOFT and the reviewer raises absence as a NIT; once mailbox routing lands (R-047 prerequisite), this requirement promotes to HARD automatically. The work item lives in `meta/backlog.md` per `meta/decisions/launch-readiness.md` D-21. Verification: `curl https://pouk.ai/.well-known/security.txt` returns 200 with valid `Contact:` and non-expired `Expires:` fields. Source: [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116); `meta/decisions/launch-readiness.md` D-21.
 
 ---
 
@@ -181,11 +192,11 @@ Requirements are numbered consecutively across all sub-topics so a future review
 
 **R-055 (HARD)** — `astro check` (via `@astrojs/check`) reports zero TypeScript errors. Verification: CI runs `pnpm astro check` (or it's wired into `pnpm build`). Source: `meta/masterplan.md` section 4.2 ("`@astrojs/check` — typecheck on build").
 
-**R-056 (HARD)** — `lighthouse-ci` runs against the Vercel preview deploy for every PR and asserts 100/100/100/100 on mobile for each of the four routes. Failure to meet the threshold blocks the deploy from being promoted to production. Verification: CI artifact archive contains the Lighthouse JSON; reviewer cites it in the review's "Build & metrics" block. Source: `meta/masterplan.md` section 1 and section 6.1.
+**R-056 (HARD)** — `lighthouse-ci` runs against the Vercel preview deploy for every PR and asserts Performance ≥ 95, Accessibility = 100, Best Practices = 100, SEO = 100 on mobile for each of the four routes. Failure to meet any per-category threshold blocks the deploy from being promoted to production. Performance flake (single-run dips of 1–2 points) is handled by re-running before failing the build; sustained Performance misses below 95 must be root-caused, not retried away. Verification: CI artifact archive contains the Lighthouse JSON; reviewer cites it in the review's "Build & metrics" block. Source: `meta/masterplan.md` section 1 and section 6.1; `meta/decisions/launch-readiness.md` D-14.
 
 **R-057 (HARD)** — `@axe-core/playwright` (or equivalent axe-core runner) runs against every preview deploy for every PR and reports zero violations on every route. Verification: CI artifact archive contains the axe JSON. Source: `meta/masterplan.md` section 6.1.
 
-**R-058 (HARD)** — `pnpm test` exits 0 if any test files exist in the repo. Adding tests is encouraged; absence of tests does not block merge, but if a test file exists and is red, merge is blocked. Verification: CI runs `pnpm test`. Source: universal engineering quality; will be tightened to a coverage threshold when section 6 Open Question O-008 is resolved.
+**R-058 (HARD when tests exist on changed files)** — `pnpm test` exits 0 if any test files exist in the repo; if a test file exists and is red, merge is blocked. When tests exist on the changed files, line coverage on those changed files must be ≥ 80%. Every new component ships with a smoke test. If no tests exist on the changed files, the coverage threshold does not apply for that PR — but the reviewer surfaces the absence as a NIT so the gap stays visible. Verification: CI runs `pnpm test`; coverage report is parsed and the changed-files threshold checked. Source: `meta/decisions/launch-readiness.md` D-20; universal engineering quality.
 
 **R-059 (HARD)** — Before the `pouk.ai` domain alias swaps from the legacy holding page to the new Astro project, the preview deploy must pass every check in the masterplan section 6.1 parity matrix (visual diff "indistinguishable" on `/`, Lighthouse 100/100/100/100, axe 0 violations, JSON-LD identical to current page, HTML weight `/` ≤ current page +10%, `prefers-reduced-motion` all animation off). This is a launch gate, not a per-PR gate. Verification: a launch-readiness review documents each row of the matrix with a measurement and a verdict. Source: `meta/masterplan.md` section 6.1 and section 6.2.
 
@@ -193,11 +204,11 @@ Requirements are numbered consecutively across all sub-topics so a future review
 
 ### 3.9 Observability
 
-**R-060 (SOFT)** — Analytics, if added, must be cookieless and require zero client JS for the basic tier. Vercel Web Analytics' basic tier meets this; Cloudflare Web Analytics is an acceptable alternative. Third-party analytics (Google Analytics, Mixpanel, PostHog) are not permitted on the marketing site at this stage. Verification: vendor confirmation; Network-panel diff confirms no cookie set, no JS request on first paint. Source: `meta/backlog.md` "Nice-to-haves" ("Vercel Web Analytics is one toggle in the dashboard (cookieless, no JS for the basic tier)").
+**R-060 (HARD)** — Analytics provider is Matomo. The Matomo tracker runs on every page including `/`. Tracker is configured in cookieless mode at launch (no `_pk_*` cookies set); IPs are anonymized before storage. Matomo's HTTP API may also be hit server-side for first-party event recording where useful. The deployment shape — self-hosted on Pouk-AI-INC infrastructure vs. Matomo Cloud (paid SaaS) — is a remaining infrastructure decision tracked at O-011 in section 6; the tool pick is locked. Verification: parse `BaseLayout.astro` for the Matomo tracker tag annotated `// analytics: matomo`; confirm on the preview deploy that no `_pk_*` cookies are set on first paint; confirm Matomo's tracker file gzips to ≤ 30 kB (sub-budget within R-010). Source: `meta/decisions/launch-readiness.md` D-15; [Matomo cookieless tracking documentation] as the configuration reference.
 
-**R-061 (SOFT)** — Error reporting tool — undecided. Pending Arian's call (see O-003). If chosen, the SDK must respect R-009 (zero client JS on `/`); a build-time error sink (Vercel logs, Sentry release-only) is preferred over a client-side runtime SDK. Verification: deferred until decision. Source: universal observability hygiene.
+**R-061 (HARD)** — Error reporting tool is Bugsink (Sentry-compatible, self-hostable). The Sentry-protocol browser SDK and server SDK are both active. The client SDK runs on every page including `/`. Server-side ingest scrubs IP addresses and form data before storage. The deployment shape — self-hosted vs. Bugsink Cloud — is a remaining infrastructure decision tracked at O-012 in section 6; the tool pick is locked. The SDK tag in `BaseLayout.astro` is annotated `// error-reporting: bugsink`. Verification: parse `BaseLayout.astro` for the Bugsink SDK tag with the inline justification comment; confirm the SDK file gzips to ≤ 45 kB (sub-budget within R-010); confirm Bugsink ingest config scrubs PII. Source: `meta/decisions/launch-readiness.md` D-16; [Bugsink documentation] and [Sentry browser SDK docs] as the configuration references.
 
-**R-062 (HARD)** — No analytics, observability, or telemetry tool fires before user-visible content has rendered. If a tool is added, it loads from the same origin (no third-party blocking request on the critical path). Verification: Lighthouse "render-blocking-resources" audit; Network panel diff. Source: `meta/masterplan.md` section 1 (Quality bar implies critical-path discipline); reinforces R-023.
+**R-062 (HARD)** — No analytics, observability, or telemetry tool fires before user-visible content has rendered. Matomo and Bugsink load `defer`-ed (R-011) and execute after the meaningful paint; both load from the site's own origin if self-hosted (preferred per O-011 and O-012), or from the vendor's first-party CDN if the cloud deployment shape is chosen. No third-party blocking request on the critical path under any deployment shape. Verification: Lighthouse "render-blocking-resources" audit passes; Network panel diff confirms Matomo and Bugsink fire after `DOMContentLoaded`. Source: `meta/masterplan.md` section 1 (Quality bar implies critical-path discipline); reinforces R-011 and R-023.
 
 ---
 
@@ -221,11 +232,11 @@ Requirements are numbered consecutively across all sub-topics so a future review
 
 **R-069 (HARD)** — `.gitignore` excludes: `/brand` (brand source assets), `.env*` (local env files), `dist/`, `.astro/`, `.vercel/`, `node_modules/`, OS files (`.DS_Store`, `Thumbs.db`), and editor folders (`.idea/`, `.vscode/` unless explicitly shared). Verification: file content check. Source: `meta/architecture.md` "File layout" ("Brand source assets live in a `brand/` folder … but are **gitignored**"); universal repo hygiene.
 
-**R-070 (SOFT)** — Branch naming: `feature/<slug>` for new work, `fix/<slug>` for bugfixes, `chore/<slug>` for tooling. `main` is the long-lived default. Verification: branch naming convention checked at PR-open time. Source: reviewer judgment, common-practice default. Promoted to HARD on Arian's call (see O-009).
+**R-070 (SOFT)** — Branch naming: `feature/<slug>` for new work, `fix/<slug>` for bugfixes, `chore/<slug>` for tooling. `main` is the long-lived default. Reviewer prefers this convention but does not block on a non-matching name. Verification: reviewer reads the branch name at PR-open time and notes drift as a NIT. Source: `meta/decisions/launch-readiness.md` D-22; reviewer judgment.
 
 **R-071 (HARD)** — No force-push to `main`. No force-push to a branch with an open PR unless the PR author owns the branch and the rebase is non-destructive. Verification: branch protection rules on GitHub. Source: universal git hygiene; matches reviewer agent definition section 9 ("Don't merge, push, deploy, or commit code changes").
 
-**R-072 (SOFT)** — Commit messages are readable: imperative mood, ≤ 72 chars on the subject line, body explains *why* not *what*. Conventional Commits format (`feat:`, `fix:`, `chore:`) is welcomed but not required. Verification: reviewer reads `git log` during review. Source: reviewer judgment. See O-006.
+**R-072 (SOFT)** — Commit messages follow Conventional Commits form: `type: subject`, where `type` is one of `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `ci`. Subject is imperative mood, ≤ 72 chars; optional body explains *why* not *what*. Reviewer requests changes when commits drift from this form but does not block merge on it. Verification: reviewer reads `git log` during review. Source: `meta/decisions/launch-readiness.md` D-19; reviewer judgment.
 
 **R-073 (HARD)** — No `console.log`, no `debugger`, no commented-out experiments, no `TODO` without a tracking issue, no dead imports in the merged code. Verification: ESLint rules `no-console`, `no-debugger`; reviewer manual scan. Source: reviewer agent definition section 5 ("Maintainability: No dead code, no commented-out experiments, no `console.log`").
 
@@ -252,9 +263,12 @@ Requirements are numbered consecutively across all sub-topics so a future review
 | Lint | ESLint (with `no-console`, `no-debugger`) | R-073 |
 | Type check | `astro check` | R-055 |
 | Build | `pnpm build` | R-054 |
-| Lighthouse | `lighthouse-ci` on preview | R-013, R-014, R-015, R-023, R-056 |
+| Lighthouse | `lighthouse-ci` on preview (Perf ≥ 95, A11y/BP/SEO = 100) | R-013, R-014, R-015, R-023, R-056 |
 | Axe-core | `@axe-core/playwright` on preview | R-024–R-033, R-057 |
+| Client-JS budget | parse built HTML; sum gzipped third-party JS ≤ 75 kB | R-009, R-010, R-011, R-012, R-078, R-079, R-080 |
+| Test coverage | `pnpm test` + coverage report on changed files (≥ 80% when tests exist) | R-058 |
 | Security headers | `curl -I` on preview deploy | R-042–R-045 |
+| security.txt | `curl /.well-known/security.txt` (SOFT until R-047 lands) | R-081 |
 | Dependency audit | `pnpm audit --prod --audit-level=high` | R-049 |
 | License check | `pnpm licenses list` (or `license-checker`) | R-064 |
 | Lockfile freshness | `pnpm install --frozen-lockfile` | R-066 |
@@ -269,28 +283,55 @@ Requirements are numbered consecutively across all sub-topics so a future review
 
 ---
 
-## 5. Change log
+## 5. Rationale and change log
+
+### 5.1 Rationale — the 2026-05-13 posture shift
+
+The original draft of this document held two related positions: (a) Lighthouse Performance at 100, no exceptions; (b) zero client JS on `/`. Both were means to an end. The end is fast, private, accessible, owned. The 2026-05-13 decision pass (`meta/decisions/launch-readiness.md` D-14 through D-22) changed the means and preserved the end. Three shifts deserve explanation in this document because they're the ones most likely to surprise a future reviewer reading R-009, R-010, or R-013 against the masterplan's older "no JS unless strictly necessary" framing.
+
+**Performance band relaxed from 100 to ≥ 95 (R-013, R-056).** Lighthouse Performance is sensitive to third-party JS payload, even when deferred. Matomo's tracker (~25 kB gzipped) plus Bugsink's browser SDK (~40 kB gzipped) together baseline at ~65 kB of post-paint JS that the audit measures. Holding Performance at exactly 100 with that baseline forces a constant fight against single-run flake without materially improving the user experience. Relaxing the band to ≥ 95 absorbs that baseline honestly while keeping the bar visibly tight. A11y, Best Practices, and SEO stay at 100 because they're deterministic — they measure properties of the markup, not properties of the JS budget — and there's no reason to lower a bar that the JS-budget shift doesn't touch.
+
+**Zero-JS-on-`/` posture shift (R-009, section 3.2 rewrite).** The brand competes by owning its stack. Matomo (analytics) and Bugsink (error reporting) are first-party, self-hostable, privacy-respecting tools chosen explicitly to avoid the alternative — Google Analytics, Sentry SaaS, third-party SDKs that quietly grow the surface area you don't control. Loading them on every page including `/` is the cost of owning the operational telemetry rather than borrowing it. The new R-009 makes that explicit, the new R-010 puts a hard ceiling on what "first-party JS" is allowed to grow into, and the new R-011 enforces that the JS the site does ship doesn't block the meaningful paint.
+
+**Third-party JS ceiling at 75 kB gzipped (R-010).** Matomo + Bugsink together are ~65 kB. The 75 kB ceiling leaves ~10 kB of headroom — enough to absorb minor SDK version bumps, not enough to absorb a third tool without an explicit standards revision. The number is calibrated to force a conversation rather than enable drift. The user-facing performance bars (R-014 Core Web Vitals: LCP < 2.5s, CLS < 0.1, INP < 200ms; R-015 HTML weight) stay HARD; if the third-party JS budget makes meeting them harder, that's an engineer problem to solve (deferred loading, partial hydration discipline, server-side event recording where the tracker would otherwise fire), not a standards problem to lower.
+
+### 5.2 Change log
 
 | Date | Author | Change |
 | --- | --- | --- |
 | 2026-05-13 | pouk-ai-reviewer | Initial Draft. R-001 through R-077 published. Status: Draft. |
+| 2026-05-13 | pouk-ai-reviewer | Promoted Draft → Approved via `meta/decisions/launch-readiness.md` D-14 through D-22. Rewrote section 3.2 (Zero-JS contract → Client JS budget and discipline); R-009/R-010/R-011/R-012 replaced; old R-010 hydration discipline → R-078, old R-011 DS-SSR rule → R-079. Updated R-013 (Lighthouse Perf ≥ 95, A11y/BP/SEO = 100), R-046 (no CSP on launch), R-056 (lighthouse-ci thresholds), R-058 (test coverage ≥ 80% on changed files when tests exist), R-060 (Matomo locked), R-061 (Bugsink locked), R-062 (defer discipline for first-party tools), R-070 (branch naming SOFT, reviewer-NIT only), R-072 (Conventional Commits SOFT). Added R-080 (no service worker), R-081 (security.txt, SOFT until email lands). Closed O-001 through O-009; left O-010 noted as resolved; added O-011 (Matomo deployment shape) and O-012 (Bugsink deployment shape). |
 
 ---
 
 ## 6. Open questions
 
-Items the reviewer could not resolve without Arian's input. Each is the blocker for promoting this document from Draft to Approved.
+### 6.1 Open
 
-- **O-001 — Lighthouse 100 vs. 99 as the HARD bar (R-013, R-056).** The masterplan says 100. In practice, Lighthouse Performance fluctuates by 1–2 points run-to-run on identical content. Reviewer default: hold the bar at 100 — but Arian should confirm he's accepting the operational cost (occasional re-runs, occasional last-minute optimization to claw back a point).
-- **O-002 — Analytics provider for production (R-060).** Vercel Web Analytics basic tier or Cloudflare Web Analytics? Both meet the cookieless / no-JS bar. Vercel is one toggle, lives where the deploy lives. Cloudflare is host-agnostic and is the "future-proof" pick. Reviewer default: ship Vercel until there's a reason to migrate.
-- **O-003 — Error reporting tool (R-061).** Sentry (full-featured, but is a third-party JS SDK on the client by default), Vercel's built-in logs (server-side only, free), or none until traffic justifies it? Reviewer default: none on launch; revisit at first sustained traffic.
-- **O-004 — CSP strategy (R-046).** Ship a CSP from day one (and hash-pin the JSON-LD), or stay CSP-less until there's an actual XSS surface? Reviewer default: stay CSP-less for the static-marketing phase, add CSP the moment a form or third-party embed enters the picture.
-- **O-005 — Service worker for offline (universal).** Reviewer default: no. The site is small enough that browser HTTP cache plus Vercel's edge CDN cover the offline-ish case; a service worker adds complexity that fights R-009 (zero JS).
-- **O-006 — Conventional Commits as HARD or SOFT (R-072).** Reviewer default: SOFT. The masterplan is silent. Adopting strict Conventional Commits would unlock changesets-style automation, but the site is small and the cost may not be worth it.
-- **O-007 — Test coverage threshold (R-058).** No tests today. If/when tests are added, what's the bar? Reviewer default: when tests exist, require ≥ 80% line coverage on changed files (not absolute), and require any new component to ship with a smoke test.
-- **O-008 — `.well-known/security.txt` (universal security hygiene).** A `security.txt` file at `/.well-known/security.txt` advertising a security contact ([security@pouk.ai], a PGP key, a disclosure policy) is a low-cost good-citizen move. Reviewer default: add it once `hello@pouk.ai` is live (R-047 prerequisite).
-- **O-009 — Branch naming as HARD (R-070).** Default SOFT; promote to HARD if Arian wants branch-name-based PR labeling.
-- **O-010 — PM specs missing.** `meta/specs/pages/*.md` and `meta/specs/content/*.md` referenced in this reviewer's brief are not yet present in the tree (only `.gitkeep` files). Several requirements in this document defer to "the governing PM spec" (e.g., R-038 JSON-LD, R-007 new routes). Until the PM lands those specs, the reviewer falls back to the masterplan and `meta/backlog.md` "Approved copy from founder" sections, which is fine for now — but this gap should be closed before the four-page build starts in earnest.
+Items still needing resolution. None of these block the standards document from being Approved; both are infrastructure choices downstream of the locked tool picks in D-15 and D-16.
+
+- **O-011 — Matomo deployment shape (R-060).** Self-hosted on Pouk-AI-INC infrastructure vs. Matomo Cloud (paid SaaS). Reviewer default: self-hosted matches the brand's "owns the stack" posture and avoids a third-party data-flow on every page load. Cloud is faster to launch and offloads ops. The decision affects R-061 indirectly (if Matomo is cloud-hosted the tracker file is served from a third-party origin and the JS budget rules in R-009/R-010/R-011 still apply but the verification step changes).
+- **O-012 — Bugsink deployment shape (R-061).** Self-hosted vs. Bugsink Cloud. Reviewer default: self-hosted, same rationale as O-011. Same caveat about R-009/R-010/R-011 verification under the cloud shape.
+
+A future revision watch-list (not gating approval, just flagged for the reviewer to track):
+
+- If Matomo's cookie mode is enabled in a future configuration change (currently cookieless per D-15 and R-060), R-012 must be tightened with a consent-gate flow before the change ships.
+- If a third operational tool (beyond Matomo and Bugsink) is proposed, R-010's 75 kB ceiling will be hit — that's by design and forces a standards revision rather than allowing drift.
+
+### 6.2 Resolved (closed via decisions doc)
+
+All items O-001 through O-009 were resolved on 2026-05-13 via `meta/decisions/launch-readiness.md`. See section 5.1 (Rationale) and 5.2 (Change log) for resolution detail per requirement.
+
+- **O-001 — Lighthouse threshold band.** Resolved by D-14 → R-013, R-056. Performance ≥ 95, A11y/BP/SEO = 100, HARD on every page.
+- **O-002 — Analytics provider.** Resolved by D-15 → R-060. Matomo, every page including `/`, cookieless at launch.
+- **O-003 — Error reporting tool.** Resolved by D-16 → R-061. Bugsink, client + server SDK, every page including `/`.
+- **O-004 — CSP strategy.** Resolved by D-17 → R-046. No CSP on launch; add when a form or non-first-party embed appears.
+- **O-005 — Service worker.** Resolved by D-18 → R-080. None registered.
+- **O-006 — Conventional Commits.** Resolved by D-19 → R-072. SOFT; reviewer requests changes on drift but does not block.
+- **O-007 — Test coverage threshold.** Resolved by D-20 → R-058. ≥ 80% on changed files when tests exist; absence surfaced as NIT.
+- **O-008 — `.well-known/security.txt`.** Resolved by D-21 → R-081. SOFT now, HARD once `hello@pouk.ai` is live; task tracked in `meta/backlog.md`.
+- **O-009 — Branch naming.** Resolved by D-22 → R-070. SOFT; reviewer prefers convention but does not block.
+- **O-010 — PM specs missing.** Resolved 2026-05-13: PM specs for `meta/specs/pages/*.md` and `meta/specs/content/*.md` landed on the same date as this revision. Future review findings deferring to "the governing PM spec" can now cite a real spec file.
 
 ---
 
@@ -310,7 +351,9 @@ Items where reading the masterplan against this standard surfaced wording that s
 - `meta/masterplan.md` — strategic decisions, taxonomy, release sequence. Especially sections 1, 2A, 4.2, 4.3, 4.4, 5.1, 5.2, 6.1, 6.2, 8.
 - `meta/architecture.md` — current single-file reality, design-token contract, motion / a11y rules.
 - `meta/backlog.md` — launch blockers (security headers, DNS, OG image), approved page copy.
+- `meta/decisions/launch-readiness.md` — D-14 through D-22 (resolved 2026-05-13) drive the section 3.2 rewrite and the R-013/R-046/R-058/R-060/R-061/R-070/R-072/R-080/R-081 changes.
 - `.claude/agents/pouk-ai-reviewer.md` — reviewer's own working contract, especially section 5 (universal quality checks) and section 9 (hard "no" list).
+- [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116) — `security.txt` format (cited under R-081).
 - [W3C WCAG 2.1](https://www.w3.org/TR/WCAG21/) — accessibility upstream specification (cited under R-024, R-025, R-026, R-027, R-028, R-030, R-031, R-032, R-053).
 - [web.dev — Web Vitals](https://web.dev/articles/vitals) — Core Web Vitals "Good" thresholds (cited under R-014).
 - [OWASP Secure Headers Project](https://owasp.org/www-project-secure-headers/) — security header recommendations (cited under R-042, R-043, R-044).

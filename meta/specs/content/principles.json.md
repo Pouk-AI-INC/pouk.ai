@@ -2,10 +2,11 @@
 
 **File**: `src/content/principles.json`
 **Consumed by**: `src/pages/principles.astro` (see `meta/specs/pages/principles.md`)
-**Status**: Draft
+**Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
 **Last updated**: 2026-05-13
 **Masterplan reference**: Section 4.1 (site layout), 4.4 (long-form content as data)
+**Decisions log**: D-09 (page heading) and D-10 (bookend voice) confirmed; the schema's `intro` and `conclusion` top-level fields and the `numeral` field on principle entries remain consistent with those decisions. Resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
 ---
 
@@ -85,10 +86,14 @@ The anchor on `/principles` for a given principle is exactly `#${id}`. No transf
 
 ## 8. Open questions / dependencies
 
+The page-level decisions affecting this schema (page heading per D-09, bookend voice per D-10) were resolved via `meta/decisions/launch-readiness.md` on 2026-05-13. The schema's `intro` / `conclusion` top-level fields and the `numeral` field per principle remain consistent with those decisions — no schema changes required.
+
+Remaining dependencies blocking `Built`:
+
 - **Numeral storage vs. computation — locked.** Roman numerals are stored to avoid a converter dependency and to make reordering explicit. Engineer should not synthesize numerals from array index.
 - **DS dependency — `Principle` molecule.** Confirm `Principle.numeral`, `Principle.title`, and the children/body slot accept the field values directly. Tracked in `meta/specs/pages/principles.md` section 9.
-- **Bookend rendering — site-side.** `intro` and `conclusion` do not pass through a DS molecule; they render in the page template directly with the editorial-voice treatment recommended in `pages/principles.md`.
-- **Markdown subset — recommendation.** Italic, bold, and paragraph breaks only. If a principle's body ever needs a link, escalate to the `Principle` molecule API (DS) — do not widen the schema.
+- **Bookend rendering — site-side.** `intro` and `conclusion` do not pass through a DS molecule; they render in the page template directly with **Instrument Serif italic** treatment per D-10.
+- **Markdown subset — locked.** Italic, bold, and paragraph breaks only. If a principle's body ever needs a link, escalate to the `Principle` molecule API (DS) — do not widen the schema.
 
 ## 9. Out of scope
 

@@ -1,10 +1,11 @@
 # Spec: Visitor-to-conversation flow
 
 **Surfaces affected**: `/`, `/why-ai`, `/roles`, `/principles`, `mailto:hello@pouk.ai`
-**Status**: Draft
+**Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
 **Last updated**: 2026-05-13
 **Masterplan reference**: Sections 4.1 (site layout), 2A (decision authority), 6 (cutover)
+**Decisions log**: D-13 (nav order) — resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
 ---
 
@@ -75,9 +76,11 @@ The masterplan section 2A reserves nav contents as **site repo's** decision. The
 
 ## 6. Top-nav order
 
-**Opinionated call: nav order is `Why AI`, `Roles`, `Principles` — mirroring the funnel left-to-right.** Defended: a first-time visitor scans the nav left-to-right; placing the diagnosis page first signals where the journey starts. A returning visitor uses the nav as a jump table; the funnel order is still the most defensible default since it matches the canonical path. Alternative orders considered: alphabetical (rejected — `Principles, Roles, Why AI` is meaningless to a prospect); reverse-funnel `Principles → Roles → Why AI` (rejected — front-loads character at the cost of diagnosis). Locked unless Arian overrides.
+**Locked per D-13: nav order is `Why AI`, `Roles`, `Principles` — funnel order, left-to-right.** A first-time visitor scans the nav left-to-right; placing the diagnosis page first signals where the journey starts. A returning visitor uses the nav as a jump table; the funnel order is still the most defensible default since it matches the canonical path. Alternative orders considered and rejected: alphabetical (`Principles, Roles, Why AI` — meaningless to a prospect); commercial-first (`Roles, Why AI, Principles` — leads with services); reverse-funnel `Principles → Roles → Why AI` — front-loads character at the cost of diagnosis.
 
 The homepage `/` is reachable via the `SiteShell` wordmark, not a separate "Home" nav item. This is consistent with the holding page's restraint and with `pages/home.md` section 4.
+
+**Cascade**: the sitemap (`sitemap.xml`) and footer link ordering match the same funnel order — Why AI → Roles → Principles. Engineer wires sitemap and footer consistent with this nav order.
 
 ## 7. Entry-source distribution (assumed, pre-analytics)
 
@@ -106,7 +109,10 @@ Implication for engineer: every page must be **self-sufficient at first touch** 
 
 ## 9. Open questions / dependencies
 
-- **Nav order — Arian's final call.** Recommendation locked above; Arian can override.
+The original draft's open question (nav order) was resolved via `meta/decisions/launch-readiness.md` on 2026-05-13. See decision D-13.
+
+Remaining dependencies blocking `Built`:
+
 - **Email address — locked.** `hello@pouk.ai` is the single contact point. LinkedIn DM is a secondary channel handled outside the site (linked from `SiteShell` footer per masterplan section 3.2 if `SiteShell` exposes social links; otherwise not surfaced).
 - **DS dependency — `SiteShell`.** Required to enforce the nav order and the wordmark hand-off on every page. In scope for DS Phase 1.3.
 - **Analytics — out of scope.** This spec relies on qualitative signals (inbound email content, referrer cite patterns) at launch. Once analytics arrive, this spec's section 3 and 7 should be revisited against measured data.
