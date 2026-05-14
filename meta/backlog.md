@@ -39,14 +39,21 @@ These touch external systems (Porkbun dashboard, Vercel dashboard, email host on
 
 All four of these must be live **before the first prospect email goes out** — otherwise it lands in spam.
 
-## Asset migration to site repo — **can be done by Claude on request, or by Arian**
+## Asset migration to site repo
 
-The generated brand assets currently live in the DS repo (`poukai-ui/src/brand/`). They need to land in the site repo before sharing the canonical `pouk.ai` URL on a social surface — otherwise the OG preview 404s and the iOS home-screen icon falls back to a screenshot.
+Closed by `pouk-ai-engineer` during the Astro round-1 build (commit `13f8668`). Brand assets pulled from `poukai-ui/src/brand/` into the site's `public/` directory:
 
-- [ ] Copy `poukai-ui/src/brand/og.png` → site repo `public/og.png` (or repo root for the pre-Astro era). 1200×630, referenced by `<meta property="og:image">` and Twitter card in `index.html`.
-- [ ] Copy `poukai-ui/src/brand/apple-touch-icon.png` → site repo `public/apple-touch-icon.png` (or repo root). 180×180, referenced by `<link rel="apple-touch-icon">` in `index.html`.
-- [ ] Rewrite the favicon `<link>` in `index.html` line 33 — the existing inline data-URI SVG is the old 3-stroke altimeter placeholder. Replace with either (a) an inline data-URI SVG built from the feather isotype paths (matches the dark-mode-aware approach in the original spec) or (b) external `<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">` + 16x16 variant, copying the matching PNGs from `poukai-ui/src/brand/`. Approach (a) is one HTTP request fewer.
-- [ ] Once Astro lands, repath everything under `public/` and add `<link rel="manifest">` if `android-chrome-*` icons are kept.
+- [x] `public/og.png` (1200×630). Done 2026-05-13.
+- [x] `public/apple-touch-icon.png` (180×180). Done 2026-05-13.
+- [x] `public/favicon-{16x16,32x32}.png`, `public/android-chrome-{192x192,512x512}.png`. Done 2026-05-13.
+- [ ] **`index.html` favicon `<link>`** — line 33 still references the old altimeter inline-SVG placeholder. Per founder rule ("any changes to the current holding landing page are cosmetic and temporary"), this stays untouched until `/` is ported into Astro. The new Astro routes (`/why-ai`, `/roles`, `/principles`) already use the new isotype via `BaseLayout.astro`.
+
+## DS-side coordination (Claude Design's lane)
+
+Tracked here so the site engineer doesn't lose sight while the DS team works in parallel. None of these are this repo's lane to fix.
+
+- [x] **`@poukai-inc/ui@0.2.1` published** with the `cpy --flat` fix for `dist/tokens.css`. Done 2026-05-14 via DS PR #5 + version-bump PR #6.
+- [ ] **Component CSS not delivered to consumers (`SiteShell`, `RoleCard`, `Hero`, `Principle`, `FailureMode` render unstyled).** The DS package builds `dist/style.css` containing all per-component scoped CSS-module styles, but (a) the package.json `exports` field exposes only `./tokens.css`, not `./style.css`, and (b) the ESM/CJS entry files don't `import "./style.css"`. Result: when a consumer does `import { SiteShell } from "@poukai-inc/ui"`, only JS lands — every `.poukai_<hash>` class on the rendered DOM is a dangling reference, and the components fall back to user-agent defaults (nav renders as a bulleted list, header bar is missing, card hairlines vanish, etc.). Verified locally on 2026-05-14 by inspecting `dist/roles/index.html` and the package's `index.js`. Bug surface is the entire DS, not just `SiteShell` — `SiteShell` only looks worst because it's the most layout-heavy. Suggested fix (one line): add `import "./style.css";` to `src/index.ts` (or equivalent build-time injection). Cut as `0.2.2` via changesets.
 
 ## Security hygiene (once email lands)
 
