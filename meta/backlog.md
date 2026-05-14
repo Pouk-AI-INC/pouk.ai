@@ -13,12 +13,40 @@ Things to ship before / around launch. Roughly priority-ordered within sections.
 - [x] Add `vercel.json` at the repo root. Done 2026-05-13 (commit `bc81bc3`).
 - [x] Resolve JSON-LD ↔ CSP. Closed — `vercel.json` ships without CSP per D-17, so the conflict never materialized. Re-open if/when a CSP is introduced.
 
-## DNS + email
+## DNS + email — **manual (Arian executes)**
 
-- [ ] Configure Porkbun: `ALIAS` apex + `CNAME www` → `cname.vercel-dns.com`
-- [ ] Vercel → **Settings → Domains**: add `pouk.ai` and `www.pouk.ai`, wait for cert
-- [ ] Pick email host (Fastmail / Google Workspace) for `hello@pouk.ai`
-- [ ] Add MX, SPF, DKIM, DMARC, CAA records — must be live before first prospect email goes out
+These touch external systems (Porkbun dashboard, Vercel dashboard, email host onboarding) that the engineering agents can't reach. Arian's lane.
+
+- [ ] **Porkbun DNS records** — Domain Management → DNS Records → add:
+  - `ALIAS` apex (leave host blank) → `cname.vercel-dns.com`, TTL 600
+  - `CNAME www` → `cname.vercel-dns.com`, TTL 600
+- [ ] **Vercel domain binding** — Vercel → Project → Settings → Domains → add `pouk.ai` and `www.pouk.ai`. Wait for TLS provisioning (≈30s–2min once DNS propagates).
+- [ ] **Pick email host for `hello@pouk.ai`** — Fastmail or Google Workspace are the standard picks. Provider determines the next four record values.
+- [ ] **Email DNS records** at Porkbun — values come from the chosen provider:
+  - `MX` (root) → `<provider MX records>`
+  - `TXT` (root) → `v=spf1 include:<provider> -all`
+  - `TXT` `_dmarc` → `v=DMARC1; p=quarantine; rua=mailto:hello@pouk.ai`
+  - `TXT` `<selector>._domainkey` → `<DKIM key>`
+  - `CAA` (root) → `0 issue "letsencrypt.org"`
+  - `CAA` (root) → `0 issue "pki.goog"`
+- [ ] **Verify with `dig` + `curl`**:
+  ```
+  dig +short pouk.ai
+  dig +short www.pouk.ai
+  curl -I https://pouk.ai/
+  ```
+  Expect `200`, `server: Vercel`, and `strict-transport-security` header (from `vercel.json`).
+
+All four of these must be live **before the first prospect email goes out** — otherwise it lands in spam.
+
+## Asset migration to site repo — **can be done by Claude on request, or by Arian**
+
+The generated brand assets currently live in the DS repo (`poukai-ui/src/brand/`). They need to land in the site repo before sharing the canonical `pouk.ai` URL on a social surface — otherwise the OG preview 404s and the iOS home-screen icon falls back to a screenshot.
+
+- [ ] Copy `poukai-ui/src/brand/og.png` → site repo `public/og.png` (or repo root for the pre-Astro era). 1200×630, referenced by `<meta property="og:image">` and Twitter card in `index.html`.
+- [ ] Copy `poukai-ui/src/brand/apple-touch-icon.png` → site repo `public/apple-touch-icon.png` (or repo root). 180×180, referenced by `<link rel="apple-touch-icon">` in `index.html`.
+- [ ] Rewrite the favicon `<link>` in `index.html` line 33 — the existing inline data-URI SVG is the old 3-stroke altimeter placeholder. Replace with either (a) an inline data-URI SVG built from the feather isotype paths (matches the dark-mode-aware approach in the original spec) or (b) external `<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">` + 16x16 variant, copying the matching PNGs from `poukai-ui/src/brand/`. Approach (a) is one HTTP request fewer.
+- [ ] Once Astro lands, repath everything under `public/` and add `<link rel="manifest">` if `android-chrome-*` icons are kept.
 
 ## Security hygiene (once email lands)
 
