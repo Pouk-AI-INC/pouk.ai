@@ -9,10 +9,7 @@ export default defineConfig({
 
   integrations: [
     react(),
-    sitemap({
-      // Register the static index.html route alongside the Astro routes
-      customPages: ["https://pouk.ai/"],
-    }),
+    sitemap(),
     compress(),
   ],
 

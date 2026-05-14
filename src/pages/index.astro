@@ -1,0 +1,63 @@
+---
+/**
+ * / — Homepage. Doorway, not destination.
+ *
+ * IA per meta/specs/pages/home.md sections 4 and 8.
+ * Copy verbatim from public/index.html (the source of truth, now deleted).
+ *
+ * Decisions honoured:
+ *   D-11 — integrated lede-extension link sentence at end of lede,
+ *           pointing at /why-ai. Structural form locked; exact wording
+ *           is a Draft pending Arian's final approval (see HomeHero.tsx).
+ *   D-12 — status-line copy byte-identical to former public/index.html:
+ *           "Currently taking conversations for Q3."
+ *
+ * Visual parity: indistinguishable from public/index.html per masterplan
+ * section 6.1, plus SiteShell top nav (deliberate site evolution)
+ * and the D-11 integrated lede-extension link.
+ *
+ * Complex JSX prop assembly lives in HomeHero.tsx — only scalar props
+ * cross the .astro → React boundary (same pattern as ShellWrapper.tsx).
+ */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { HomeHero } from "../components/HomeHero";
+
+const pageTitle = "pouk.ai — Technical consulting for teams shipping with AI";
+const pageDescription =
+  "Custom AI builds, automations, and advisory for teams that need to ship. Founded by a frontend engineer. Currently taking Q3 conversations.";
+const canonical = "https://pouk.ai/";
+
+/** Organization JSON-LD — byte-identical to former public/index.html. */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "pouk.ai",
+  url: "https://pouk.ai",
+  email: "hello@pouk.ai",
+  description: "Technical consulting for teams shipping with AI.",
+  sameAs: [
+    "https://linkedin.com/company/poukai",
+    "https://x.com/pouk_ai",
+    "https://instagram.com/pouk.ai",
+    "https://github.com/pouk-ai",
+  ],
+};
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+  currentRoute="/"
+>
+  <!--
+    Homepage: single Hero block inside .site-page.
+    No additional sections — the page is a doorway per spec section 4.
+    HomeHero.tsx owns all JSX slot assembly (D-11 lede link, D-12 status).
+  -->
+  <div class="site-page">
+    <HomeHero />
+  </div>
+</BaseLayout>
