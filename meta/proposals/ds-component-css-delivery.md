@@ -1,10 +1,21 @@
-# Proposal to Claude Design: deliver component CSS to consumers
+---
+title: "Deliver component CSS to consumers via side-effect imports"
+target_repo: poukai-inc/poukai-ui
+suggested_resolution: patch
+status: resolved
+ds_issue:
+target_version: 0.2.2
+created: 2026-05-14
+resolved: 2026-05-14
+---
+
+# Proposal: deliver component CSS to consumers
+
+> **Resolved**: shipped as `@poukai-inc/ui@0.2.2` on 2026-05-14 (DS PR #8 — auto-inject per-entry CSS). Consumer side: `89c5751` added `vite.ssr.noExternal: ["@poukai-inc/ui"]` to handle Astro SSR. Retained as a record of the cross-repo flow's first successful round-trip; predates the formal proposal frontmatter convention in `meta/workflow.md`.
 
 **From**: `poukai-inc/pouk.ai` (site repo)
-**To**: `poukai-inc/poukai-ui` (DS repo) — Claude Design
-**Affected version**: `@poukai-inc/ui@0.2.1` (currently published)
-**Suggested resolution**: cut as `0.2.2` (patch) via changesets
-**Date**: 2026-05-14
+**To**: `poukai-inc/poukai-ui` (DS repo)
+**Affected version**: `@poukai-inc/ui@0.2.1`
 
 ---
 

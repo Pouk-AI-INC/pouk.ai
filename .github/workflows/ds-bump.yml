@@ -1,0 +1,136 @@
+name: DS package bump
+
+# Listens for the DS repo's post-publish dispatch event and opens a draft
+# PR bumping @poukai-inc/ui in package.json + regenerating pnpm-lock.yaml.
+#
+# See meta/workflow.md for the full cross-repo loop.
+#
+# To trigger manually (e.g. testing): from the DS repo or any authorized
+# context, hit the GitHub API:
+#   gh api -X POST repos/poukai-inc/pouk.ai/dispatches \
+#     -f event_type=ds-package-published \
+#     -f client_payload[version]=0.x.y
+
+on:
+  repository_dispatch:
+    types: [ds-package-published]
+  # Manual override — useful when bootstrapping or testing
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Target @poukai-inc/ui version (e.g. 0.2.3)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    env:
+      DS_VERSION: ${{ github.event.client_payload.version || inputs.version }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    steps:
+      - name: Validate version input
+        run: |
+          if [ -z "$DS_VERSION" ]; then
+            echo "::error::No version provided in dispatch payload or workflow input."
+            exit 1
+          fi
+          if ! echo "$DS_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9.-]+)?$'; then
+            echo "::error::Version '$DS_VERSION' is not a valid SemVer."
+            exit 1
+          fi
+          echo "Bumping to @poukai-inc/ui@$DS_VERSION"
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Check if bump already applied
+        id: check
+        run: |
+          current=$(node -p "require('./package.json').dependencies['@poukai-inc/ui']")
+          echo "Current pinned version: $current"
+          echo "Target version:         $DS_VERSION"
+          if [ "$current" = "$DS_VERSION" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Already on $DS_VERSION; nothing to do."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump package.json
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.dependencies['@poukai-inc/ui'] = process.env.DS_VERSION;
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Install deps (regenerates pnpm-lock.yaml against registry)
+        if: steps.check.outputs.skip != 'true'
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build
+        if: steps.check.outputs.skip != 'true'
+        run: pnpm build
+
+      - name: Open draft PR
+        if: steps.check.outputs.skip != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: bot/ds-bump-${{ env.DS_VERSION }}
+          delete-branch: true
+          title: "chore: bump @poukai-inc/ui to ${{ env.DS_VERSION }}"
+          commit-message: |
+            chore: bump @poukai-inc/ui to ${{ env.DS_VERSION }}
+
+            Auto-opened by .github/workflows/ds-bump.yml in response to
+            a ds-package-published dispatch from poukai-inc/poukai-ui.
+
+            See meta/workflow.md for the cross-repo proposal flow.
+          body: |
+            **Auto-generated bump PR.** Triggered by a `ds-package-published` dispatch from `poukai-inc/poukai-ui`.
+
+            ## What changed
+            - `package.json`: `@poukai-inc/ui` → `${{ env.DS_VERSION }}`
+            - `pnpm-lock.yaml`: regenerated against `npm.pkg.github.com`
+
+            ## Local verification (already passed on this runner)
+            - `pnpm install --no-frozen-lockfile` — green
+            - `pnpm build` — green
+
+            ## Before merging
+            - [ ] Confirm the version matches an expected proposal in `meta/proposals/`
+            - [ ] If the version closes a tracked proposal, update its frontmatter:
+              - `status: resolved`
+              - `target_version: ${{ env.DS_VERSION }}`
+              - `resolved: <today>`
+            - [ ] Skim the lockfile diff for unexpected transitive bumps
+            - [ ] After merge, Vercel auto-deploys main; spot-check the canonical routes
+
+            cc @arianzargaran
+          draft: true
+          labels: |
+            bot
+            ds-bump
