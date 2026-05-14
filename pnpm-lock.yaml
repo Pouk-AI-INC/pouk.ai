@@ -15,8 +15,8 @@ importers:
         specifier: 3.3.0
         version: 3.3.0
       '@poukai-inc/ui':
-        specifier: 0.2.0
-        version: 0.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(lucide-react@0.511.0(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.2.1
+        version: 0.2.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(lucide-react@0.511.0(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       astro:
         specifier: 5.7.13
         version: 5.7.13(@types/node@25.7.0)(lightningcss@1.27.0)(rollup@4.60.3)(terser@5.34.1)(typescript@5.9.3)(yaml@2.9.0)
@@ -521,8 +521,8 @@ packages:
   '@playform/pipe@0.1.1':
     resolution: {integrity: sha512-qofwa/+UKbvyHw4NiVwQZ5Z4UNEDSKmrtKFUL6JO9NhtaEuio3a90QuvTTsTw4g4tGHCmj0is/7p1igkRJ2EyA==}
 
-  '@poukai-inc/ui@0.2.0':
-    resolution: {integrity: sha512-2+x50CfuEDDKdTI3XModT+h1ITe8t2wmPM+jBRbnK/ExajeH2tscVrSRDwmc1HK35Aah587PtSB7RFo+mT09tg==, tarball: https://npm.pkg.github.com/download/@poukai-inc/ui/0.2.0/191f6559387178c8f4772cc50f4c8d64cade12dd}
+  '@poukai-inc/ui@0.2.1':
+    resolution: {integrity: sha512-H/Ct1xjx4f3hzE8qOvzhIMqk7kd6VrMM0uWnvK1E5neZ0lUOmjthiJ4NOMuAccvbbDLuKb5t7zaaHLA6RqszJA==, tarball: https://npm.pkg.github.com/download/@poukai-inc/ui/0.2.1/7f3fedd78fa09106ca677ac28beefb0b740526e2}
     peerDependencies:
       lucide-react: '>=0.400.0'
       react: '>=18'
@@ -3083,7 +3083,7 @@ snapshots:
       deepmerge-ts: 7.1.0
       fast-glob: 3.3.2
 
-  '@poukai-inc/ui@0.2.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(lucide-react@0.511.0(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@poukai-inc/ui@0.2.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(lucide-react@0.511.0(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.4(@types/react@18.3.28)(react@18.3.1)
