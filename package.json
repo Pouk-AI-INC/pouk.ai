@@ -1,0 +1,32 @@
+{
+  "name": "pouk-ai-site",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/react": "4.2.1",
+    "@astrojs/sitemap": "3.3.0",
+    "@poukai/ui": "workspace:*",
+    "astro": "5.7.13",
+    "astro-compress": "2.3.3",
+    "lucide-react": "0.511.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "3.25.28"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.6.0"
+  }
+}

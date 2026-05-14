@@ -1,0 +1,84 @@
+---
+/**
+ * /principles — Trust-closer: ten operating principles that define how pouk.ai works.
+ *
+ * IA per meta/specs/pages/principles.md sections 4 and 8.
+ * Content: intro, ten principles, conclusion from src/content/principles.json.
+ *
+ * Decisions honoured:
+ *   D-09 — page heading "Principles" (not "Operating Principles")
+ *   D-10 — intro + conclusion in Instrument Serif italic; principles in sans
+ *
+ * Anchor IDs per spec: #ownership, #integrity, #reliability, #systems-thinking,
+ * #intellectual-curiosity, #obsession, #range, #momentum, #willingness-to-fail,
+ * #good-nature
+ */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Hero, Principle } from "@poukai/ui";
+// principles.json is a single-object file; imported directly (no collection needed
+// since no other page reuses it — per spec section 6 deferral rule).
+import principlesData from "../content/principles.json";
+
+const { intro, conclusion, principles } = principlesData;
+
+const pageTitle = "Principles — how pouk.ai operates | pouk.ai";
+const pageDescription =
+  "Ten operating principles. Built one project at a time. The compass pouk.ai works from — on ownership, integrity, systems thinking, momentum, and more.";
+const canonical = "https://pouk.ai/principles";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Principles — pouk.ai",
+  description: pageDescription,
+  url: canonical,
+};
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+  currentRoute="/principles"
+>
+  <div class="site-page">
+    <!-- 1. Hero — page h1: "Principles" per D-09 -->
+    <Hero
+      title="Principles"
+      lede="Ten operating principles. Built one project at a time. The compass we work from."
+    />
+
+    <!-- 2. Introduction — Instrument Serif italic per D-10 -->
+    <div class="principles-bookend">
+      <p>{intro}</p>
+    </div>
+
+    <!-- 3. Ten Principle molecules — sans per D-10 -->
+    <!-- sr-only h2 bridges h1 → h3 (Principle) to satisfy axe heading-order (R-026). -->
+    <h2 class="visually-hidden">The ten principles</h2>
+    <div class="principles-list">
+      {principles.map((p) => (
+        <div id={p.anchor}>
+          <Principle numeral={p.numeral} title={p.title}>
+            <p>{p.body}</p>
+          </Principle>
+        </div>
+      ))}
+    </div>
+
+    <!-- 4. Conclusion — Instrument Serif italic per D-10 -->
+    <div class="principles-bookend">
+      <p>{conclusion}</p>
+    </div>
+
+    <!-- 5. End CTA — single muted line per spec IA item 6 -->
+    <div class="end-cta">
+      <p>
+        If this is the kind of partner you want,{" "}
+        <a href="mailto:hello@pouk.ai">hello@pouk.ai</a>
+      </p>
+    </div>
+  </div>
+</BaseLayout>

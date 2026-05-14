@@ -1,0 +1,75 @@
+---
+/**
+ * /roles — Self-identification page: four shapes of help pouk.ai delivers.
+ *
+ * IA per meta/specs/pages/roles.md sections 4 and 8.
+ * Content: four role entries from src/content/roles.json (Zod-validated).
+ * Lucide icon picks per D-06: hammer, workflow, graduation-cap, clapperboard.
+ * Eyebrow convention per D-07: "The Builder", "The Automator", etc.
+ * Universal end CTA per D-08: single mailto: at page bottom, no per-card CTA.
+ *
+ * Icon note: Lucide JSX requires a React context — resolved in RolesGrid.tsx,
+ * a site-side component (not a DS primitive). Rendered as static HTML; no
+ * hydration directive (R-079).
+ */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { Hero } from "@poukai/ui";
+import { RolesGrid } from "../components/RolesGrid";
+
+// file() loader returns one CollectionEntry per array item; .data is the item.
+// JSON order (Builder, Automator, Educator, Creator) is preserved by the loader.
+const roleEntries = await getCollection("roles");
+const orderedRoles = roleEntries.map((e) => e.data);
+
+const pageTitle = "Roles — four shapes of AI consulting help | pouk.ai";
+const pageDescription =
+  "Builder, Automator, Educator, Creator. Four archetypes — each pinned to a hiring trigger. Find which shape of help pouk.ai delivers for your situation.";
+const canonical = "https://pouk.ai/roles";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Roles — pouk.ai",
+  description: pageDescription,
+  url: canonical,
+};
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+  currentRoute="/roles"
+>
+  <div class="site-page">
+    <!-- 1. Hero -->
+    <Hero
+      title="Four shapes of help"
+      lede="Builder. Automator. Educator. Creator. pouk.ai operates across all four — the engagement shape depends on what you need. Which one are you hiring?"
+    />
+
+    <!-- 2. Role jump nav — one-line typographic nav per spec IA item 3 -->
+    <nav class="role-jump-nav" aria-label="Jump to role">
+      {orderedRoles.map((role) => (
+        <a href={`#${role.id}`}>{role.title}</a>
+      ))}
+    </nav>
+
+    <!-- 3. Four RoleCard molecules (via RolesGrid — Lucide JSX requires React context) -->
+    <!-- Rendered as static HTML at build time; no hydration directive (R-079). -->
+    <!-- sr-only h2 bridges h1 → h3 (RoleCard) to satisfy axe heading-order (R-026). -->
+    <h2 class="visually-hidden">Role archetypes</h2>
+    <RolesGrid roles={orderedRoles} />
+
+    <!-- 4. Universal end CTA — per D-08, single block for all four roles -->
+    <div class="end-cta">
+      <p>
+        Not sure which fits? Describe your situation and we'll work it out together.
+        <a href="mailto:hello@pouk.ai">hello@pouk.ai &rarr;</a>
+      </p>
+    </div>
+  </div>
+</BaseLayout>

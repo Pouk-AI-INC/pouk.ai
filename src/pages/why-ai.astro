@@ -1,0 +1,249 @@
+---
+/**
+ * /why-ai — Thesis page: the AI deployment gap and five failure modes.
+ *
+ * IA per meta/specs/pages/why-ai.md sections 4 and 8.
+ * Content: failure modes from src/content/failure-modes.json (Zod-validated).
+ * Opening argument, leaders section, consulting angle, discovery questions,
+ * references, and last-reviewed footer live as page-template prose here
+ * (only one page renders them — no reuse argues for a separate JSON yet,
+ * per spec section 6).
+ *
+ * Decisions honoured:
+ *   D-01 — footnote-style superscript citations → References block
+ *   D-02 — sticky right-rail TOC on desktop ≥ 1024px, CSS-only
+ *   D-03 — "Last reviewed: 2026-05-13" footer
+ *   D-04 — discovery questions as inline italic <blockquote>
+ *   D-05 — 500% (FM2) and 61% (FM5) extracted to stats[] in JSON
+ */
+
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { Hero, FailureMode, Stat } from "@poukai/ui";
+
+// file() loader returns one CollectionEntry per array item; .data holds the item.
+const failureModeEntries = await getCollection("failure-modes");
+const sortedModes = failureModeEntries
+  .map((e) => e.data)
+  .sort((a, b) => a.index - b.index);
+
+const pageTitle = "Why AI projects fail — and how to fix them | pouk.ai";
+const pageDescription =
+  "Only 12–18% of companies deploying AI capture meaningful ROI. Here are the five failure modes — data readiness, wrong use case, integration, governance, and change management — and what to do about each.";
+const canonical = "https://pouk.ai/why-ai";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: "Why AI projects fail — and how to fix them",
+  description: pageDescription,
+  url: canonical,
+  author: {
+    "@type": "Organization",
+    name: "pouk.ai",
+    url: "https://pouk.ai",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "pouk.ai",
+    url: "https://pouk.ai",
+  },
+  dateModified: "2026-05-13",
+};
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonical}
+  jsonLd={jsonLd}
+  currentRoute="/why-ai"
+>
+  <div class="site-page">
+    <!-- 1. Hero — page eyebrow + thesis title + lede -->
+    <Hero
+      title="Why AI projects fail — and what to do about it"
+      lede="Only 12–18% of companies deploying AI are capturing meaningful ROI. The rest are stuck in one of five failure modes. Here they are — and what to do about each."
+    />
+
+    <div class="why-ai-layout">
+      <!-- Main content column -->
+      <div class="why-ai-main">
+
+        <!-- 2. Opening argument with headline stats -->
+        <section aria-label="The deployment gap">
+          <p>
+            The headline stat from every major consulting firm in 2026 is the same: only
+            <strong>12–18% of companies deploying AI are capturing meaningful ROI</strong>.<sup class="footnote-ref"><a href="#ref-1" id="cite-1">¹</a></sup>
+            Gartner says <strong>85% of AI projects fail to meet business goals</strong>.<sup class="footnote-ref"><a href="#ref-2" id="cite-2">²</a></sup>
+            PwC's 2026 AI predictions report finds only
+            <strong>15% of AI decision-makers reported a positive impact on profitability</strong>
+            in the last 12 months.<sup class="footnote-ref"><a href="#ref-3" id="cite-3">³</a></sup>
+            Despite <strong>$300B in AI venture funding in Q1 2026 alone</strong>,<sup class="footnote-ref"><a href="#ref-4" id="cite-4">⁴</a></sup>
+            the deployment gap between "launched an AI pilot" and "AI is delivering measurable
+            business value" is enormous.
+          </p>
+
+          <div class="stats-row" role="list" aria-label="Headline statistics">
+            <div role="listitem">
+              <Stat value="12–18%" caption="of companies deploying AI capture meaningful ROI" source="Gartner, 2026" size="lg" />
+            </div>
+            <div role="listitem">
+              <Stat value="85%" caption="of AI projects fail to meet business goals" source="Gartner, 2026" size="lg" />
+            </div>
+            <div role="listitem">
+              <Stat value="15%" caption="of AI decision-makers report positive profitability impact" source="PwC, 2026" size="lg" />
+            </div>
+            <div role="listitem">
+              <Stat value="$300B" caption="in AI venture funding in Q1 2026 alone" source="CT Labs, 2026" size="lg" />
+            </div>
+          </div>
+
+          <p>This is the gap your consulting practice lives in.</p>
+        </section>
+
+        <!-- 3. Section heading — five failure modes -->
+        <h2>Why projects fail — the five failure modes</h2>
+        <p>
+          Most AI initiatives don't fail because the model isn't good enough. They fail before
+          the model is ever really tested. Here's the pattern:
+        </p>
+
+        <!-- 4. Five FailureMode molecules (data from collection) -->
+        <div class="failure-modes-section">
+          {sortedModes.map((mode) => (
+            <section id={mode.anchor} aria-labelledby={`fm-title-${mode.index}`}>
+              <FailureMode
+                index={mode.index}
+                title={mode.title}
+              >
+                {mode.stats.length > 0 && (
+                  <div class="stats-row" role="list" aria-label={`Statistics for failure mode ${mode.index}`}>
+                    {mode.stats.map((stat) => (
+                      <div role="listitem">
+                        <Stat
+                          value={stat.value}
+                          caption={stat.caption}
+                          source={stat.source}
+                          size="lg"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p>{mode.body}</p>
+              </FailureMode>
+            </section>
+          ))}
+        </div>
+
+        <!-- 5. What the leaders do differently -->
+        <h2>What the leaders do differently</h2>
+        <p>The companies delivering the best AI returns share a pattern:</p>
+        <ul class="leaders-list">
+          <li><strong>Top-down strategy</strong> — Senior leadership identifies a focused set of workflows with high economic value, then allocates resources specifically for those.</li>
+          <li><strong>Vertical specialization</strong> — Domain-specific agents in a few key processes, not a horizontal AI layer across everything.</li>
+          <li><strong>Measurement from day one</strong> — ROI baseline before deployment, not after; clear metrics (time saved, error reduction, revenue influenced).</li>
+          <li><strong>Iterative rollout</strong> — Start with one team, measure, adjust, then expand.</li>
+        </ul>
+
+        <p>The quantified gap is significant: companies in the top quartile on AI deployment show:</p>
+
+        <div class="quartile-stats" role="list" aria-label="Top-quartile AI deployment statistics">
+          <div role="listitem">
+            <Stat value="1.7×" caption="revenue growth vs. laggards" size="lg" />
+          </div>
+          <div role="listitem">
+            <Stat value="3.6×" caption="three-year total shareholder return" size="lg" />
+          </div>
+          <div role="listitem">
+            <Stat value="2.7×" caption="return on invested capital" size="lg" />
+          </div>
+        </div>
+
+        <!-- 6. The consulting angle -->
+        <h2>The consulting angle — where to position yourself</h2>
+        <p>
+          You are most valuable at the intersection of technical competence and business process
+          knowledge. The failure modes above are mostly not technical problems — they're
+          organizational, strategic, and operational. A client who's tried a generic AI tool and
+          been disappointed doesn't need a better model; they need someone who can diagnose which
+          failure mode they're in and fix it.
+        </p>
+        <p>
+          The questions to ask in a discovery conversation:
+        </p>
+
+        <!-- 7. Discovery questions — inline italic blockquote per D-04 -->
+        <blockquote class="discovery-questions" cite="https://pouk.ai/why-ai">
+          <ol>
+            <li><em>"What specific workflow are we trying to improve, and what's the current unit cost of that workflow?"</em></li>
+            <li><em>"Who owns the data this AI would need, and what does it look like today?"</em></li>
+            <li><em>"Who in this organization will champion this post-deployment?"</em></li>
+            <li><em>"What does success look like in 90 days, and how will we measure it?"</em></li>
+          </ol>
+        </blockquote>
+
+        <p>
+          That conversation is your differentiation. Most vendors answer "here's our AI product."
+          You answer "let me understand your problem first."
+        </p>
+
+        <!-- 8. End CTA -->
+        <div class="end-cta">
+          <p>
+            Want to start that conversation?
+            <a href="mailto:hello@pouk.ai">hello@pouk.ai</a>
+          </p>
+          <p>
+            Or read about the four shapes of help pouk.ai delivers:
+            <a href="/roles">Roles →</a>
+          </p>
+        </div>
+
+        <!-- 9. References — per D-01, footnote-style round-trip -->
+        <section class="references" aria-label="References">
+          <h2>References</h2>
+          <ol>
+            <li id="ref-1">
+              <a href="https://masterofcode.com/blog/ai-roi/" rel="noopener">AI ROI: Why Only 5% of Enterprises See Real Returns</a> — Master of Code
+              <a href="#cite-1" aria-label="Back to citation 1">↩</a>
+            </li>
+            <li id="ref-2">
+              <a href="https://www.wndyr.com/blog/2026-the-year-ai-roi-gets-real-and-forces-a-strategic-fork-in-the-road/" rel="noopener">2026: The Year AI ROI Gets Real</a> — Wndyr
+              <a href="#cite-2" aria-label="Back to citation 2">↩</a>
+            </li>
+            <li id="ref-3">
+              <a href="https://www.ibm.com/think/insights/ai-roi/" rel="noopener">How to maximize AI ROI in 2026</a> — IBM
+              <a href="#cite-3" aria-label="Back to citation 3">↩</a>
+            </li>
+            <li id="ref-4">
+              <a href="https://ctlabs.ai/blog/ai-agent-roi-in-2026-calculation-methods-industry-benchmarks-and-u-s-business-impact/" rel="noopener">AI Agent ROI in 2026: Benchmarks, Formulas &amp; Case Studies</a> — CT Labs
+              <a href="#cite-4" aria-label="Back to citation 4">↩</a>
+            </li>
+          </ol>
+          <p><em>Source URLs cleaned from email click-trackers to canonical destinations.</em></p>
+        </section>
+
+        <!-- 10. Last reviewed footer per D-03 -->
+        <p class="last-reviewed">
+          Last reviewed: 2026-05-13. Stats and sources reviewed annually; ping
+          <a href="mailto:hello@pouk.ai">hello@pouk.ai</a> if you spot an outdated reference.
+        </p>
+
+      </div>
+
+      <!-- Sticky right-rail TOC — desktop only, CSS-only, no JS per D-02 -->
+      <nav class="why-ai-toc" aria-label="Page sections">
+        <p class="why-ai-toc-label">Failure modes</p>
+        <ol>
+          <li><a href="#data-readiness">1. Data readiness</a></li>
+          <li><a href="#wrong-use-case">2. Wrong use case</a></li>
+          <li><a href="#integration">3. Integration</a></li>
+          <li><a href="#governance">4. Governance</a></li>
+          <li><a href="#change-management">5. Change management</a></li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</BaseLayout>

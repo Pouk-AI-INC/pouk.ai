@@ -1,0 +1,34 @@
+[
+  {
+    "id": "builder",
+    "eyebrow": "The Builder",
+    "title": "Builder",
+    "body": "Builds custom solutions when off-the-shelf tools fall short — dashboards, agents, internal tools, client-facing products. Modern tools (Lovable, Claude, Supabase) collapsed what used to take a dev team six months into days or weeks.",
+    "hiredBy": "Founders needing prototypes, product leads testing ideas fast, teams unlocking budget with a proof-of-concept.",
+    "icon": "hammer"
+  },
+  {
+    "id": "automator",
+    "eyebrow": "The Automator",
+    "title": "Automator",
+    "body": "Redesigns how work gets done by wiring together the right tools and turning scattered tasks into self-running systems — connecting an LLM, like GPT, to Salesforce, eliminating manual data entry, building 24/7 outreach sequences. Their edge is systems thinking, not technical complexity.",
+    "hiredBy": "Ops leaders cutting manual work, sales teams drowning in admin, small businesses scaling without headcount.",
+    "icon": "workflow"
+  },
+  {
+    "id": "educator",
+    "eyebrow": "The Educator",
+    "title": "Educator",
+    "body": "Focuses on adoption — helping teams actually use AI, not just talk about it. The blocker is rarely tech; it's behavior. Educators deliver AI audits, hands-on training with real workflows, and prompt libraries teams can use immediately.",
+    "hiredBy": "HR/L&D teams rolling out AI org-wide, leadership closing the gap between \"we bought the tools\" and \"people use them.\"",
+    "icon": "graduation-cap"
+  },
+  {
+    "id": "creator",
+    "eyebrow": "The Creator",
+    "title": "Creator",
+    "body": "Streamlines creative workflows that are time and cost intensive. Creators don't run full-service agencies with agents. They identify where concept iteration, motion graphics, post-production, and other parts of the creative process get faster and cheaper with the right tools.",
+    "hiredBy": "Chief Marketing / Chief Creative Officers who are feeling their budgets constrain and their timelines accelerate.",
+    "icon": "clapperboard"
+  }
+]

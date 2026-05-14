@@ -1,0 +1,54 @@
+[
+  {
+    "id": "data-readiness",
+    "index": 1,
+    "title": "Data readiness — the hidden blocker",
+    "anchor": "data-readiness",
+    "body": "The most common failure mode. A client's CRM data is incomplete. Their documents are in inconsistent formats. Different departments define the same field differently. Trying to build an AI solution on top of messy data produces inconsistent, unreliable outputs — and the client blames the AI when the real problem is years of technical debt underneath it. Before any AI work begins, audit the data: Is it accessible? Is it structured? Is it accurate? This diagnostic step alone is often a billable engagement.",
+    "stats": []
+  },
+  {
+    "id": "wrong-use-case",
+    "index": 2,
+    "title": "Wrong use case — horizontal vs. vertical",
+    "anchor": "wrong-use-case",
+    "body": "The research finding that should define your pitch: sector-specific AI agents deliver significantly higher ROI compared to horizontal AI deployments. A generic \"AI assistant\" bolted onto a company's existing workflows rarely changes how work gets done. An AI that understands the specific domain — clinical notes, insurance claims, legal contracts, engineering tickets — and integrates into the specific workflow that generates value produces measurable results. The sales pitch isn't \"let's add AI to your company.\" It's \"let's find the one workflow where AI changes the unit economics, and build that.\"",
+    "stats": [
+      {
+        "value": "500%",
+        "caption": "average ROI from sector-specific AI agents vs. horizontal deployments",
+        "source": "CT Labs, 2026"
+      }
+    ]
+  },
+  {
+    "id": "integration",
+    "index": 3,
+    "title": "Integration — AI as an island",
+    "anchor": "integration",
+    "body": "AI tools that sit next to workflows instead of inside them get abandoned. If a sales rep has to open a separate AI tool, copy-paste data, read a summary, and then manually enter the conclusion back into their CRM, they'll stop using it within three weeks. The AI has to be embedded where the work happens: inside the CRM, the document editor, the ticketing system, the email client. Integration is where most of the technical consulting work actually lives.",
+    "stats": []
+  },
+  {
+    "id": "governance",
+    "index": 4,
+    "title": "Governance — no owner, no outcome",
+    "anchor": "governance",
+    "body": "Successful AI deployments always have one person who owns the AI outcome: owns the data quality, owns the prompt updates when the model drifts, owns the metrics. Pilots that emerge bottom-up from enthusiastic engineers but lack executive ownership stall when they need production infrastructure, legal sign-off, or budget. Part of your job as a consultant is identifying and aligning the executive sponsor before the build starts.",
+    "stats": []
+  },
+  {
+    "id": "change-management",
+    "index": 5,
+    "title": "Change management — the people problem",
+    "anchor": "change-management",
+    "body": "That pressure often causes teams to rush deployment without training users or explaining what the AI is for. Employees who don't understand what the AI is doing, or who see it as a threat to their role, work around it. The AI produces outputs that no one trusts and no one uses. Change management isn't a soft add-on — it's why consultants who can navigate organizational behavior outperform purely technical AI shops.",
+    "stats": [
+      {
+        "value": "61%",
+        "caption": "of senior business leaders feel pressure to prove AI ROI within six months or less",
+        "source": "IBM, 2026"
+      }
+    ]
+  }
+]

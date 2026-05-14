@@ -1,0 +1,66 @@
+{
+  "intro": "The tools matter. The systems matter. But what matters most, what separates great consultants from everyone else, is how they think and operate. These ten principles aren't tactics or hacks. They're the foundations for doing great work. Learn them. Practice them. Build from them.",
+  "conclusion": "You can't fake these principles. They're built one project, one decision, one late night at a time. Tools will change, trends will fade, but how you operate — how you think, communicate, and carry yourself — will always define the quality of your work. These principles are your compass.",
+  "principles": [
+    {
+      "numeral": "i.",
+      "title": "Ownership",
+      "anchor": "ownership",
+      "body": "Working for yourself doesn't make life easier. It makes it 10× harder. Everything starts and ends with you: every relationship, deliverable, deadline, and outcome. When something goes wrong, there's nowhere to point but inward. That's the trade: no safety net, but full control. Once you accept that, you stop waiting for permission and start building momentum. Ownership is what turns uncertainty into action."
+    },
+    {
+      "numeral": "ii.",
+      "title": "Integrity",
+      "anchor": "integrity",
+      "body": "AI consulting runs on trust. Clients rarely understand every technical detail, so they trust your word, your process, and your judgment. That means doing what you say you'll do, even when it's inconvenient, especially when no one's watching. Integrity compounds quietly: one honest conversation at a time, one promise kept after another. Over time, it becomes your reputation. And your moat."
+    },
+    {
+      "numeral": "iii.",
+      "title": "Reliability",
+      "anchor": "reliability",
+      "body": "The best consultants make clients feel safe. Reliability means showing up prepared, meeting deadlines, and staying composed when things go sideways. It's not glamorous, but it's the backbone of every great engagement. You communicate early, document clearly, and fix problems before they spread. Clients might not notice when you're reliable, but they always notice when you're not. Consistency is credibility."
+    },
+    {
+      "numeral": "iv.",
+      "title": "Systems Thinking",
+      "anchor": "systems-thinking",
+      "body": "Every problem is part of a larger system: a web of people, processes, tools, and incentives. Weak consultants treat symptoms. Strong ones zoom out to treat root causes. Systems thinking means designing solutions that last: automations that evolve, workflows that scale, insights that keep paying off. The more you think in loops, not lines, the more durable your impact becomes."
+    },
+    {
+      "numeral": "v.",
+      "title": "Intellectual Curiosity",
+      "anchor": "intellectual-curiosity",
+      "body": "AI changes weekly. The habit that separates professionals from tourists is staying genuinely interested, not just in tools but in ideas. Intellectual curiosity is the muscle of asking why: why this process exists, why a result happened, why something might work better another way. The more interested you are, the more leverage you create, because you see what others don't."
+    },
+    {
+      "numeral": "vi.",
+      "title": "Obsession",
+      "anchor": "obsession",
+      "body": "To be great at this, you have to care more than most people think is reasonable. Obsession means caring about the details: the UX of your workflows, the wording of your prompts, the reliability of your systems. You experiment after hours because you want to see what's possible. That kind of energy can't be faked. Clients can feel it. Obsession is what turns skill into mastery."
+    },
+    {
+      "numeral": "vii.",
+      "title": "Range",
+      "anchor": "range",
+      "body": "Range is the ability to think and operate across disciplines. You're strategic enough to scope a project and technical enough to build it. You can talk business with executives and tokens with developers — often in the same meeting. Range gives you adaptability; it's what lets you stay valuable as the landscape shifts. In AI consulting, depth gets you in the room, but range keeps you relevant."
+    },
+    {
+      "numeral": "viii.",
+      "title": "Momentum",
+      "anchor": "momentum",
+      "body": "Momentum beats perfection every time. Every draft, demo, and deliverable teaches you something — but only if you ship it. Momentum means valuing iteration over polish, learning in public, and letting progress create confidence. The faster your feedback loops, the faster you grow. The consultants who win aren't the ones with perfect plans. They're the ones who keep moving."
+    },
+    {
+      "numeral": "ix.",
+      "title": "Willingness to Fail",
+      "anchor": "willingness-to-fail",
+      "body": "Failure isn't an obstacle; it's part of the rhythm. You'll write prompts that break, run pilots that flop, pitch clients who ghost. What matters is how quickly you rebound and what you learn. Most people retreat when things go wrong; professionals get curious. The willingness to fail, to feel discomfort without losing momentum, is the single fastest way to level up your craft."
+    },
+    {
+      "numeral": "x.",
+      "title": "Good Nature",
+      "anchor": "good-nature",
+      "body": "Skill might open the door, but character keeps it open. Good nature means being calm under pressure, generous with your knowledge, and easy to work with. You don't need to be everyone's best friend, but people should leave interactions with more clarity and energy than they came in with. Clients remember how you made them feel, and that memory is often what turns a project into a partnership."
+    }
+  ]
+}

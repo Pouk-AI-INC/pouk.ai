@@ -1,0 +1,279 @@
+/*
+ * site.css — page-level overrides only.
+ *
+ * Tokens come from @poukai/ui/tokens.css (imported in BaseLayout.astro).
+ * Component CSS ships inside the package.
+ *
+ * Rules here must be:
+ *   - page-composition concerns (layout of DS components on a page)
+ *   - not duplicating or overriding token values
+ *   - not authoring new primitives (those belong in @poukai/ui)
+ *
+ * Never: new color values, new type sizes, new spacing tokens, !important
+ * (the sole !important exception lives in @poukai/ui/tokens.css for
+ * prefers-reduced-motion, per the a11y exception documented there).
+ */
+
+/* ---------- Page wrapper ---------- */
+
+.site-page {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--page-pad);
+  padding-block: var(--space-16);
+}
+
+/* ---------- Why AI page — layout ---------- */
+
+.why-ai-layout {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .why-ai-layout {
+    display: grid;
+    grid-template-columns: 1fr 14rem;
+    gap: var(--space-16);
+    align-items: start;
+  }
+}
+
+/* Sticky right-rail TOC — desktop only, CSS-only, no scroll-spy */
+.why-ai-toc {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .why-ai-toc {
+    display: block;
+    position: sticky;
+    top: var(--space-16);
+    padding-block-start: var(--space-4);
+  }
+}
+
+.why-ai-toc-label {
+  font-size: var(--fs-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-block-end: var(--space-4);
+}
+
+.why-ai-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.why-ai-toc ol li a {
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+  background-image: none;
+  transition: color var(--dur-fast) ease;
+  padding-bottom: 0;
+}
+
+.why-ai-toc ol li a:hover {
+  color: var(--fg);
+}
+
+/* ---------- Opening stats row ---------- */
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-block: var(--space-8);
+}
+
+/* ---------- Leaders pattern list ---------- */
+
+.leaders-list {
+  margin: var(--space-4) 0 var(--space-8);
+  padding-left: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.leaders-list li {
+  color: var(--fg);
+}
+
+/* ---------- Quartile stats ---------- */
+
+.quartile-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-block: var(--space-8);
+}
+
+/* ---------- Discovery questions blockquote ---------- */
+
+.discovery-questions {
+  font-style: italic;
+  border-left: none;
+  margin: var(--space-8) 0;
+  padding: 0;
+}
+
+.discovery-questions ol {
+  margin: 0;
+  padding-left: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.discovery-questions ol li {
+  color: var(--fg-muted);
+}
+
+/* ---------- Footnote citations ---------- */
+
+.footnote-ref {
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 1;
+}
+
+.footnote-ref a {
+  color: var(--fg-muted);
+  background-image: none;
+  padding-bottom: 0;
+}
+
+/* ---------- References block ---------- */
+
+.references {
+  margin-block-start: var(--space-12);
+  padding-block-start: var(--space-8);
+  border-top: 1px solid var(--hairline);
+}
+
+.references h2 {
+  font-size: var(--fs-meta);
+  font-family: var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-block-end: var(--space-4);
+}
+
+.references ol {
+  margin: 0;
+  padding-left: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.references ol li {
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+}
+
+/* ---------- Last-reviewed footer ---------- */
+
+.last-reviewed {
+  margin-block-start: var(--space-8);
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+}
+
+/* ---------- Failure modes section ---------- */
+
+.failure-modes-section {
+  margin-block: var(--space-12);
+}
+
+/* ---------- Roles page — role cards grid ---------- */
+
+.roles-grid {
+  display: grid;
+  gap: var(--space-8);
+  margin-block: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .roles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- Role jump nav ---------- */
+
+.role-jump-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-block: var(--space-6);
+  font-size: var(--fs-meta);
+  color: var(--fg-muted);
+}
+
+.role-jump-nav a {
+  color: var(--fg-muted);
+  background-image: none;
+  padding-bottom: 0;
+  transition: color var(--dur-fast) ease;
+}
+
+.role-jump-nav a:hover {
+  color: var(--fg);
+}
+
+/* ---------- Universal end CTA ---------- */
+
+.end-cta {
+  margin-block-start: var(--space-12);
+  padding-block-start: var(--space-8);
+  border-top: 1px solid var(--hairline);
+}
+
+/* ---------- Principles page — bookend serif italic ---------- */
+
+.principles-bookend {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+  line-height: 1.5;
+  color: var(--fg-muted);
+  max-width: 38rem;
+  margin-block: var(--space-8);
+}
+
+.principles-bookend p {
+  color: inherit;
+  font-family: inherit;
+  font-style: inherit;
+}
+
+/* ---------- Principles list ---------- */
+
+.principles-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  margin-block: var(--space-8);
+}
+
+/* ---------- Visually hidden (a11y) ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

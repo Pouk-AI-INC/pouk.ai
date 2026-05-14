@@ -1,0 +1,185 @@
+---
+/**
+ * BaseLayout.astro
+ *
+ * HTML shell for all Astro-rendered pages. Owns:
+ *   - <html> / <head> (meta, canonical, OG, Twitter, JSON-LD, font preload)
+ *   - @poukai/ui/tokens.css import
+ *   - site.css import
+ *   - Matomo + Bugsink env-var-gated script tags (emit nothing when unset)
+ *   - SiteShell organism wrapping <slot />
+ *
+ * Does NOT port the static /index.html — that lives verbatim in public/.
+ */
+
+import "@poukai/ui/tokens.css";
+import "../styles/site.css";
+import { ShellWrapper } from "../components/ShellWrapper";
+
+export interface Props {
+  /** <title> for this page. */
+  title: string;
+  /** <meta name="description"> — 70–160 chars. */
+  description: string;
+  /** Absolute canonical URL for this page. */
+  canonical: string;
+  /**
+   * JSON-LD structured data object for this page.
+   * BaseLayout serialises it into a <script type="application/ld+json">.
+   */
+  jsonLd?: Record<string, unknown>;
+  /** The href of the currently active route — passed to SiteShell for aria-current. */
+  currentRoute: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  jsonLd,
+  currentRoute,
+} = Astro.props;
+
+const ogImageUrl = "https://pouk.ai/og.png";
+const twitterSite = "@pouk_ai";
+
+/** Primary nav — funnel order per D-13. */
+const navRoutes = [
+  { href: "/why-ai",     label: "Why AI" },
+  { href: "/roles",      label: "Roles" },
+  { href: "/principles", label: "Principles" },
+];
+
+const currentYear = new Date().getFullYear();
+
+// Serialise JSON-LD at build time — safe because content comes from typed props.
+const jsonLdString = jsonLd ? JSON.stringify(jsonLd) : null;
+
+// Env-var-gated analytics / error reporting — emit nothing when unset.
+// TODO: provide Matomo endpoint (O-011) — set PUBLIC_MATOMO_URL + PUBLIC_MATOMO_SITE_ID in Vercel env
+const matomoUrl = import.meta.env.PUBLIC_MATOMO_URL as string | undefined;
+const matomoSiteId = import.meta.env.PUBLIC_MATOMO_SITE_ID as string | undefined;
+const hasMatomoConfig = Boolean(matomoUrl && matomoSiteId);
+
+// TODO: provide Bugsink DSN (O-012) — set PUBLIC_BUGSINK_DSN in Vercel env
+const bugsinkDsn = import.meta.env.PUBLIC_BUGSINK_DSN as string | undefined;
+const hasBugsinkConfig = Boolean(bugsinkDsn);
+
+// Build the Matomo tracker script string at build time (only when configured).
+const matomoScript = hasMatomoConfig
+  ? `var _paq = window._paq = window._paq || [];
+_paq.push(['disableCookies']);
+_paq.push(['trackPageView']);
+_paq.push(['enableLinkTracking']);
+(function() {
+  var u = "${matomoUrl}";
+  _paq.push(['setTrackerUrl', u + 'matomo.php']);
+  _paq.push(['setSiteId', '${matomoSiteId}']);
+  var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+  g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
+})();`
+  : null;
+
+// Build the Bugsink SDK script string at build time (only when configured).
+const bugsinkScript = hasBugsinkConfig
+  ? `import("https://browser.sentry-cdn.com/8.0.0/bundle.tracing.min.js").then(function(S) {
+  S.init({ dsn: "${bugsinkDsn}" });
+});`
+  : null;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#FFFFFF" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="index,follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={twitterSite} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!--
+      Font preload — self-hosted via public/fonts/ (copies of DS source fonts).
+      Two primary faces per R-018: Geist Regular (variable) + Instrument Serif Regular.
+      crossorigin is required for font preloads even on same-origin (browser spec).
+    -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/Geist-Variable.woff2"
+      crossorigin=""
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/InstrumentSerif-Regular.woff2"
+      crossorigin=""
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/InstrumentSerif-Italic.woff2"
+      crossorigin=""
+    />
+
+    <!--
+      JSON-LD structured data (serialised in frontmatter; set:html injects verbatim).
+      Ternary with null avoids the && short-circuit pattern that esbuild's JSX
+      transform misreads as an incomplete ternary expression.
+    -->
+    {jsonLdString ? <script is:inline type="application/ld+json" set:html={jsonLdString} /> : null}
+
+    <!--
+      analytics: matomo
+      Loads only when PUBLIC_MATOMO_URL + PUBLIC_MATOMO_SITE_ID are set.
+      Cookieless mode at launch (no _pk_* cookies). Deferred — no render blocking.
+      TODO: O-011 — decide self-hosted vs. Matomo Cloud before wiring endpoints.
+    -->
+    {matomoScript ? <script is:inline defer set:html={matomoScript} /> : null}
+
+    <!--
+      error-reporting: bugsink
+      Loads only when PUBLIC_BUGSINK_DSN is set.
+      Sentry-compatible browser SDK. Deferred — no render blocking.
+      TODO: O-012 — decide self-hosted vs. Bugsink Cloud before wiring DSN.
+    -->
+    {bugsinkScript ? <script is:inline defer set:html={bugsinkScript} /> : null}
+  </head>
+  <body>
+    <!-- SiteShell renders as static HTML — no hydration directive (R-079). -->
+    <ShellWrapper
+      currentRoute={currentRoute}
+      routes={navRoutes}
+      year={currentYear}
+    >
+      <slot />
+    </ShellWrapper>
+  </body>
+</html>

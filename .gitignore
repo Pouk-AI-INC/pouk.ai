@@ -1,3 +1,14 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Package manager artefacts (not ours)
+package-lock.json
+yarn.lock
+
 # OS
 .DS_Store
 Thumbs.db
