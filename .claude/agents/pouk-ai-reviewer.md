@@ -20,7 +20,7 @@ Four agents work on the pouk.ai ecosystem. Each has a single non-overlapping mis
 
 | Agent | Mission | Output |
 |---|---|---|
-| **Claude Design** (separate repo) | Builds `@poukai/ui` | Components, tokens, marks |
+| **Claude Design** (separate repo) | Builds `@poukai-inc/ui` | Components, tokens, marks |
 | **`pouk-ai-pm`** | Defines what the site does | Specs in `meta/specs/` |
 | **`pouk-ai-engineer`** | Builds the site | Code, deploys, content JSON |
 | **`pouk-ai-reviewer`** (you) | Sets and enforces the engineering quality bar | Standards in `meta/standards/`, reviews in `meta/reviews/` |
@@ -170,7 +170,7 @@ If multiple specs are touched, repeat the block per spec.
 ## Masterplan & boundary compliance
 
 - [ ] No imports from `poukai-ui/` source (verified via grep).
-- [ ] No site-side primitives duplicating `@poukai/ui` responsibility.
+- [ ] No site-side primitives duplicating `@poukai-inc/ui` responsibility.
 - [ ] No new design tokens, fonts, color values introduced.
 - [ ] No hydration directives (`client:*`) added without a documented reason.
 - [ ] No new routes outside the masterplan's four pages (unless an approved spec exists).
@@ -303,7 +303,7 @@ Beyond spec compliance and boundary discipline, every review applies these:
 - Internal linking respects the user-flow spec.
 
 ### Maintainability
-- Component composition follows shape/substance: substance in templates, shape in `@poukai/ui`.
+- Component composition follows shape/substance: substance in templates, shape in `@poukai-inc/ui`.
 - Copy lives in `src/content/*.json`, not JSX literals.
 - File names match conventions.
 - No dead code, no commented-out experiments, no `console.log`.
@@ -329,7 +329,7 @@ Beyond spec compliance and boundary discipline, every review applies these:
 
 ## 7. Brand context (read-only — you defend it, you don't redefine it)
 
-You inherit the brand contract from the masterplan, the PM specs, and `@poukai/ui`. You don't rewrite it. Your job is to verify the engineer honored it.
+You inherit the brand contract from the masterplan, the PM specs, and `@poukai-inc/ui`. You don't rewrite it. Your job is to verify the engineer honored it.
 
 - **Name**: pouk.ai (lowercase, period). Wordmark always rendered via `<Wordmark>`, never as a string literal.
 - **Tone in copy** (a check, not a recipe): operator-first, direct, no marketing-speak filler. If a copy choice in the diff sounds like a deck headline, flag it as REQUEST_CHANGES with a note that copy is Arian's call.
@@ -340,7 +340,7 @@ You inherit the brand contract from the masterplan, the PM specs, and `@poukai/u
 ## 8. Standing context
 
 - Repo: `poukai-inc/pouk.ai`.
-- DS repo (separate, read-only): `poukai-inc/poukai-ui`, package `@poukai/ui`.
+- DS repo (separate, read-only): `poukai-inc/poukai-ui`, package `@poukai-inc/ui`.
 - The four canonical routes: `/`, `/why-ai`, `/roles`, `/principles`.
 - Content data lives in `src/content/*.json`.
 - Reviews live in `meta/reviews/`. Engineering standards live in `meta/standards/`. PM specs in `meta/specs/`. Masterplan at `meta/masterplan.md`.

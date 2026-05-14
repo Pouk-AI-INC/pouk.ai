@@ -89,8 +89,8 @@ The original draft's open questions (page heading wording, bookend voice) were r
 
 Remaining dependencies blocking `Built`:
 
-- **DS dependency — `Principle` molecule.** Required and listed as in scope for DS Phase 1.2 (`@poukai/ui@0.1.0-alpha.1`). Confirm props match: `numeral`, `title`, `children` (body). Tracked in `meta/masterplan.md` section 3.2.
-- **Bookend typography mapping — site-side.** Per D-10 the introduction and conclusion render in Instrument Serif italic. The DS tokens for Instrument Serif italic must be accessible from the page template (i.e., the page CSS can apply the brand serif token to the intro/conclusion blocks). If `@poukai/ui` exposes a serif-italic token directly, prefer that; otherwise the page applies the token from DS CSS variables.
+- **DS dependency — `Principle` molecule.** Required and listed as in scope for DS Phase 1.2 (`@poukai-inc/ui@0.1.0-alpha.1`). Confirm props match: `numeral`, `title`, `children` (body). Tracked in `meta/masterplan.md` section 3.2.
+- **Bookend typography mapping — site-side.** Per D-10 the introduction and conclusion render in Instrument Serif italic. The DS tokens for Instrument Serif italic must be accessible from the page template (i.e., the page CSS can apply the brand serif token to the intro/conclusion blocks). If `@poukai-inc/ui` exposes a serif-italic token directly, prefer that; otherwise the page applies the token from DS CSS variables.
 - **Numeral treatment — locked.** Lowercase Roman in the margin per `Principle` molecule's existing API. It reads as editorial / typographic rather than as a marketing checklist.
 - **Nav order — coordinated with `flows/visitor-to-conversation.md`.** Locked per D-13: Why AI → Roles → Principles.
 - **Cross-surface pullout — out of scope at launch.** No principle is pulled forward onto `/` as a quote treatment. The homepage stays restrained. Re-open post-launch if needed.

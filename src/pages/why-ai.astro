@@ -19,7 +19,7 @@
 
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { Hero, FailureMode, Stat } from "@poukai/ui";
+import { Hero, FailureMode, Stat } from "@poukai-inc/ui";
 
 // file() loader returns one CollectionEntry per array item; .data holds the item.
 const failureModeEntries = await getCollection("failure-modes");

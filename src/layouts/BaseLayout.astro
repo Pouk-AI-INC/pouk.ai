@@ -4,7 +4,7 @@
  *
  * HTML shell for all Astro-rendered pages. Owns:
  *   - <html> / <head> (meta, canonical, OG, Twitter, JSON-LD, font preload)
- *   - @poukai/ui/tokens.css import
+ *   - @poukai-inc/ui/tokens.css import
  *   - site.css import
  *   - Matomo + Bugsink env-var-gated script tags (emit nothing when unset)
  *   - SiteShell organism wrapping <slot />
@@ -12,7 +12,7 @@
  * Does NOT port the static /index.html — that lives verbatim in public/.
  */
 
-import "@poukai/ui/tokens.css";
+import "@poukai-inc/ui/tokens.css";
 import "../styles/site.css";
 import { ShellWrapper } from "../components/ShellWrapper";
 

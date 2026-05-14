@@ -4,7 +4,7 @@ This directory holds product specs authored by `pouk-ai-pm` for the pouk.ai mark
 
 This file is the running, prioritized list of every spec authored under `meta/specs/`. Distinct from the parent `meta/backlog.md`, which tracks launch blockers, DNS, and approved verbatim copy — **this file tracks specs only**: what's drafted, what's approved, what's blocked, what's next. The agent updates it whenever a spec is added, moved in priority, or moves through `Draft → In review → Approved → Built → Live`.
 
-> **2026-05-13 — Decisions D-01 through D-13 resolved.** All spec-side decisions tracked in `meta/decisions/launch-readiness.md` were closed on 2026-05-13. Every spec listed below has had its `Status` field flipped from `Draft` to `Approved`. The remaining dependencies are now framed as **Dependencies blocking `Built`**, primarily DS molecule availability in `@poukai/ui@0.1.0` and a handful of Arian-owned final copy lifts. See each spec's "Decisions log" line for the IDs that touched it.
+> **2026-05-13 — Decisions D-01 through D-13 resolved.** All spec-side decisions tracked in `meta/decisions/launch-readiness.md` were closed on 2026-05-13. Every spec listed below has had its `Status` field flipped from `Draft` to `Approved`. The remaining dependencies are now framed as **Dependencies blocking `Built`**, primarily DS molecule availability in `@poukai-inc/ui@0.1.0` and a handful of Arian-owned final copy lifts. See each spec's "Decisions log" line for the IDs that touched it.
 
 ---
 
@@ -25,7 +25,7 @@ This file is the running, prioritized list of every spec authored under `meta/sp
 1. **`pages/why-ai.md`** — `Approved`
    - Why this priority: Top-of-funnel thesis page. The biggest content lift; the page that frames why anyone hires pouk.ai. Per the funnel order (Why AI → Roles → Principles → contact) this is the most leveraged page to ship first.
    - Decisions applied: D-01 (citation style), D-02 (sticky desktop TOC), D-03 (dataset-vintage footer), D-04 (discovery-questions callout), D-05 (stats extraction).
-   - Dependencies blocking `Built`: DS `FailureMode` molecule + `Stat` atom shipped in `@poukai/ui@0.1.0`; `content/failure-modes.json.md` spec also `Approved` (same content lifecycle — now satisfied); Arian-owned rewrite of the 500%/61% sentences post-extraction; final copy on end CTA.
+   - Dependencies blocking `Built`: DS `FailureMode` molecule + `Stat` atom shipped in `@poukai-inc/ui@0.1.0`; `content/failure-modes.json.md` spec also `Approved` (same content lifecycle — now satisfied); Arian-owned rewrite of the 500%/61% sentences post-extraction; final copy on end CTA.
 
 2. **`pages/roles.md`** — `Approved`
    - Why this priority: Self-identification page. Once a prospect agrees with `/why-ai`, they need to match their problem to a service shape. Single page with anchor links recommended (`#builder`, `#automator`, etc.) over four sub-routes — defended in the spec.

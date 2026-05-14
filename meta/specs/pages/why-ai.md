@@ -99,8 +99,8 @@ The original draft's open questions (citation style, sticky TOC, dataset vintage
 
 Remaining dependencies blocking `Built`:
 
-- **DS dependency — `FailureMode` molecule.** Required and listed as in scope for DS Phase 1.3. Cannot ship until the molecule is published in `@poukai/ui@0.1.0`. Tracked in `meta/masterplan.md` section 3.2.
-- **DS dependency — `Stat` atom.** Required and listed as in scope for DS Phase 1.2 (`@poukai/ui@0.1.0-alpha.1`). Site needs both `align="start"` (inline within `FailureMode` body) and the standalone large display variant. Confirm `Stat` supports both before this page can be built end-to-end.
+- **DS dependency — `FailureMode` molecule.** Required and listed as in scope for DS Phase 1.3. Cannot ship until the molecule is published in `@poukai-inc/ui@0.1.0`. Tracked in `meta/masterplan.md` section 3.2.
+- **DS dependency — `Stat` atom.** Required and listed as in scope for DS Phase 1.2 (`@poukai-inc/ui@0.1.0-alpha.1`). Site needs both `align="start"` (inline within `FailureMode` body) and the standalone large display variant. Confirm `Stat` supports both before this page can be built end-to-end.
 - **Footnote-superscript implementation — engineer's call.** D-01 locks the style; the engineer chooses the HTML mechanism (e.g., `<sup><a href="#ref-1">¹</a></sup>` round-tripped to a numbered References `<ol>`). No JS required.
 - **Homepage hand-off — coordinated with `/` spec.** When `/why-ai` ships, the homepage lede ends with "Most AI projects fail to deliver. Here's why →" pointing here. Locked in `meta/specs/pages/home.md` per D-11.
 - **Content lift — Arian-owned.** The verbatim copy in `meta/backlog.md` is approved as the source. The rewrite of the 500% and 61% sentences (post-extraction to `stats` array) is Arian-approved. Any edits to that copy are Arian's, not the engineer's. If the engineer hits a question while implementing, route via Arian.

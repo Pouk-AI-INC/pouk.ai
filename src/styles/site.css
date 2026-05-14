@@ -1,16 +1,16 @@
 /*
  * site.css — page-level overrides only.
  *
- * Tokens come from @poukai/ui/tokens.css (imported in BaseLayout.astro).
+ * Tokens come from @poukai-inc/ui/tokens.css (imported in BaseLayout.astro).
  * Component CSS ships inside the package.
  *
  * Rules here must be:
  *   - page-composition concerns (layout of DS components on a page)
  *   - not duplicating or overriding token values
- *   - not authoring new primitives (those belong in @poukai/ui)
+ *   - not authoring new primitives (those belong in @poukai-inc/ui)
  *
  * Never: new color values, new type sizes, new spacing tokens, !important
- * (the sole !important exception lives in @poukai/ui/tokens.css for
+ * (the sole !important exception lives in @poukai-inc/ui/tokens.css for
  * prefers-reduced-motion, per the a11y exception documented there).
  */
 

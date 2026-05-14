@@ -3,13 +3,13 @@
  *
  * Site-side React component that renders the four RoleCard molecules
  * with their Lucide icon slots. Lives in the site repo because:
- *   - Lucide is a direct site dep (not re-exported by @poukai/ui per masterplan 2A)
+ *   - Lucide is a direct site dep (not re-exported by @poukai-inc/ui per masterplan 2A)
  *   - JSX in Astro frontmatter can't resolve dynamic component names
  *
  * Rendered as static HTML at build time — no hydration directive used.
  */
 
-import { RoleCard } from "@poukai/ui";
+import { RoleCard } from "@poukai-inc/ui";
 import { Hammer, Workflow, GraduationCap, Clapperboard } from "lucide-react";
 
 type IconName = "hammer" | "workflow" | "graduation-cap" | "clapperboard";

@@ -459,7 +459,7 @@ If you mark `accept all defaults` and check no boxes, here's what becomes `Appro
 
 What still blocks `Approved` even on the fully-deferred path:
 
-- DS components (`Hero`, `Stat`, `RoleCard`, `Principle`, `FailureMode`, `SiteShell`) must ship in `@poukai/ui@0.1.0` before the page specs reach `Built`. That's Claude Design's lane.
+- DS components (`Hero`, `Stat`, `RoleCard`, `Principle`, `FailureMode`, `SiteShell`) must ship in `@poukai-inc/ui@0.1.0` before the page specs reach `Built`. That's Claude Design's lane.
 - Launch infrastructure (Section 8) — separate execution path, not blocked by spec approval.
 
 ---
@@ -473,4 +473,4 @@ When you've made your picks (or said `accept all defaults`):
 3. The masterplan revisions get applied by me directly (small edits, not agent-owned).
 4. This file gets archived to `meta/decisions/2026-MM-DD-launch-readiness-closed.md` with your decisions preserved as the historical record.
 
-Once that round is done, the only thing standing between us and `pouk-ai-engineer` cutting code is `@poukai/ui@0.1.0` shipping.
+Once that round is done, the only thing standing between us and `pouk-ai-engineer` cutting code is `@poukai-inc/ui@0.1.0` shipping.

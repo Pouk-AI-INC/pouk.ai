@@ -9,7 +9,7 @@
 
 ## Scope
 
-Stand up Astro alongside the existing static `index.html`. Astro serves three new routes (`/why-ai`, `/roles`, `/principles`) consuming `@poukai/ui@0.2.0` design-system components. `/` is left untouched as static `index.html`. Asset migration from the DS repo's `brand/` folder lands in `public/`.
+Stand up Astro alongside the existing static `index.html`. Astro serves three new routes (`/why-ai`, `/roles`, `/principles`) consuming `@poukai-inc/ui@0.2.0` design-system components. `/` is left untouched as static `index.html`. Asset migration from the DS repo's `brand/` folder lands in `public/`.
 
 **Not in scope (deferred)**:
 - Porting `/` to Astro — handled in a future round, untouched per founder ("any changes to the current holding landing page is cosmetic and temporary")
@@ -23,8 +23,8 @@ Stand up Astro alongside the existing static `index.html`. Astro serves three ne
 - **Astro** 5.x latest stable
 - **TypeScript** strict
 - **pnpm** + Node 20 LTS
-- **`@astrojs/react`** for SSR of `@poukai/ui` components
-- **`@poukai/ui@0.2.0`** — atoms (`Wordmark`, `StatusBadge`, `Button`, `Stat`), molecules (`Hero`, `RoleCard`, `Principle`, `FailureMode`), organism (`SiteShell`)
+- **`@astrojs/react`** for SSR of `@poukai-inc/ui` components
+- **`@poukai-inc/ui@0.2.0`** — atoms (`Wordmark`, `StatusBadge`, `Button`, `Stat`), molecules (`Hero`, `RoleCard`, `Principle`, `FailureMode`), organism (`SiteShell`)
 - **`@astrojs/sitemap`** — auto-generate sitemap including the static `/` via the integration's `customPages` option
 - **`astro-compress`** — gzip/brotli HTML+CSS at build (per masterplan section 4.2)
 - **`zod`** — content-collection schema validation (Astro 5 native)
@@ -39,7 +39,7 @@ Stand up Astro alongside the existing static `index.html`. Astro serves three ne
 ├── package.json
 ├── pnpm-lock.yaml
 ├── tsconfig.json
-├── .npmrc                          <- @poukai:registry=https://npm.pkg.github.com
+├── .npmrc                          <- @poukai-inc:registry=https://npm.pkg.github.com
 ├── vercel.json                     <- security headers + buildCommand/outputDirectory
 ├── robots.txt                      <- kept at root (Astro public/ would also work, this is fine)
 ├── public/
@@ -63,7 +63,7 @@ Stand up Astro alongside the existing static `index.html`. Astro serves three ne
 │   │   ├── roles.astro
 │   │   └── principles.astro
 │   └── styles/
-│       └── site.css                <- per-route overrides; tokens come from @poukai/ui/tokens.css
+│       └── site.css                <- per-route overrides; tokens come from @poukai-inc/ui/tokens.css
 └── sitemap.xml                     <- DELETED; @astrojs/sitemap regenerates
 ```
 
@@ -120,13 +120,13 @@ When unset (today), no tracker tags emit. Zero-JS posture on every route preserv
 ## Vercel
 
 - `vercel.json` keeps current security headers; add `buildCommand`, `outputDirectory: "dist"`, `installCommand: "pnpm install --frozen-lockfile"`.
-- `NPM_TOKEN` (GitHub PAT with `read:packages`) needed in Vercel project secrets for the `@poukai/ui` install. **Manual step Arian executes** after this round lands.
+- `NPM_TOKEN` (GitHub PAT with `read:packages`) needed in Vercel project secrets for the `@poukai-inc/ui` install. **Manual step Arian executes** after this round lands.
 
 ---
 
 ## Acceptance criteria
 
-- [ ] `pnpm install` succeeds with `@poukai/ui@0.2.0` resolved (locally via workspace link; CI/Vercel via GitHub Packages once `NPM_TOKEN` is set).
+- [ ] `pnpm install` succeeds with `@poukai-inc/ui@0.2.0` resolved (locally via workspace link; CI/Vercel via GitHub Packages once `NPM_TOKEN` is set).
 - [ ] `pnpm build` produces `dist/` with `index.html`, `why-ai/index.html`, `roles/index.html`, `principles/index.html`, `sitemap-*.xml`, all migrated assets, and security-header-compatible static layout.
 - [ ] `astro check` passes cleanly.
 - [ ] All three new pages render the DS components correctly with no runtime errors in SSR.
@@ -144,7 +144,7 @@ When unset (today), no tracker tags emit. Zero-JS posture on every route preserv
 
 | Risk | Mitigation |
 |---|---|
-| `@poukai/ui@0.2.0` not published to GitHub Packages yet | Local workspace link covers dev; Vercel deploy will fail until publication. Surface in turn-end report; do not block the round. |
+| `@poukai-inc/ui@0.2.0` not published to GitHub Packages yet | Local workspace link covers dev; Vercel deploy will fail until publication. Surface in turn-end report; do not block the round. |
 | `tokens.css` import path or font-asset URLs differ from masterplan section 3.2 expectations | Engineer reads `poukai-ui/package.json` `exports` field and uses exact subpaths. |
 | Visual parity between static `/` and Astro pages diverges (different chrome) | Acknowledged trade-off of this scope choice — `SiteShell` only wraps the three new pages; `/` stays original. |
 | Bundle weight blows past R-010 75 KB ceiling | Bugsink + Matomo not wired (env vars unset) → 0 KB third-party JS on launch. Risk only materializes when endpoints land. |

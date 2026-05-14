@@ -94,7 +94,7 @@ The original draft's open questions (Lucide picks, eyebrow convention, per-role 
 
 Remaining dependencies blocking `Built`:
 
-- **DS dependency — `RoleCard` molecule.** Required and listed as in scope for DS Phase 1.2 (`@poukai/ui@0.1.0-alpha.1`). Confirm props match the schema (`icon` slot, `eyebrow`, `title`, `body`, `hiredBy`). Tracked in `meta/masterplan.md` section 3.2.
+- **DS dependency — `RoleCard` molecule.** Required and listed as in scope for DS Phase 1.2 (`@poukai-inc/ui@0.1.0-alpha.1`). Confirm props match the schema (`icon` slot, `eyebrow`, `title`, `body`, `hiredBy`). Tracked in `meta/masterplan.md` section 3.2.
 - **DS `RoleCard` CTA slot — verify absent or unused.** Per D-08 the molecule must not require a CTA. If `RoleCard` exposes an optional CTA slot, the page template leaves it empty. If `RoleCard` requires a CTA, escalate to Claude Design — the schema decision (D-08) overrides.
 - **Hero illustration / imagery — masterplan section 7.3.** Illustrations are decided as the visual direction for the SaaS stage, but the masterplan defers per-page illustration choices to launch-day. Recommendation: ship `/roles` without per-role illustrations for launch — typography + Lucide icon is enough. Re-open if Arian wants visual depth.
 - **Content lift — Arian-owned.** Verbatim copy in `meta/backlog.md` is approved as the source. Any edits to that copy are Arian's, not the engineer's.

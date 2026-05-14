@@ -37,7 +37,7 @@ Top-level shape: an **array of four role objects**, ordered Builder → Automato
     "title": "string — the bare role name. Required. Plain text. One word, no 'The' prefix (per D-07). Allowed values: 'Builder' | 'Automator' | 'Educator' | 'Creator'. Sentence-case capitalization.",
     "body": "string — the role's service-shape description. Required. Plain text or lightweight markdown (bold/italic only — no headings, lists, or links). Typically two to four sentences. Maps to RoleCard.body. Source: meta/backlog.md 'Roles page' block.",
     "hiredBy": "string — the hiring-trigger descriptor. Required. Plain text. One sentence describing who hires this role. Maps to RoleCard.hiredBy. Source: meta/backlog.md 'Roles page' block.",
-    "icon": "string — Lucide glyph name (kebab-case identifier as used in lucide.dev). Required. Locked per D-06: exactly one of 'hammer' (Builder) | 'workflow' (Automator) | 'graduation-cap' (Educator) | 'clapperboard' (Creator). The page template translates the kebab-case identifier to the corresponding lucide-react import; never re-exported through @poukai/ui."
+    "icon": "string — Lucide glyph name (kebab-case identifier as used in lucide.dev). Required. Locked per D-06: exactly one of 'hammer' (Builder) | 'workflow' (Automator) | 'graduation-cap' (Educator) | 'clapperboard' (Creator). The page template translates the kebab-case identifier to the corresponding lucide-react import; never re-exported through @poukai-inc/ui."
   }
 ]
 ```

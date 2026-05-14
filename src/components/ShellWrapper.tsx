@@ -14,7 +14,7 @@
  */
 
 import type { ReactNode } from "react";
-import { SiteShell } from "@poukai/ui";
+import { SiteShell } from "@poukai-inc/ui";
 
 interface NavRoute {
   href: string;

@@ -1,4 +1,4 @@
-# pouk.ai -> `@poukai/ui` -- migration plan
+# pouk.ai -> `@poukai-inc/ui` -- migration plan
 
 **Status** Draft v1 - 2026-05-12
 **Author** Design-system pass, for review
@@ -10,8 +10,8 @@
 
 We're going to do **three things, in order**, and not skip step 1:
 
-1. **Reshape `@poukai/ui` under an atomic-design taxonomy** and ship six new pieces (`Stat`, `Hero`, `RoleCard`, `Principle`, `FailureMode`, `SiteShell`). Cut **`@poukai/ui@0.1.0`** and publish to GitHub Packages.
-2. **Rebuild `poukai-inc/pouk.ai` as an Astro site** that consumes `@poukai/ui` -- static-rendered React from the package, no client JS on the holding page, islands only where they earn it.
+1. **Reshape `@poukai-inc/ui` under an atomic-design taxonomy** and ship six new pieces (`Stat`, `Hero`, `RoleCard`, `Principle`, `FailureMode`, `SiteShell`). Cut **`@poukai-inc/ui@0.1.0`** and publish to GitHub Packages.
+2. **Rebuild `poukai-inc/pouk.ai` as an Astro site** that consumes `@poukai-inc/ui` -- static-rendered React from the package, no client JS on the holding page, islands only where they earn it.
 3. **Wire the dev loop both ways** -- pnpm workspace link for day-to-day iteration, the published GitHub Packages version for CI/Vercel -- so the system is realistic in prod and frictionless in dev.
 
 No code in this document. Mechanics, taxonomy, file layout, and risks only. Code starts the moment this plan is signed off.
@@ -26,7 +26,7 @@ Pulled directly from your answers; restated so they can't drift:
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Stack**         | Astro for the site shell. React islands for anything stateful. `@astrojs/react` renders package components to static HTML at build time.                                                                                |
 | **Repo layout**   | Site stays at `poukai-inc/pouk.ai`. Design system stays at `poukai-inc/poukai-ui` (this repo). They are **separate repos**; the site never imports source from the DS -- only the published package.                  |
-| **Dep mode**      | Dual. `pnpm` workspace link locally (`@poukai/ui` resolves to the in-repo build); CI installs the versioned package from `npm.pkg.github.com`.                                                                          |
+| **Dep mode**      | Dual. `pnpm` workspace link locally (`@poukai-inc/ui` resolves to the in-repo build); CI installs the versioned package from `npm.pkg.github.com`.                                                                          |
 | **Scope**         | All four surfaces -- `/`, `/why-ai`, `/roles`, `/principles`.                                                                                                                                                           |
 | **Deploy**        | Vercel.                                                                                                                                                                                                                 |
 | **Quality bar**   | Lighthouse 100 across Performance, Accessibility, Best-practices, SEO -- on every page, on mobile.                                                                                                                      |
@@ -41,7 +41,7 @@ The Lighthouse 100 + Astro choice has one immediate implication: **the holding p
 The DS already implicitly uses an atomic split. Making it explicit so future contributors (and other internal clients) don't have to guess.
 
 ```
-@poukai/ui                                poukai-inc/pouk.ai
+@poukai-inc/ui                                poukai-inc/pouk.ai
 -------------                             --------------------
 tokens/   <- single source of truth        templates/  <- page layouts
 atoms/    <- Wordmark, StatusBadge,        pages/      <- /, /why-ai,
@@ -56,7 +56,7 @@ organisms/<- SiteShell (new)               public/     <- og.png, robots
 - **Atom** -- one job, no children of its own (`Stat` = numeral + caption).
 - **Molecule** -- combines atoms into a self-contained unit of meaning (`RoleCard` = icon + eyebrow + h + body + hired-by).
 - **Organism** -- combines molecules with layout intent and may know about the page chrome (`SiteShell` = top nav + slot + footer).
-- **Template / Page** -- never in `@poukai/ui`. Lives in the consumer repo.
+- **Template / Page** -- never in `@poukai-inc/ui`. Lives in the consumer repo.
 
 This is the only piece of structure the consuming repos need to memorise.
 
@@ -66,7 +66,7 @@ This is the only piece of structure the consuming repos need to memorise.
 
 The DS package and the site repo answer different questions. Mixing them is the failure mode that ate the most time in your last migration; pinning it down before code lands.
 
-### What `@poukai/ui` owns (this repo)
+### What `@poukai-inc/ui` owns (this repo)
 
 - Design tokens -- color, type, spacing, motion, radii -- the brand contract.
 - Self-hosted webfonts (`.woff2` files in `tokens/fonts/`).
@@ -148,7 +148,7 @@ No line item appears in both columns. If something feels like it should, the bou
 
 ---
 
-## 3. Phase 1 -- Reshape `@poukai/ui` (DS repo)
+## 3. Phase 1 -- Reshape `@poukai-inc/ui` (DS repo)
 
 ### 3.1 Restructure `src/`
 
@@ -173,16 +173,16 @@ src/
 `-- index.ts               <- named exports, grouped by layer
 ```
 
-The `components/` folder goes away. Imports stay flat at the package level (`import { Hero } from "@poukai/ui"`) -- the on-disk taxonomy is for contributors, not consumers.
+The `components/` folder goes away. Imports stay flat at the package level (`import { Hero } from "@poukai-inc/ui"`) -- the on-disk taxonomy is for contributors, not consumers.
 
 **Subpath exports** (optional, recommended):
 
 | Subpath                 | Resolves to          |
 | ----------------------- | -------------------- |
-| `@poukai/ui`            | everything (current) |
-| `@poukai/ui/atoms`      | atoms only           |
-| `@poukai/ui/tokens.css` | unchanged            |
-| `@poukai/ui/fonts/*`    | unchanged            |
+| `@poukai-inc/ui`            | everything (current) |
+| `@poukai-inc/ui/atoms`      | atoms only           |
+| `@poukai-inc/ui/tokens.css` | unchanged            |
+| `@poukai-inc/ui/fonts/*`    | unchanged            |
 
 This lets other Pouk AI INC services that only need atoms tree-shake cleanly.
 
@@ -231,7 +231,7 @@ Each follows the existing four-file recipe (`*.tsx`, `*.module.css`, `*.stories.
 ```
 poukai-inc/pouk.ai
 |-- .github/workflows/        ci.yml, deploy is Vercel-native
-|-- .npmrc                    <- @poukai:registry=https://npm.pkg.github.com
+|-- .npmrc                    <- @poukai-inc:registry=https://npm.pkg.github.com
 |-- astro.config.mjs
 |-- package.json
 |-- public/
@@ -257,7 +257,7 @@ poukai-inc/pouk.ai
 
 ### 4.2 Astro integrations
 
-- `@astrojs/react` -- render `@poukai/ui` components.
+- `@astrojs/react` -- render `@poukai-inc/ui` components.
 - `@astrojs/sitemap` -- Lighthouse SEO 100.
 - `@astrojs/check` -- typecheck on build.
 - `astro-compress` -- gzip/brotli HTML+CSS at build.
@@ -275,14 +275,14 @@ The Lighthouse + Axe gates run against the Vercel preview, not against `pnpm dev
 
 ### 4.3 Client-JS posture
 
-`@poukai/ui` components render through Astro's server-renderer (`<Hero client:none />` is the default -- no hydration directive). The shipped HTML contains the rendered DOM and the imported CSS. No React runtime is sent to the browser for the DS layer.
+`@poukai-inc/ui` components render through Astro's server-renderer (`<Hero client:none />` is the default -- no hydration directive). The shipped HTML contains the rendered DOM and the imported CSS. No React runtime is sent to the browser for the DS layer.
 
 Two pieces of first-party client JS run on every page (decision recorded in `meta/decisions/launch-readiness.md` D-15 / D-16, 2026-05-13):
 
 - **Matomo** -- privacy-respecting first-party analytics, JS tracker on every route including `/`. Cookieless mode; loaded `defer`.
 - **Bugsink** -- Sentry-compatible self-hostable error reporter; client SDK on every route including `/`. Loaded `defer`.
 
-The combined budget is ≤ 75 KB gzipped per page (R-010). Any third script -- third-party hydration, a `<Dialog>` island, a Stripe checkout, anything -- requires an inline `// hydration: <reason>` comment and counts against the budget. The earlier "zero JS on `/`" formulation has been retired; the practical bar now is "no JS that isn't first-party (Matomo / Bugsink / explicitly justified `@poukai/ui` island)."
+The combined budget is ≤ 75 KB gzipped per page (R-010). Any third script -- third-party hydration, a `<Dialog>` island, a Stripe checkout, anything -- requires an inline `// hydration: <reason>` comment and counts against the budget. The earlier "zero JS on `/`" formulation has been retired; the practical bar now is "no JS that isn't first-party (Matomo / Bugsink / explicitly justified `@poukai-inc/ui` island)."
 
 `StatusBadge`'s pulse is CSS keyframes, not state -- it remains JS-free regardless of the budget conversation.
 
@@ -300,15 +300,15 @@ Three pages (`/why-ai`, `/roles`, `/principles`) are content-heavy. The copy fro
 
 ### 5.1 The two repos, two install modes
 
-| Mode                         | Where                                                                                                                  | What `@poukai/ui` resolves to                                                                           |
+| Mode                         | Where                                                                                                                  | What `@poukai-inc/ui` resolves to                                                                           |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Dev (local)**              | Designer/dev has both repos cloned into a parent folder and uses a `pnpm-workspace.yaml` at the parent that lists both | The freshly built `dist/` of the DS -- live, watchable via `pnpm dev` in the DS repo.                   |
-| **CI (Vercel + GH Actions)** | Only `pouk.ai` is checked out                                                                                          | The versioned `@poukai/ui@0.1.x` pulled from `npm.pkg.github.com` using a read-only `NPM_TOKEN` secret. |
+| **CI (Vercel + GH Actions)** | Only `pouk.ai` is checked out                                                                                          | The versioned `@poukai-inc/ui@0.1.x` pulled from `npm.pkg.github.com` using a read-only `NPM_TOKEN` secret. |
 
 The trick is one file, **`.npmrc`** in `pouk.ai`:
 
 ```
-@poukai:registry=https://npm.pkg.github.com
+@poukai-inc:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
 ```
 
@@ -334,7 +334,7 @@ edit Stat.tsx
 pnpm changeset
 git push                        # CI opens version PR
 merge version PR                # CI publishes 0.1.1
-                                pnpm up @poukai/ui
+                                pnpm up @poukai-inc/ui
                                 git push           # Vercel deploys
 ```
 
@@ -417,7 +417,7 @@ Five tagged releases. ~Five PR-sized chunks.
 | **Date**                    | 2026-05-12                                                                                               |
 | **Mode**                    | Defaults (no answers within the sign-off window)                                                         |
 | **Section 2 taxonomy**      | Approved as drafted                                                                                      |
-| **SiteShell placement**     | Stays in `@poukai/ui` as an organism                                                                     |
+| **SiteShell placement**     | Stays in `@poukai-inc/ui` as an organism                                                                     |
 | **Registry**                | GitHub Packages (`npm.pkg.github.com`)                                                                   |
 | **Concurrent contributors** | Assumed none                                                                                             |
 | **Release sequence**        | Five tagged releases as listed in section 9                                                              |
@@ -435,7 +435,7 @@ Five tagged releases. ~Five PR-sized chunks.
 - `package.json` version bumped `0.0.1` -> `0.1.0-alpha.0`.
 - Changeset added (`atomic-restructure.md`) -- minor bump, no public API change.
 
-Public import paths (`import { Wordmark } from "@poukai/ui"`) are unchanged. This is a contributor-facing reshape only.
+Public import paths (`import { Wordmark } from "@poukai-inc/ui"`) are unchanged. This is a contributor-facing reshape only.
 
 ### Next PR
 
