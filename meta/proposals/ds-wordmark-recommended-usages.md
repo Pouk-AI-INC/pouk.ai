@@ -2,8 +2,8 @@
 title: "Expand Wordmark recommended usages: size + horizontal lockup"
 target_repo: poukai-inc/poukai-ui
 suggested_resolution: patch
-status: drafted
-ds_issue:
+status: issue-opened
+ds_issue: https://github.com/poukai-inc/poukai-ui/issues/10
 target_version: 0.2.3
 created: 2026-05-14
 resolved:
