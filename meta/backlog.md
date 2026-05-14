@@ -4,14 +4,14 @@ Things to ship before / around launch. Roughly priority-ordered within sections.
 
 ## Blockers for launch
 
-- [ ] **Register `pouk.ai` at Porkbun.** The Vercel deploy is live on its `*.vercel.app` preview URL but the canonical domain doesn't exist yet. Until registered: meta tags (canonical, OG, Twitter, JSON-LD) all reference `https://pouk.ai/` and will be wrong if shared anywhere. Priced at ~$10–15/yr with WHOIS privacy.
-- [ ] **Generate `og.png`** (1200×630). Spec: `#FFFFFF` bg, full POUKAI logo (feather isotype + letterforms from `brand/avatar svg.svg`) in `#1D1D1F` centered, tagline in Instrument Serif italic 56px `#6E6E73` below. ≤80KB. Referenced by `<meta property="og:image">` and Twitter card.
-- [ ] **Generate `apple-touch-icon.png`** (180×180). Feather isotype `#1D1D1F` on `#FFFFFF` bg. Source: extract from `brand/avatar svg.svg` or convert `brand/avatar-isotype.png` (which is already isotype-only) to 180×180. Referenced by `<link rel="apple-touch-icon">`.
-- [ ] **Update favicon** to the feather isotype (currently still the 3-stroke placeholder altimeter from the original spec). The header now uses the real brand logo, so the favicon should match. Inline data-URI SVG using just the two isotype paths from `brand/avatar svg.svg`, with a `prefers-color-scheme: dark` rule to flip to `#F5F5F7` for dark browser-tab UIs.
-- [ ] Add `robots.txt` (`User-agent: *\nAllow: /\nSitemap: https://pouk.ai/sitemap.xml`)
-- [ ] Add `sitemap.xml` (single URL: `https://pouk.ai/`)
-- [ ] Add `vercel.json` at the repo root (HSTS, X-Content-Type-Options, Referrer-Policy, Permissions-Policy; CSP optional). Baseline JSON in `README.md`.
-- [ ] Resolve JSON-LD ↔ CSP only **if** you add `script-src 'none'` to `vercel.json`. Vercel doesn't enforce a CSP by default, so the conflict is opt-in. If you do opt in: hash-pin (`'sha256-…'`), relax to `'unsafe-inline'`, or drop JSON-LD from `index.html`.
+- [x] **Register `pouk.ai` at Porkbun.** Done 2026-05-13.
+- [x] **Generate `og.png`** (1200×630). Done 2026-05-13. Lives in the DS repo at `poukai-ui/src/brand/og.png`. **Operational follow-up**: per masterplan section 2A, `og.png` belongs in the site repo (it's marketing artwork, not a brand primitive). Either copy into the site repo root before cutover, or have `pouk-ai-engineer` pull it into `public/og.png` during the Astro scaffold round.
+- [x] **Generate `apple-touch-icon.png`** (180×180). Done 2026-05-13. Same location/follow-up as `og.png` — currently at `poukai-ui/src/brand/apple-touch-icon.png`; needs to land at `public/apple-touch-icon.png` in the site repo before cutover.
+- [x] **Update favicon** to the feather isotype. Done 2026-05-13. Favicon variations (`favicon-16x16.png`, `favicon-32x32.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`) generated in `poukai-ui/src/brand/`. **Operational follow-up**: index.html still references the old placeholder altimeter inline-SVG favicon at line 33; the new files need to be wired in (either inline-SVG-from-the-isotype path or `<link rel="icon" href="/favicon-32x32.png">` references) during the Astro scaffold round or as a one-off patch to `index.html` if cutover comes first.
+- [x] Add `robots.txt`. Done 2026-05-13 (commit `bc81bc3`).
+- [x] Add `sitemap.xml`. Done 2026-05-13 (commit `bc81bc3`).
+- [x] Add `vercel.json` at the repo root. Done 2026-05-13 (commit `bc81bc3`).
+- [x] Resolve JSON-LD ↔ CSP. Closed — `vercel.json` ships without CSP per D-17, so the conflict never materialized. Re-open if/when a CSP is introduced.
 
 ## DNS + email
 
