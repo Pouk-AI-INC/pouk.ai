@@ -146,6 +146,8 @@ The first DS issue we open under this flow can be the bootstrap request itself.
 | Producer publishes without going through an issue | `ds-bump.yml` runs on every publish anyway and opens a draft PR. The proposal-tracking is for traceability, not gating. |
 | Consumer opens an issue without authoring a local proposal | Wrong direction — proposals are the consumer's record. Author the proposal file first, then open the issue from it. |
 | The two records drift (issue body diverges from proposal file) | The producer's issue body is a snapshot at open-time; the proposal file in the consumer repo is the living record. When they conflict, the file wins. Consumer agent re-syncs by commenting on the issue with a link to the new file revision. |
+| `CONSUMER_DISPATCH_TOKEN` fine-grained PAT errors with `Resource not accessible by personal access token` | The endpoint `POST /repos/{owner}/{repo}/dispatches` requires fine-grained permission **Contents: Read and write** on the target consumer repo — not `Actions`. (Originally documented incorrectly in the bootstrap proposal; corrected here after the first round-trip failed at the dispatch step.) Regenerate the PAT with Contents permission, repaste into the DS repo's `CONSUMER_DISPATCH_TOKEN` secret. |
+| Bump PR introduces a silent gzipped-weight regression | `ds-bump.yml` captures per-route raw + gzipped HTML sizes and embeds them in the PR body. Reviewer compares against the prior bump PR's table; routes >10% larger gzipped violate R-015 in `meta/standards/technical-requirements.md`. |
 
 ---
 

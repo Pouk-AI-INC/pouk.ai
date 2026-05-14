@@ -35,7 +35,7 @@ Install the Claude Code GitHub Action / App on `poukai-inc/poukai-ui` per [Anthr
 Secrets needed on the repo (Settings → Secrets and variables → Actions):
 
 - **`ANTHROPIC_API_KEY`** — for the Claude Code Action runtime.
-- **`CONSUMER_DISPATCH_TOKEN`** — a Personal Access Token (or fine-grained token) with `Actions: write` permission on `poukai-inc/pouk.ai`. Used by ask 3 to emit `repository_dispatch` events into the consumer repo. The default `GITHUB_TOKEN` cannot dispatch to a different repo.
+- **`CONSUMER_DISPATCH_TOKEN`** — a Personal Access Token (or fine-grained token) with **`Contents: Read and write`** permission on `poukai-inc/pouk.ai`. (~~`Actions: write`~~ — corrected 2026-05-14: GitHub's `POST /repos/{owner}/{repo}/dispatches` endpoint requires Contents, not Actions, for fine-grained PATs. Filed against `meta/workflow.md` failure-modes table.) Used by ask 3 to emit `repository_dispatch` events into the consumer repo. The default `GITHUB_TOKEN` cannot dispatch to a different repo.
 
 ### Ask 2 — `.github/workflows/handle-proposal.yml`
 

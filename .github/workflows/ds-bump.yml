@@ -94,6 +94,26 @@ jobs:
         if: steps.check.outputs.skip != 'true'
         run: pnpm build
 
+      - name: Capture per-route build sizes
+        id: sizes
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          {
+            echo 'table<<SIZES_END'
+            echo '| Route | Raw bytes | Gzipped bytes |'
+            echo '|---|---:|---:|'
+            for f in dist/index.html dist/why-ai/index.html dist/roles/index.html dist/principles/index.html; do
+              if [ -f "$f" ]; then
+                raw=$(wc -c < "$f" | tr -d ' ')
+                gz=$(gzip -c "$f" | wc -c | tr -d ' ')
+                route=$(dirname "$f" | sed 's|^dist||')
+                [ -z "$route" ] && route="/"
+                printf '| `%s` | %s | %s |\n' "$route" "$raw" "$gz"
+              fi
+            done
+            echo 'SIZES_END'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Open draft PR
         if: steps.check.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v7
@@ -118,7 +138,13 @@ jobs:
 
             ## Local verification (already passed on this runner)
             - `pnpm install --no-frozen-lockfile` — green
-            - `pnpm build` — green
+            - `pnpm build` — green (`astro check` clean as part of the build script)
+
+            ## Build artifact sizes
+
+            Per `meta/standards/technical-requirements.md` R-015 (gzipped HTML weight ≤ prior + 10%). Compare against the previous bump PR's table to spot regressions.
+
+            ${{ steps.sizes.outputs.table }}
 
             ## Before merging
             - [ ] Confirm the version matches an expected proposal in `meta/proposals/`
@@ -127,6 +153,7 @@ jobs:
               - `target_version: ${{ env.DS_VERSION }}`
               - `resolved: <today>`
             - [ ] Skim the lockfile diff for unexpected transitive bumps
+            - [ ] Compare the build-artifact-sizes table against the prior bump PR — flag any route >10% larger gzipped (R-015)
             - [ ] After merge, Vercel auto-deploys main; spot-check the canonical routes
 
             cc @arianzargaran
