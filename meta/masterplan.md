@@ -2,7 +2,7 @@
 
 **Status** Draft v1 - 2026-05-12
 **Author** Design-system pass, for review
-**Decision deadline** Before any code lands in `Pouk-AI-INC/pouk.ai`
+**Decision deadline** Before any code lands in `poukai-inc/pouk.ai`
 
 ---
 
@@ -11,7 +11,7 @@
 We're going to do **three things, in order**, and not skip step 1:
 
 1. **Reshape `@poukai/ui` under an atomic-design taxonomy** and ship six new pieces (`Stat`, `Hero`, `RoleCard`, `Principle`, `FailureMode`, `SiteShell`). Cut **`@poukai/ui@0.1.0`** and publish to GitHub Packages.
-2. **Rebuild `Pouk-AI-INC/pouk.ai` as an Astro site** that consumes `@poukai/ui` -- static-rendered React from the package, no client JS on the holding page, islands only where they earn it.
+2. **Rebuild `poukai-inc/pouk.ai` as an Astro site** that consumes `@poukai/ui` -- static-rendered React from the package, no client JS on the holding page, islands only where they earn it.
 3. **Wire the dev loop both ways** -- pnpm workspace link for day-to-day iteration, the published GitHub Packages version for CI/Vercel -- so the system is realistic in prod and frictionless in dev.
 
 No code in this document. Mechanics, taxonomy, file layout, and risks only. Code starts the moment this plan is signed off.
@@ -25,7 +25,7 @@ Pulled directly from your answers; restated so they can't drift:
 |                   |                                                                                                                                                                                                                         |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Stack**         | Astro for the site shell. React islands for anything stateful. `@astrojs/react` renders package components to static HTML at build time.                                                                                |
-| **Repo layout**   | Site stays at `Pouk-AI-INC/pouk.ai`. Design system stays at `Pouk-AI-INC/poukai-ds` (this repo). They are **separate repos**; the site never imports source from the DS -- only the published package.                  |
+| **Repo layout**   | Site stays at `poukai-inc/pouk.ai`. Design system stays at `poukai-inc/poukai-ui` (this repo). They are **separate repos**; the site never imports source from the DS -- only the published package.                  |
 | **Dep mode**      | Dual. `pnpm` workspace link locally (`@poukai/ui` resolves to the in-repo build); CI installs the versioned package from `npm.pkg.github.com`.                                                                          |
 | **Scope**         | All four surfaces -- `/`, `/why-ai`, `/roles`, `/principles`.                                                                                                                                                           |
 | **Deploy**        | Vercel.                                                                                                                                                                                                                 |
@@ -41,7 +41,7 @@ The Lighthouse 100 + Astro choice has one immediate implication: **the holding p
 The DS already implicitly uses an atomic split. Making it explicit so future contributors (and other internal clients) don't have to guess.
 
 ```
-@poukai/ui                                Pouk-AI-INC/pouk.ai
+@poukai/ui                                poukai-inc/pouk.ai
 -------------                             --------------------
 tokens/   <- single source of truth        templates/  <- page layouts
 atoms/    <- Wordmark, StatusBadge,        pages/      <- /, /why-ai,
@@ -77,7 +77,7 @@ The DS package and the site repo answer different questions. Mixing them is the 
 - Versioning, `CHANGELOG.md`, GitHub Packages publish.
 - Public `README` explaining how to consume.
 
-### What `Pouk-AI-INC/pouk.ai` owns (the site repo)
+### What `poukai-inc/pouk.ai` owns (the site repo)
 
 - Astro config, Vercel deploy, lighthouse-ci, sitemap.
 - Routes, page templates, navigation contents (what's in the menu).
@@ -229,7 +229,7 @@ Each follows the existing four-file recipe (`*.tsx`, `*.module.css`, `*.stories.
 ### 4.1 Repo layout
 
 ```
-Pouk-AI-INC/pouk.ai
+poukai-inc/pouk.ai
 |-- .github/workflows/        ci.yml, deploy is Vercel-native
 |-- .npmrc                    <- @poukai:registry=https://npm.pkg.github.com
 |-- astro.config.mjs
@@ -375,7 +375,7 @@ These don't block the plan but should be resolved before launch:
 1. **`og.png`** -- still on the backlog. Required at **1200×630, ≤ 80 KB** per `meta/standards/technical-requirements.md` R-037. The earlier "ship `banner.png` as the fallback" position has been retired: `banner.png`'s dimensions are not guaranteed to match the 1200×630 contract, and a misshaped OG card degrades the share preview on every social surface. If `og.png` isn't ready at cutover, omit the OG image rather than ship the wrong dimensions; Lighthouse SEO will flag it, the engineer fixes it before promoting the preview to the canonical domain.
 2. **Icon library** -- **decided:** Lucide is the icon system. The DS lists `lucide-react` as a peer dep; the site imports directly. Branded glyphs or anything Lucide can't cover get hand-built into a DS atom on demand. `RoleCard.icon` stays a slot so each consumer picks its own.
 3. **Imagery** -- **decided:** illustrations are the visual direction for the SaaS stage. They live in the site repo (per-page marketing material, not brand primitives). Real photography lands later, only via a Customer Story page (founder-approved per case). `Hero` still exposes no image slot -- imagery sits in page templates around the hero, not inside it.
-4. **Other internal clients** -- once the DS pattern proves out here, the obvious next consumer is whatever ships under `Pouk-AI-INC/*-app`. The taxonomy in section 2 is set up so that's a config change in the new repo's `.npmrc`, not a DS rewrite.
+4. **Other internal clients** -- once the DS pattern proves out here, the obvious next consumer is whatever ships under `poukai-inc/*-app`. The taxonomy in section 2 is set up so that's a config change in the new repo's `.npmrc`, not a DS rewrite.
 
 ---
 

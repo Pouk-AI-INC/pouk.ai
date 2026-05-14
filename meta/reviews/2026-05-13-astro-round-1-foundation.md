@@ -89,7 +89,7 @@ The headline drift is on the **dual-consumption mechanic that the masterplan cal
 
 ## Masterplan & boundary compliance
 
-- [x] No imports from `poukai-ds/` or `poukai-ui/` source paths — `grep -rE 'from ["'\'']poukai-ui|@poukai/ui/src'` returns zero matches across `src/`. Imports are all `from "@poukai/ui"` (package public exports) plus one `import "@poukai/ui/tokens.css"`.
+- [x] No imports from `poukai-ui/` or `poukai-ui/` source paths — `grep -rE 'from ["'\'']poukai-ui|@poukai/ui/src'` returns zero matches across `src/`. Imports are all `from "@poukai/ui"` (package public exports) plus one `import "@poukai/ui/tokens.css"`.
 - [ ] No site-side primitives duplicating `@poukai/ui` responsibility. — `ShellWrapper.tsx` and `RolesGrid.tsx` are site-side components. They are NOT duplicating DS responsibility (they compose DS molecules with site-substance), but they sit close enough to the line to warrant scrutiny — see F-102 and F-103.
 - [x] No new design tokens, fonts, color values introduced. — `site.css` consumes `var(--…)` tokens only; no raw colors or sizes.
 - [x] No hydration directives (`client:*`) added without a documented reason. — `grep -rE 'client:(load|idle|visible|media|only)' src/` returns zero. R-078 honored.

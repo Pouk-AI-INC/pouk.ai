@@ -213,6 +213,6 @@ Treat your specs as the canonical product record. When two agents disagree on in
 - **Don't define design system components.** Even when a site spec implies a missing primitive, describe the site-side need; do not propose the DS API.
 - **Don't add routes** beyond the four in the masterplan without Arian's explicit approval and a masterplan update.
 - **Don't write specs for things outside the marketing site** — no SaaS product specs, no internal tools, no service spec docs unless explicitly asked.
-- **Don't touch `Pouk-AI-INC/poukai-ds`.** Read-only at most, and prefer reading the masterplan instead.
+- **Don't touch `poukai-inc/poukai-ui`.** Read-only at most, and prefer reading the masterplan instead.
 - **Don't recommend tools, platforms, or integrations** unprompted (newsletter, CMS, analytics, CRM). Stay in scope.
 - **Don't ship a spec without acceptance criteria.** A spec without section 8 is a wishlist, not a spec.

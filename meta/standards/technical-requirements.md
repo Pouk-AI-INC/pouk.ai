@@ -11,7 +11,7 @@
 
 ## 1. Purpose
 
-This document is the catalog of testable, non-functional requirements that every change to `Pouk-AI-INC/pouk.ai` must satisfy before merge. It promotes the standards embedded in `meta/masterplan.md` and `meta/architecture.md` prose into first-class, numbered requirements that reviews can cite (e.g. "violates R-014").
+This document is the catalog of testable, non-functional requirements that every change to `poukai-inc/pouk.ai` must satisfy before merge. It promotes the standards embedded in `meta/masterplan.md` and `meta/architecture.md` prose into first-class, numbered requirements that reviews can cite (e.g. "violates R-014").
 
 The masterplan remains the strategic narrative — the *why*. This document is the operational checklist — the *what must be true*. Where the two overlap, the masterplan wins on intent and this document wins on test specificity. Where this document references a masterplan section, that section stays authoritative for the underlying decision.
 
@@ -21,9 +21,9 @@ This document is Approved. The open questions O-001 through O-009 that gated pro
 
 ## 2. Scope
 
-**In scope**: the `Pouk-AI-INC/pouk.ai` repo only — the Astro site that will replace the current single-file `index.html`. Covers the four canonical routes (`/`, `/why-ai`, `/roles`, `/principles`), `BaseLayout.astro`, content JSON files, build pipeline, Vercel deploy, and the `.npmrc` / GitHub Packages consumption of `@poukai/ui`.
+**In scope**: the `poukai-inc/pouk.ai` repo only — the Astro site that will replace the current single-file `index.html`. Covers the four canonical routes (`/`, `/why-ai`, `/roles`, `/principles`), `BaseLayout.astro`, content JSON files, build pipeline, Vercel deploy, and the `.npmrc` / GitHub Packages consumption of `@poukai/ui`.
 
-**Out of scope**: the `@poukai/ui` package itself (lives in `Pouk-AI-INC/poukai-ds`, has its own quality bars in masterplan section 3.3 and its own `size-limit` budgets). Brand-source assets in `/brand/`. The `meta/` project-memory tree. Future product surfaces (`*-app` repos).
+**Out of scope**: the `@poukai/ui` package itself (lives in `poukai-inc/poukai-ui`, has its own quality bars in masterplan section 3.3 and its own `size-limit` budgets). Brand-source assets in `/brand/`. The `meta/` project-memory tree. Future product surfaces (`*-app` repos).
 
 **Audience**: `pouk-ai-engineer` (must satisfy these to ship), `pouk-ai-reviewer` (cites these in review findings), `pouk-ai-pm` (writes specs that respect these as the baseline), Arian (decides when a requirement should change).
 
@@ -204,7 +204,7 @@ The original posture (zero client JS on `/`) was relaxed on 2026-05-13 by decisi
 
 ### 3.9 Observability
 
-**R-060 (HARD)** — Analytics provider is Matomo. The Matomo tracker runs on every page including `/`. Tracker is configured in cookieless mode at launch (no `_pk_*` cookies set); IPs are anonymized before storage. Matomo's HTTP API may also be hit server-side for first-party event recording where useful. The deployment shape — self-hosted on Pouk-AI-INC infrastructure vs. Matomo Cloud (paid SaaS) — is a remaining infrastructure decision tracked at O-011 in section 6; the tool pick is locked. Verification: parse `BaseLayout.astro` for the Matomo tracker tag annotated `// analytics: matomo`; confirm on the preview deploy that no `_pk_*` cookies are set on first paint; confirm Matomo's tracker file gzips to ≤ 30 kB (sub-budget within R-010). Source: `meta/decisions/launch-readiness.md` D-15; [Matomo cookieless tracking documentation] as the configuration reference.
+**R-060 (HARD)** — Analytics provider is Matomo. The Matomo tracker runs on every page including `/`. Tracker is configured in cookieless mode at launch (no `_pk_*` cookies set); IPs are anonymized before storage. Matomo's HTTP API may also be hit server-side for first-party event recording where useful. The deployment shape — self-hosted on poukai-inc infrastructure vs. Matomo Cloud (paid SaaS) — is a remaining infrastructure decision tracked at O-011 in section 6; the tool pick is locked. Verification: parse `BaseLayout.astro` for the Matomo tracker tag annotated `// analytics: matomo`; confirm on the preview deploy that no `_pk_*` cookies are set on first paint; confirm Matomo's tracker file gzips to ≤ 30 kB (sub-budget within R-010). Source: `meta/decisions/launch-readiness.md` D-15; [Matomo cookieless tracking documentation] as the configuration reference.
 
 **R-061 (HARD)** — Error reporting tool is Bugsink (Sentry-compatible, self-hostable). The Sentry-protocol browser SDK and server SDK are both active. The client SDK runs on every page including `/`. Server-side ingest scrubs IP addresses and form data before storage. The deployment shape — self-hosted vs. Bugsink Cloud — is a remaining infrastructure decision tracked at O-012 in section 6; the tool pick is locked. The SDK tag in `BaseLayout.astro` is annotated `// error-reporting: bugsink`. Verification: parse `BaseLayout.astro` for the Bugsink SDK tag with the inline justification comment; confirm the SDK file gzips to ≤ 45 kB (sub-budget within R-010); confirm Bugsink ingest config scrubs PII. Source: `meta/decisions/launch-readiness.md` D-16; [Bugsink documentation] and [Sentry browser SDK docs] as the configuration references.
 
@@ -310,7 +310,7 @@ The original draft of this document held two related positions: (a) Lighthouse P
 
 Items still needing resolution. None of these block the standards document from being Approved; both are infrastructure choices downstream of the locked tool picks in D-15 and D-16.
 
-- **O-011 — Matomo deployment shape (R-060).** Self-hosted on Pouk-AI-INC infrastructure vs. Matomo Cloud (paid SaaS). Reviewer default: self-hosted matches the brand's "owns the stack" posture and avoids a third-party data-flow on every page load. Cloud is faster to launch and offloads ops. The decision affects R-061 indirectly (if Matomo is cloud-hosted the tracker file is served from a third-party origin and the JS budget rules in R-009/R-010/R-011 still apply but the verification step changes).
+- **O-011 — Matomo deployment shape (R-060).** Self-hosted on poukai-inc infrastructure vs. Matomo Cloud (paid SaaS). Reviewer default: self-hosted matches the brand's "owns the stack" posture and avoids a third-party data-flow on every page load. Cloud is faster to launch and offloads ops. The decision affects R-061 indirectly (if Matomo is cloud-hosted the tracker file is served from a third-party origin and the JS budget rules in R-009/R-010/R-011 still apply but the verification step changes).
 - **O-012 — Bugsink deployment shape (R-061).** Self-hosted vs. Bugsink Cloud. Reviewer default: self-hosted, same rationale as O-011. Same caveat about R-009/R-010/R-011 verification under the cloud shape.
 
 A future revision watch-list (not gating approval, just flagged for the reviewer to track):
