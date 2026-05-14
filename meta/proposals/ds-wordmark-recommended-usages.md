@@ -2,11 +2,21 @@
 title: "Expand Wordmark recommended usages: size + horizontal lockup"
 target_repo: poukai-inc/poukai-ui
 suggested_resolution: patch
-status: issue-opened
+status: resolved
 ds_issue: https://github.com/poukai-inc/poukai-ui/issues/10
 target_version: 0.2.3
 created: 2026-05-14
-resolved:
+resolved: 2026-05-14
+ds_pr: https://github.com/poukai-inc/poukai-ui/pull/17
+notes_on_resolution: |
+  Shipped Option A1 from the proposal — SiteShell brand-mark height
+  raised from 28 → 56. Investigation step confirmed the underlying
+  SVG path data is byte-identical to the prior holding page (same
+  viewBox 0 0 518.67 274.41, same first path coords), so no orientation
+  reshape was needed. Composition was always isotype-above-wordmark
+  within a horizontal canvas. Open follow-up if desired: bump from
+  fixed 56px to a 56–72px responsive clamp to match the old holding
+  page's max-height feel on wider viewports.
 ---
 
 # Expand `Wordmark` recommended usages: size + horizontal lockup
