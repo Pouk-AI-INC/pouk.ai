@@ -4,7 +4,7 @@ target_repo: poukai-inc/poukai-ui
 suggested_resolution: minor
 status: resolved
 ds_issue: https://github.com/poukai-inc/poukai-ui/issues/29
-target_version: 0.4.0
+target_version: 0.5.0  # 0.4.0 shipped a single llms.txt with full content; 0.5.0 split into llms.txt (index) + llms-full.txt (content) per the original ask
 created: 2026-05-15
 resolved: 2026-05-15
 notes_on_resolution: |
