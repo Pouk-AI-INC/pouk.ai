@@ -114,6 +114,50 @@ jobs:
             echo 'SIZES_END'
           } >> "$GITHUB_OUTPUT"
 
+      - name: Diff @poukai-inc/ui llms-full.txt against snapshot
+        id: llms
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          new="node_modules/@poukai-inc/ui/dist/llms-full.txt"
+          snap="meta/ds-snapshot/llms-full.txt"
+          mkdir -p meta/ds-snapshot
+          if [ ! -f "$new" ]; then
+            echo "::notice::No llms-full.txt in @poukai-inc/ui@${DS_VERSION} — skipping diff. (Pending DS proposal ds-llms-context-files.)"
+            {
+              echo 'diff<<LLMS_END'
+              echo '_No `llms-full.txt` shipped in this version. See `meta/proposals/ds-llms-context-files.md`._'
+              echo 'LLMS_END'
+            } >> "$GITHUB_OUTPUT"
+          else
+            cp "$new" "$snap.new"
+            {
+              echo 'diff<<LLMS_END'
+              if [ ! -f "$snap" ]; then
+                echo '_First snapshot — no prior version to diff against. Full file in this PR:_'
+                echo ''
+                echo '<details><summary>llms-full.txt (full content)</summary>'
+                echo ''
+                echo '```'
+                head -200 "$new"
+                echo '```'
+                echo '</details>'
+              else
+                if diff -q "$snap" "$new" > /dev/null; then
+                  echo '_No change to `llms-full.txt` since the prior bump._'
+                else
+                  echo '<details><summary>Diff vs prior snapshot</summary>'
+                  echo ''
+                  echo '```diff'
+                  diff -u "$snap" "$new" | head -200
+                  echo '```'
+                  echo '</details>'
+                fi
+              fi
+              echo 'LLMS_END'
+            } >> "$GITHUB_OUTPUT"
+            cp "$new" "$snap"
+          fi
+
       - name: Open draft PR
         if: steps.check.outputs.skip != 'true'
         uses: peter-evans/create-pull-request@v7
@@ -145,6 +189,12 @@ jobs:
             Per `meta/standards/technical-requirements.md` R-015 (gzipped HTML weight ≤ prior + 10%). Compare against the previous bump PR's table to spot regressions.
 
             ${{ steps.sizes.outputs.table }}
+
+            ## DS guidance changes (`llms-full.txt`)
+
+            The brand's living constitution. Read it via `cat node_modules/@poukai-inc/ui/dist/llms-full.txt` before any DS-touching code change. Snapshot refreshed in this PR at `meta/ds-snapshot/llms-full.txt`.
+
+            ${{ steps.llms.outputs.diff }}
 
             ## Before merging
             - [ ] Confirm the version matches an expected proposal in `meta/proposals/`
