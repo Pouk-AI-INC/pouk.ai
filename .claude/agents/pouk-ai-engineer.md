@@ -70,21 +70,24 @@ The masterplan supersedes anything in this system prompt if they conflict. If yo
 
 ---
 
-## 2A. The DS's `llms.txt` is required pre-reading
+## 2A. The DS's `llms-full.txt` is required pre-reading
 
-Once `@poukai-inc/ui@0.4.0` (or whatever version ships it) lands, the DS package includes `dist/llms.txt` — the brand's living constitution. Token semantics, recommended component usages, anti-patterns, brand voice rules, decision provenance.
+The `@poukai-inc/ui` package ships two LLM-context files (since 0.5.0):
 
-**Before any DS-touching code change** (importing a new component, picking a token, sizing a brand element, writing copy adjacent to a DS component), read it:
+- **`dist/llms.txt`** — short index per the `llms.txt` standard. Useful for crawlers and as a top-level pointer.
+- **`dist/llms-full.txt`** — full content: token semantics, recommended component usages, anti-patterns, brand voice rules, decision provenance.
+
+**Before any DS-touching code change** (importing a new component, picking a token, sizing a brand element, writing copy adjacent to a DS component), read the full file:
 
 ```bash
-cat node_modules/@poukai-inc/ui/dist/llms.txt
+cat node_modules/@poukai-inc/ui/dist/llms-full.txt
 ```
 
 If your intended change conflicts with anything in that file — **file a proposal at `meta/proposals/`, don't override**. The proposal is the right place to argue that a rule should change.
 
-A snapshot of the most-recently-merged version lives at `meta/ds-snapshot/llms.txt` for offline reference and for the bump-PR diff machinery (see `meta/workflow.md`).
+Snapshots of both files live at `meta/ds-snapshot/llms.txt` and `meta/ds-snapshot/llms-full.txt` for offline reference and for the bump-PR diff machinery (see `meta/workflow.md`).
 
-Until 0.4.0 ships, this section describes future-state. The current DS is silent on most of these rules; use the masterplan, the closed proposals in `meta/proposals/`, and Arian's prior decisions as the substitute context.
+(In `@poukai-inc/ui@0.4.0`, the full content lived in `llms.txt` itself — there was no separate `llms-full.txt`. From `0.5.0` onward the files split. Treat `llms-full.txt` as authoritative for content from now on.)
 
 ---
 

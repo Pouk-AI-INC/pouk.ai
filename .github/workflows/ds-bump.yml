@@ -114,49 +114,48 @@ jobs:
             echo 'SIZES_END'
           } >> "$GITHUB_OUTPUT"
 
-      - name: Diff @poukai-inc/ui llms.txt against snapshot
+      - name: Diff @poukai-inc/ui llms files against snapshots
         id: llms
         if: steps.check.outputs.skip != 'true'
+        # Tracks two files (DS may ship either or both):
+        #   - llms.txt        — short index (post-0.5.0)
+        #   - llms-full.txt   — full content (post-0.5.0; in 0.4.0 the
+        #                       full content lived in llms.txt itself)
+        # Each file is diffed independently against its snapshot. Missing
+        # files print a defensive notice; nothing fails the step.
         run: |
-          new="node_modules/@poukai-inc/ui/dist/llms.txt"
-          snap="meta/ds-snapshot/llms.txt"
           mkdir -p meta/ds-snapshot
-          if [ ! -f "$new" ]; then
-            echo "::notice::No llms.txt in @poukai-inc/ui@${DS_VERSION} — skipping diff. (Pending DS proposal ds-llms-context-files.)"
-            {
-              echo 'diff<<LLMS_END'
-              echo '_No `llms.txt` shipped in this version. See `meta/proposals/ds-llms-context-files.md`._'
-              echo 'LLMS_END'
-            } >> "$GITHUB_OUTPUT"
-          else
-            cp "$new" "$snap.new"
-            {
-              echo 'diff<<LLMS_END'
+          {
+            echo 'diff<<LLMS_END'
+            for file in llms.txt llms-full.txt; do
+              new="node_modules/@poukai-inc/ui/dist/$file"
+              snap="meta/ds-snapshot/$file"
+              echo "### \`$file\`"
+              echo ''
+              if [ ! -f "$new" ]; then
+                echo "_Not shipped in @poukai-inc/ui@${DS_VERSION}._"
+                echo ''
+                continue
+              fi
               if [ ! -f "$snap" ]; then
-                echo '_First snapshot — no prior version to diff against. Full file in this PR:_'
+                echo '_First snapshot — no prior version to diff against._ Full file ships in this PR.'
                 echo ''
-                echo '<details><summary>llms.txt (full content)</summary>'
+              elif diff -q "$snap" "$new" > /dev/null; then
+                echo '_No change since the prior bump._'
                 echo ''
-                echo '```'
-                head -200 "$new"
+              else
+                echo '<details><summary>Diff vs prior snapshot</summary>'
+                echo ''
+                echo '```diff'
+                diff -u "$snap" "$new" | head -300
                 echo '```'
                 echo '</details>'
-              else
-                if diff -q "$snap" "$new" > /dev/null; then
-                  echo '_No change to `llms.txt` since the prior bump._'
-                else
-                  echo '<details><summary>Diff vs prior snapshot</summary>'
-                  echo ''
-                  echo '```diff'
-                  diff -u "$snap" "$new" | head -200
-                  echo '```'
-                  echo '</details>'
-                fi
+                echo ''
               fi
-              echo 'LLMS_END'
-            } >> "$GITHUB_OUTPUT"
-            cp "$new" "$snap"
-          fi
+              cp "$new" "$snap"
+            done
+            echo 'LLMS_END'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Open draft PR
         if: steps.check.outputs.skip != 'true'

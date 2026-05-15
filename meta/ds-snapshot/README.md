@@ -6,7 +6,8 @@ Per-bump cache of `@poukai-inc/ui` runtime context files. **Not authored by hand
 
 | File | Source | Refreshed by |
 |---|---|---|
-| `llms.txt` | `node_modules/@poukai-inc/ui/dist/llms.txt` (once DS ships it per proposal `ds-llms-context-files.md`) | `ds-bump.yml` |
+| `llms.txt` | `node_modules/@poukai-inc/ui/dist/llms.txt` — short index | `ds-bump.yml` |
+| `llms-full.txt` | `node_modules/@poukai-inc/ui/dist/llms-full.txt` — full content (since 0.5.0) | `ds-bump.yml` |
 
 ## Why this exists
 
