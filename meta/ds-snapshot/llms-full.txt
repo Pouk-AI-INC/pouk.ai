@@ -1,0 +1,169 @@
+# @poukai-inc/ui — design system rules for LLM consumers
+
+This file is the authoritative brand contract for `@poukai-inc/ui`. Hand-authored by `poukai-design`. Takes precedence over inline comments, story descriptions, or any generated output (including `dist/llms.txt`). Read before writing, reviewing, or modifying any component, token, or style in this repository.
+
+Consumed via: `cat node_modules/@poukai-inc/ui/dist/llms-full.txt`
+
+---
+
+## Token semantics
+
+All tokens live in `src/tokens/tokens.css` on `:root`. Owned exclusively by `poukai-design`. Engineers read tokens; they never modify the token file. If an implementation requires a value with no token, work stops until `poukai-design` adds it.
+
+### Color
+
+- `--bg: #ffffff` — Page background. NEVER used as a foreground color or border. The only surfaces that should be `--bg` are the literal page and elements that need to feel “on the page” rather than elevated above it.
+- `--surface: #f5f5f7` — Subtle elevation (one step above `--bg`). Used for code blocks, quote backgrounds, card fills (RoleCard). NEVER use as body text. NEVER use as a section divider. `--bg` is the canvas; `--surface` is a card on that canvas.
+- `--fg: #1d1d1f` — Primary text, wordmark fill, sigil stroke, and the `primary` button background (inverts: `--fg` fill, `--bg` text). The only color allowed for body paragraph text. NEVER use decoratively as a background wash.
+- `--fg-muted: #6e6e73` — Secondary text: captions, footer copy, eyebrow labels, lede paragraphs, hiredBy lines, Stat provenance. NEVER use for primary calls to action. NEVER use as a disabled-state substitute.
+- `--hairline: #d2d2d7` — Dividers, 1px rules, borders. Always applied as a border/border-top/border-bottom, NEVER as a background. Never render thicker than `--hairline-w: 1px`.
+- `--accent: #0071e3` — The brand’s single accent. Roles: status dot fill, link underline-on-hover, focus rings. NEVER use as a surface fill, body text color, or button background. It is a signal color: interactivity and focus only.
+- `--accent-glow: rgba(0, 113, 227, 0.18)` — Transparent halo for the available status dot and `::selection`. NEVER use as a container fill or hover state. Never stack it.
+
+### Typography
+
+- `--font-serif: "Instrument Serif", Georgia, …` — Editorial display face. Used for h1, h2, RoleCard titles, Principle titles, FailureMode titles, Stat numeral. NEVER use for UI chrome.
+- `--font-sans: "Geist", -apple-system, …` — Primary UI face. All body copy, navigation, buttons, captions, badges, eyebrows. Self-hosted in src/tokens/fonts/. NEVER substitute another sans-serif.
+- `--font-mono: "Geist Mono", ui-monospace, …` — Used for Stat source lines and RoleCard eyebrow labels. Encodes "reference" or "label" semantics.
+- `--fs-tagline: clamp(2.25rem, 1.5rem + 3.5vw, 4.25rem)` (36-68px) — The h1 display scale. Used exactly once per page for the Hero title.
+- `--fs-body: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem)` (17-19px) — Primary reading size.
+- `--fs-meta: 0.875rem` (14px) — Secondary text: captions, nav labels, badge text, hiredBy lines.
+- `--fs-micro: 0.75rem` (12px) — Uppercase labels only. Always paired with letter-spacing: 0.04em and text-transform: uppercase.
+- `--fs-stat: clamp(2.75rem, 2rem + 3vw, 4.5rem)` (44-72px) — Stat numeral at size="md".
+- `--fs-stat-large: clamp(3.5rem, 2.25rem + 5vw, 6rem)` (56-96px) — Stat numeral at size="lg". One per section at most.
+- `--tracking-stat: -0.015em` — Negative letter-spacing for display numerals in Stat only.
+
+### Spacing (4px base grid)
+
+- `--space-1`: 0.25rem (4px) — Tight: icon-to-label gap
+- `--space-2`: 0.5rem (8px) — Inline gap: eyebrow-to-title
+- `--space-3`: 0.75rem (12px) — Badge dot-to-text, Stat column gap
+- `--space-4`: 1rem (16px) — Body paragraph margin, card internal rhythm
+- `--space-6`: 1.5rem (24px) — Hero status-to-title, nav gap, card padding tier
+- `--space-8`: 2rem (32px) — Hero title-to-lede, Principle padding
+- `--space-12`: 3rem (48px) — Principle desktop padding, main content top
+- `--space-16`: 4rem (64px) — Large section gaps
+- `--space-24`: 6rem (96px) — Main content bottom padding
+- `--space-32`: 8rem (128px) — Maximum editorial breathing room
+
+Gaps between tokens (--space-5, --space-7, etc.) do not exist. NEVER use raw pixel values.
+
+### Layout
+
+- `--page-pad: clamp(1.5rem, 2vw + 1rem, 3rem)` — Horizontal padding for SiteShell header/footer. The only token that governs the outer page edge.
+- `--content-max: 64rem` (1024px) — Maximum width of the main content column. NEVER exceed in the main column layout.
+- `--hero-max: 38rem` (608px) — Maximum width of the Hero text column. Applies at all widths. NEVER override with a wider value.
+
+### Motion
+
+- `--easing: cubic-bezier(0.16, 1, 0.3, 1)` — Expo-out for entrance animations.
+- `--easing-link: cubic-bezier(0.2, 0, 0, 1)` — Link underline grow animation.
+- `--dur-fast: 180ms` — Micro-interactions.
+- `--dur-mid: 240ms` — Standard transition.
+- `--dur-slow: 600ms` — Entrance animations.
+
+All motion is gated by `prefers-reduced-motion: reduce` via a `:root !important` block. This block is the ONLY permitted use of `!important` in the codebase.
+
+### Radii and rules
+
+- `--radius-1: 2px` — Focus rings only.
+- `--radius-2: 4px` — Button corners and the icon well in RoleCard.
+- `--radius-3: 8px` — RoleCard container.
+- `--hairline-w: 1px` — Universal border width. NEVER use 2px or more for decorative borders.
+
+---
+
+## Component recommended usages
+
+### Wordmark
+- Min height: 40px. SiteShell default is height={56}.
+- Aspect ratio locked at ~4.08:1 (viewBox 0 0 1184 290). Set only `height`; width is auto.
+- Do NOT render below height={40}. Do NOT add a second Wordmark inside SiteShell's children. Do NOT use as a watermark. Do NOT set label="" (it is the a11y name).
+- Path geometry changes require Arian's approval (ADR-0011).
+
+### StatusBadge
+- Maximum 1 instance per page. Encodes consultant/service availability — not system status.
+- status="available" triggers pulse animation automatically. Do NOT add additional CSS animation.
+- prefers-reduced-motion disables the pulse at the CSS level — do NOT force-animate via JS or inline styles.
+- Children: single short clause, 10 words or fewer.
+
+### Button
+- Maximum one variant="primary" per visual section.
+- Labels always sentence-case, never ALL CAPS.
+- Min heights: size="sm" 32px, size="md" 44px, size="lg" 52px.
+- Use asChild with an <a> element for link-styled buttons. Do NOT nest a <button> inside Button with asChild.
+
+### Stat
+- Requires a caption — numeral alone is not self-explanatory.
+- value must be a numeral or numeral+unit string. source should be citation only.
+- Maximum 4 Stats per section. Maximum 1 size="lg" per section.
+
+### Hero
+- One per page. Do NOT nest Hero inside another Hero.
+- status slot: StatusBadge or equivalent only.
+- lede: 1-3 sentences at most.
+- align="center": standalone landing contexts only.
+
+### RoleCard
+- Eyebrow format: "Role 01", "Role 02" — Title Case "Role", zero-padded two-digit numeral.
+- hiredBy footer: names separated by " · " (middle dot with spaces).
+- Min 2 cards per use; max 6 per grid.
+
+### Principle
+- Numeral convention: lowercase Roman numerals with trailing period ("i.", "ii.", "iii.").
+- Numeral is aria-hidden. Min 2 Principles per use.
+
+### FailureMode
+- index is typed number, auto-formats as zero-padded ("01"). Do NOT pass as string.
+- Index span is aria-hidden. Titles should be declarative noun phrases.
+
+### SiteShell
+- Do NOT nest SiteShell inside another SiteShell. It is min-height: 100dvh.
+- Emits plain <a href> tags — framework-router consumers intercept at app level.
+- navLabel (default: "Primary") is the aria-label for the nav element.
+
+---
+
+## Anti-patterns
+
+- **Do not override Wordmark colors via style= or CSS.** Set color on a parent instead.
+- **Do not use --accent as a surface fill or body text color.** It is a signal color for interactivity and focus only.
+- **Do not use --fg as a decorative background fill.** No dark-mode scheme is defined.
+- **Do not hardcode hex values, raw pixel sizes, or magic numbers.** Every CSS value resolves to a var(--token) (ADR-0002).
+- **Do not render Wordmark below height={40}.** Isotype detail collapses into illegibility.
+- **Do not change the Wordmark aspect ratio.** Use only height; width is auto.
+- **Do not use the stacked lockup as the default.** The horizontal lockup is canonical; stacked is for square-format surfaces only.
+- **Do not nest Hero inside another Hero.** Invalid ARIA structure, duplicate h1, compounded max-width.
+- **Do not use :global selectors in .module.css files.** ADR-0002 prohibits this.
+- **Do not force-animate StatusBadge under prefers-reduced-motion.** The !important block in tokens.css handles it.
+- **Do not import from sub-paths in tests.** Import from the component file directly.
+- **Do not import from dist/ in source files.** Import from src/.
+- **Do not make prop removals or renames without a major version bump.**
+- **Do not ship a component without both a *.test.tsx and *.stories.tsx.**
+
+---
+
+## Brand voice
+
+Precise, direct, technically confident. Never hedges, inflates, or reassures. No startup boilerplate ("unlock," "leverage," "empower," "transform").
+
+- Eyebrows: "Role 01", "Role 02" (structural labels, not prose)
+- StatusBadge: "Taking conversations for Q3." / "Not taking new work at this time." (availability facts, no exclamation marks)
+- Button labels: sentence-case, max 4 words, specific verbs. "Get in touch", "Learn more", not "Click here" or "LET'S CONNECT!"
+- Error states (consumer responsibility): declarative, specific, not apologetic. "Email address is required." not "Oops! Something went wrong."
+
+---
+
+## Decision provenance
+
+ADR-0001: Atomic design taxonomy (atoms/molecules/organisms). No fourth layer. Subpath exports are semver-governed.
+ADR-0002: CSS Modules; all values via tokens. No hex, raw px, or magic numbers. tokens.css owned by poukai-design.
+ADR-0003: Changesets for semver. Every PR needs a changeset. Prop removals = major. Token additions = minor.
+ADR-0004: Playwright CT + axe-core. Zero a11y violations. Every component needs *.test.tsx.
+ADR-0005: Ladle for showcase. Every component needs *.stories.tsx.
+ADR-0006: Scope @poukai-inc/ui (GitHub Packages).
+ADR-0007: vite-plugin-lib-inject-css. cssCodeSplit: true required.
+ADR-0008: SiteShell Wordmark height=56. Brand floor; do not pass height < 40.
+ADR-0009: Horizontal lockup is canonical. Stacked for square-format only.
+ADR-0010: Proposal-loop architecture. proposal:approved label is a human gate.
+ADR-0011: Wordmark gap 120 SVG units, wordtype 1.8x, isotype 1.25x. ViewBox 0 0 1184 290.
