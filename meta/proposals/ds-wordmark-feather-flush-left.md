@@ -2,11 +2,24 @@
 title: "Reposition Wordmark feather flush-left of POUKAI lettering (not inline as 'O')"
 target_repo: poukai-inc/poukai-ui
 suggested_resolution: patch
-status: issue-opened
+status: resolved
 ds_issue: https://github.com/poukai-inc/poukai-ui/issues/21
+ds_pr: https://github.com/poukai-inc/poukai-ui/pull/22
 target_version: 0.3.1
 created: 2026-05-14
-resolved:
+resolved: 2026-05-14
+notes_on_resolution: |
+  Shipped via DS PR #22 → 0.3.1. Static geometry analysis on
+  dist/index.html after consumer bump PR #4 merged confirms the fix:
+    - Feather isotype paths cluster at viewBox x=140-200 (left third)
+    - POUKAI letter groups land at x=450-660 via per-letter matrix
+      tx values (467, 570, 655, ...) — flush right of the feather
+      with a comfortable gap.
+  Composition reads as `[feather]  POUKAI` rather than the prior
+  inline `P [feather] U K A I` of 0.3.0. All six POUKAI letterforms
+  intact. End-to-end auto-loop succeeded: issue #21 → PR #22 →
+  changesets PR #23 → publish → repository_dispatch → consumer
+  ds-bump.yml → PR #4 → merge → Vercel deploy.
 ---
 
 # Wordmark composition fix: feather flush-left, full POUKAI word intact
