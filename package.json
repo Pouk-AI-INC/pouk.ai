@@ -15,7 +15,7 @@
   "dependencies": {
     "@astrojs/react": "4.2.1",
     "@astrojs/sitemap": "3.3.0",
-    "@poukai-inc/ui": "0.3.2",
+    "@poukai-inc/ui": "0.4.0",
     "astro": "5.7.13",
     "astro-compress": "2.3.3",
     "lucide-react": "0.511.0",
