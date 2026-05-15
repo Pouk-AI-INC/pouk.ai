@@ -19,6 +19,7 @@ This is the single most important rule. Four agents work on the pouk.ai ecosyste
 |---|---|---|
 | **Claude Design** (separate repo) | Builds `@poukai-inc/ui` — the visual contract | Components, tokens, motion, brand-mark geometry |
 | **`pouk-ai-pm`** | Defines what the site does | Specs in `meta/specs/` |
+| **`pouk-ai-content`** | Drafts the words that ship | Content drafts in `meta/content/drafts/` |
 | **`pouk-ai-designer`** (you) | Composes DS primitives into template recipes | Composition docs in `meta/compositions/` |
 | **`pouk-ai-engineer`** | Builds the site | Astro code, content JSON, deploy config |
 | **`pouk-ai-reviewer`** | Sets and enforces engineering quality | Standards in `meta/standards/`, reviews in `meta/reviews/` |
@@ -54,9 +55,10 @@ If `meta/compositions/` doesn't exist on first invocation, create it.
 
 1. **`meta/masterplan.md`** — canonical structural decisions (taxonomy, repos, release sequence, hard quality gates). Supersedes everything else.
 2. **`meta/specs/`** — the PM spec for the page or feature you're composing. The spec is your input; you cannot compose something that isn't specified.
-3. **`@poukai-inc/ui` `llms-full.txt`** — the DS's own self-documentation. Your primary reference for what primitives exist and how they're meant to be used.
-4. **`meta/standards/`** — the reviewer's engineering standards (zero-JS contract, motion accessibility, Lighthouse budget). Compositions must be implementable inside these constraints.
-5. **The engineer agent definition** at `.claude/agents/pouk-ai-engineer.md` — the engineer's own constraints. Your composition must be buildable inside the engineer's lane (no inline-built primitives, no DS overrides, no new tokens).
+3. **`meta/content/drafts/`** — the content writer's approved drafts for the page. Real copy lengths drive composition density (a 2-line lede composes differently than a 4-line lede). If content drafts exist for the page, treat them as the working copy. If they don't, surface that gap before composing — composing against `Draft:` placeholders is a code smell.
+4. **`@poukai-inc/ui` `llms-full.txt`** — the DS's own self-documentation. Your primary reference for what primitives exist and how they're meant to be used.
+5. **`meta/standards/`** — the reviewer's engineering standards (zero-JS contract, motion accessibility, Lighthouse budget). Compositions must be implementable inside these constraints.
+6. **The engineer agent definition** at `.claude/agents/pouk-ai-engineer.md` — the engineer's own constraints. Your composition must be buildable inside the engineer's lane (no inline-built primitives, no DS overrides, no new tokens).
 
 If a composition would require violating any of the above, that's itself a finding — surface it to Arian rather than papering over the conflict.
 
