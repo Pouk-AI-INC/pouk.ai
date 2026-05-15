@@ -12,13 +12,18 @@ All tokens live in `src/tokens/tokens.css` on `:root`. Owned exclusively by `pou
 
 ### Color
 
-- `--bg: #ffffff` — Page background. NEVER used as a foreground color or border. The only surfaces that should be `--bg` are the literal page and elements that need to feel “on the page” rather than elevated above it.
-- `--surface: #f5f5f7` — Subtle elevation (one step above `--bg`). Used for code blocks, quote backgrounds, card fills (RoleCard). NEVER use as body text. NEVER use as a section divider. `--bg` is the canvas; `--surface` is a card on that canvas.
+- `--bg: #fbfbfd` — Page background (apple.com canvas). NEVER pure `#FFFFFF`; the off-white value gives elevation headroom above the page and allows clean dark-mode inversion. The only surfaces that should be `--bg` are the literal page canvas and elements that need to feel "on the page" (not elevated above it).
+- `--bg-elevated: #ffffff` — Front-most elevation layer. Reserved exclusively for popovers, sheets, modals, and dialogs. This is the ONLY surface where pure `#FFFFFF` is permitted — it reads as "elevated above the page" precisely because the page is `#FBFBFD`. NEVER use `--bg-elevated` for page background or content sections.
+- `--surface: #f5f5f7` — Recessed elevation (one step below `--bg`). Used for code blocks, quote backgrounds, card fills (RoleCard). NEVER use as body text. NEVER use as a section divider. `--surface` recedes below the page canvas; `--bg-elevated` rises above it.
 - `--fg: #1d1d1f` — Primary text, wordmark fill, sigil stroke, and the `primary` button background (inverts: `--fg` fill, `--bg` text). The only color allowed for body paragraph text. NEVER use decoratively as a background wash.
 - `--fg-muted: #6e6e73` — Secondary text: captions, footer copy, eyebrow labels, lede paragraphs, hiredBy lines, Stat provenance. NEVER use for primary calls to action. NEVER use as a disabled-state substitute.
 - `--hairline: #d2d2d7` — Dividers, 1px rules, borders. Always applied as a border/border-top/border-bottom, NEVER as a background. Never render thicker than `--hairline-w: 1px`.
 - `--accent: #0071e3` — The brand’s single accent. Roles: status dot fill, link underline-on-hover, focus rings. NEVER use as a surface fill, body text color, or button background. It is a signal color: interactivity and focus only.
 - `--accent-glow: rgba(0, 113, 227, 0.18)` — Transparent halo for the available status dot and `::selection`. NEVER use as a container fill or hover state. Never stack it.
+
+**Elevation rhythm.** Three steps, low to high: `--surface (#F5F5F7) < --bg (#FBFBFD) < --bg-elevated (#FFFFFF)`. Use `--surface` for recessed inline elements (code blocks, quote blocks, card fills). Use `--bg` for the page canvas and page-level content. Use `--bg-elevated` for overlays that must read as front-most. Never skip steps (e.g. using `--surface` as a popover background, or `--bg-elevated` as the page).
+
+**Never pure edges.** `--fg` is never `#000000`; `--bg` is never pure `#FFFFFF`. Both ends of the neutral ramp pull in slightly — this gives elevation headroom on the page and ensures the palette inverts cleanly to dark mode without losing its restraint. Treat any spec or hardcoded value that implies a pure edge as a brand-level escalation.
 
 ### Typography
 
@@ -140,6 +145,9 @@ All motion is gated by `prefers-reduced-motion: reduce` via a `:root !important`
 - **Do not import from dist/ in source files.** Import from src/.
 - **Do not make prop removals or renames without a major version bump.**
 - **Do not ship a component without both a *.test.tsx and *.stories.tsx.**
+- **Do not use `--bg-elevated` as the page background.** It is for overlays only. The page is always `--bg`.
+- **Do not hardcode `#FFFFFF` for page background or content sections.** `#FFFFFF` is reserved for `--bg-elevated`. Use `--bg` (`#FBFBFD`) for the page.
+- **Do not collapse the elevation rhythm.** `--surface`, `--bg`, and `--bg-elevated` are three distinct steps. Skipping or reversing them (e.g. using `--bg-elevated` where `--bg` belongs) is a brand-level error.
 
 ---
 
