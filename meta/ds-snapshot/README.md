@@ -6,7 +6,7 @@ Per-bump cache of `@poukai-inc/ui` runtime context files. **Not authored by hand
 
 | File | Source | Refreshed by |
 |---|---|---|
-| `llms-full.txt` | `node_modules/@poukai-inc/ui/dist/llms-full.txt` (once DS ships it per proposal `ds-llms-context-files.md`) | `ds-bump.yml` |
+| `llms.txt` | `node_modules/@poukai-inc/ui/dist/llms.txt` (once DS ships it per proposal `ds-llms-context-files.md`) | `ds-bump.yml` |
 
 ## Why this exists
 
@@ -18,4 +18,4 @@ The bump workflow needs a comparison target to compute a diff against. Committin
 
 ## Don't edit by hand
 
-If you want to change a rule, file a proposal against the DS repo (`meta/proposals/ds-*.md`). The DS updates its source `llms-full.txt`, publishes a new version, and the snapshot refreshes on bump.
+If you want to change a rule, file a proposal against the DS repo (`meta/proposals/ds-*.md`). The DS updates its source `llms.txt`, publishes a new version, and the snapshot refreshes on bump.

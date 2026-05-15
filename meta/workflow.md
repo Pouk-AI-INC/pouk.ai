@@ -151,16 +151,16 @@ The first DS issue we open under this flow can be the bootstrap request itself.
 
 ---
 
-## The DS's `llms-full.txt` — the brand's living constitution
+## The DS's `llms.txt` — the brand's living constitution
 
-Once `@poukai-inc/ui@0.4.0` ships (per `meta/proposals/ds-llms-context-files.md`), the package will include `dist/llms-full.txt`. Same file, two audiences:
+Once `@poukai-inc/ui@0.4.0` ships (per `meta/proposals/ds-llms-context-files.md`), the package will include `dist/llms.txt`. Same file, two audiences:
 
-- **Producer side** (DS Claude Code) reads it when implementing a change to know what invariants must hold, and **updates it** when the change introduces a new invariant. DS-side CI will fail PRs that touch components/tokens at minor-or-major level without an `llms-full.txt` update.
+- **Producer side** (DS Claude Code) reads it when implementing a change to know what invariants must hold, and **updates it** when the change introduces a new invariant. DS-side CI will fail PRs that touch components/tokens at minor-or-major level without an `llms.txt` update.
 - **Consumer side** (this repo's Claude Code) reads it before any DS-touching code change. Per `.claude/agents/pouk-ai-engineer.md` section 2A.
 
-The consumer's `.github/workflows/ds-bump.yml` reads the new file on every bump, diffs against the snapshot at `meta/ds-snapshot/llms-full.txt`, and surfaces the diff in the bump PR body. The snapshot refreshes on merge.
+The consumer's `.github/workflows/ds-bump.yml` reads the new file on every bump, diffs against the snapshot at `meta/ds-snapshot/llms.txt`, and surfaces the diff in the bump PR body. The snapshot refreshes on merge.
 
-If a consumer change would violate a rule in `llms-full.txt`, the right move is to **file a proposal asking the rule to change** — not to override it locally. Same proposal flow as any other DS request.
+If a consumer change would violate a rule in `llms.txt`, the right move is to **file a proposal asking the rule to change** — not to override it locally. Same proposal flow as any other DS request.
 
 ## Bootstrapping the first cycle
 

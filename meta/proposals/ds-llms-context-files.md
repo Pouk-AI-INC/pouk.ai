@@ -2,11 +2,29 @@
 title: "Ship llms.txt + llms-full.txt and enforce updates via changesets"
 target_repo: poukai-inc/poukai-ui
 suggested_resolution: minor
-status: issue-opened
+status: resolved
 ds_issue: https://github.com/poukai-inc/poukai-ui/issues/29
 target_version: 0.4.0
 created: 2026-05-15
-resolved:
+resolved: 2026-05-15
+notes_on_resolution: |
+  Shipped in @poukai-inc/ui@0.4.0. DS chose a single-file approach
+  (just `llms.txt`, 30KB) rather than the split `llms.txt` + `llms-full.txt`
+  the proposal asked for. Cleaner outcome — the file IS the content, no
+  redundant index layer. Structure went further than I proposed:
+  components grouped by atomic layer, design tokens documented,
+  brand assets listed, AND a series of architecture decision records
+  (Context / Decision / Consequences) for each major DS choice. The
+  ADR-per-decision pattern is stronger than the flat anti-patterns
+  list I'd sketched. Consumer-side adapted:
+    - All llms-full.txt references renamed to llms.txt across
+      .github/workflows/ds-bump.yml, .claude/agents/pouk-ai-engineer.md,
+      meta/workflow.md, meta/ds-snapshot/README.md.
+    - First snapshot captured at meta/ds-snapshot/llms.txt.
+    - Future bumps will diff against it via the bump-PR workflow.
+  CI gate (ask 3 — DS PRs touching components/tokens must update
+  llms.txt) was implemented by DS as part of the same release; verify
+  on the next DS PR that changes a component.
 ---
 
 # Ship llms-* context files and enforce updates via changesets

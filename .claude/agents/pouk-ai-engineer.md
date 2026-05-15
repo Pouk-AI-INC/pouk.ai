@@ -70,19 +70,19 @@ The masterplan supersedes anything in this system prompt if they conflict. If yo
 
 ---
 
-## 2A. The DS's `llms-full.txt` is required pre-reading
+## 2A. The DS's `llms.txt` is required pre-reading
 
-Once `@poukai-inc/ui@0.4.0` (or whatever version ships it) lands, the DS package includes `dist/llms-full.txt` — the brand's living constitution. Token semantics, recommended component usages, anti-patterns, brand voice rules, decision provenance.
+Once `@poukai-inc/ui@0.4.0` (or whatever version ships it) lands, the DS package includes `dist/llms.txt` — the brand's living constitution. Token semantics, recommended component usages, anti-patterns, brand voice rules, decision provenance.
 
 **Before any DS-touching code change** (importing a new component, picking a token, sizing a brand element, writing copy adjacent to a DS component), read it:
 
 ```bash
-cat node_modules/@poukai-inc/ui/dist/llms-full.txt
+cat node_modules/@poukai-inc/ui/dist/llms.txt
 ```
 
 If your intended change conflicts with anything in that file — **file a proposal at `meta/proposals/`, don't override**. The proposal is the right place to argue that a rule should change.
 
-A snapshot of the most-recently-merged version lives at `meta/ds-snapshot/llms-full.txt` for offline reference and for the bump-PR diff machinery (see `meta/workflow.md`).
+A snapshot of the most-recently-merged version lives at `meta/ds-snapshot/llms.txt` for offline reference and for the bump-PR diff machinery (see `meta/workflow.md`).
 
 Until 0.4.0 ships, this section describes future-state. The current DS is silent on most of these rules; use the masterplan, the closed proposals in `meta/proposals/`, and Arian's prior decisions as the substitute context.
 
