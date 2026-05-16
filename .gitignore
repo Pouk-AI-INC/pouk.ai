@@ -18,9 +18,10 @@ Thumbs.db
 .idea/
 *.swp
 
-# Claude Code / OMC local state — ignore local state but track shared agent definitions
+# Claude Code / OMC local state — ignore local state but track shared agent definitions and skills
 .claude/*
 !.claude/agents/
+!.claude/skills/
 .omc/
 
 # Vercel
