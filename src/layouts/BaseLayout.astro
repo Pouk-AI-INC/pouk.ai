@@ -15,6 +15,18 @@
 import "@poukai-inc/ui/tokens.css";
 import "../styles/site.css";
 import { ShellWrapper } from "../components/ShellWrapper";
+// Vercel Web Analytics — basic-tier signal. SDK is a no-op when not running
+// on Vercel (it inspects deployment env at runtime), so this is safe in dev
+// and on any non-Vercel preview. Enable collection via the Vercel dashboard
+// (Project → Analytics → Enable). Cookieless, no opt-in banner required.
+import Analytics from "@vercel/analytics/astro";
+
+// Vite resolves these to the same hashed /_astro/*.woff2 URLs that the
+// @poukai-inc/ui tokens.css @font-face rules reference at runtime, so the
+// preload `<link>` and the CSS request hit one file (no duplicate fetch,
+// no font-swap shift). See `meta/decisions/D-XX` (font-preload deduplication).
+import geistVariableUrl from "@poukai-inc/ui/fonts/Geist-Variable.woff2?url";
+import instrumentSerifRegularUrl from "@poukai-inc/ui/fonts/InstrumentSerif-Regular.woff2?url";
 
 export interface Props {
   /** <title> for this page. */
@@ -125,29 +137,25 @@ const bugsinkScript = hasBugsinkConfig
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!--
-      Font preload — self-hosted via public/fonts/ (copies of DS source fonts).
-      Two primary faces per R-018: Geist Regular (variable) + Instrument Serif Regular.
+      Font preload — fonts shipped by @poukai-inc/ui and bundled to /_astro/*.woff2.
+      Two critical fold faces per R-018: Geist Regular (variable) + Instrument Serif Regular.
+      Italic Instrument Serif is non-critical (only used on /principles bookend) and lazy-loads.
       crossorigin is required for font preloads even on same-origin (browser spec).
+      Imports use Astro `?url` so the preload `href` matches the @font-face URL CSS requests,
+      eliminating the duplicate font fetch + font-swap layout shift seen in the 2026-05-17 LH audit.
     -->
     <link
       rel="preload"
       as="font"
       type="font/woff2"
-      href="/fonts/Geist-Variable.woff2"
+      href={geistVariableUrl}
       crossorigin=""
     />
     <link
       rel="preload"
       as="font"
       type="font/woff2"
-      href="/fonts/InstrumentSerif-Regular.woff2"
-      crossorigin=""
-    />
-    <link
-      rel="preload"
-      as="font"
-      type="font/woff2"
-      href="/fonts/InstrumentSerif-Italic.woff2"
+      href={instrumentSerifRegularUrl}
       crossorigin=""
     />
 
@@ -183,5 +191,6 @@ const bugsinkScript = hasBugsinkConfig
     >
       <slot />
     </ShellWrapper>
+    <Analytics />
   </body>
 </html>

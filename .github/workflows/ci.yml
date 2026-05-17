@@ -318,3 +318,76 @@ jobs:
           name: coverage-reports
           path: coverage/
           retention-days: 30
+
+  argos:
+    name: argos — visual regression
+    runs-on: ubuntu-latest
+    # Non-blocking until the ARGOS_TOKEN secret + Argos project exist.
+    # The job still runs (so we discover wiring issues early) but a failed
+    # upload doesn't gate PR merges. Flip to required-check in branch
+    # protection once the Argos project has produced its first baseline
+    # against `main`. See meta/backlog.md — "Ongoing visual regression".
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        # Argos uses git history to map a screenshot to the commit + base
+        # branch. `fetch-depth: 0` gives it the full graph; cheaper than
+        # asking Argos to clone separately.
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          # Bump the suffix when Playwright version changes to invalidate
+          # the cache; the key already includes the version via the lockfile
+          # hash so most bumps invalidate automatically.
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        # pnpm 10 blocks postinstall scripts (R-048 / R-049 hardening), so
+        # the playwright package's browser-download postinstall doesn't run.
+        # We invoke it explicitly here and scope `--allow-build` to this
+        # command only. `--with-deps` pulls in the system libs Chromium
+        # needs on Ubuntu runners.
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm dlx --allow-build=playwright playwright@1.60.0 install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run visual tests + upload to Argos
+        env:
+          # Required for the upload. Set in repo settings → Secrets and
+          # variables → Actions. Until set, the reporter logs a warning and
+          # the job exits non-zero — `continue-on-error` above keeps that
+          # from blocking PRs.
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+        run: pnpm test:visual
+
+      - name: Upload Playwright artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+          if-no-files-found: ignore

@@ -37,3 +37,8 @@ Thumbs.db
 
 # Local-only assets (brand source files live outside the deploy repo)
 brand/
+
+# Playwright / Argos visual-regression artefacts
+test-results/
+playwright-report/
+.argos-screenshots/

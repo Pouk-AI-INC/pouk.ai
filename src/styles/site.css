@@ -14,10 +14,28 @@
  * prefers-reduced-motion, per the a11y exception documented there).
  */
 
+/* ---------- Global reset ----------
+   `box-sizing: border-box` makes `width: 100% + padding` stay within the
+   container instead of overflowing it. Several DS layout primitives
+   (`.poukai_C3RmFN` SiteShell main, etc.) combine `width: 100%` with
+   `padding-inline: var(--page-pad)` and would otherwise force ~40-90px
+   of horizontal scroll at every viewport — discovered in the 2026-05-17
+   320px audit. Reset is universal so it covers DS components without
+   reaching into their hashed class names. The DS may add its own reset
+   later, at which point this rule becomes a harmless redundancy. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /* ---------- Page wrapper ---------- */
 
 .site-page {
-  width: 100%;
+  /* `width: 100% + padding-inline` would overflow under default content-box,
+     producing the +64px scroll discovered in the 2026-05-17 320px audit.
+     Block default already fills the parent inline axis, so `max-width` alone
+     bounds the content while padding sits inside the available width. */
   max-width: var(--content-max);
   margin-inline: auto;
   padding-inline: var(--page-pad);
