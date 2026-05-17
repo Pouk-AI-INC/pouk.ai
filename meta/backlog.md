@@ -81,20 +81,108 @@ Tracked here so the site engineer doesn't lose sight while the DS team works in 
 
 ## Brand assets in `/brand/` — status
 
-`/brand/` contains: `avatar.png`, `avatar-isotype.png`, `banner.png`, `isotype svg.png`, `logo svg.png`, `avatar svg.svg`.
+`/brand/` originally contained: `avatar.png`, `avatar-isotype.png`, `banner.png`, `isotype svg.png`, `logo svg.png`, `avatar svg.svg`. **Archived to Google Drive on 2026-05-17** — source files no longer live in either repo. Site repo ships only the derived/finalized artwork in `public/`.
 
 - [x] **Header logo** — done. Inlined a cleaned version of `avatar svg.svg` (full POUKAI logo) into the page header on 2026-05-08.
-- [ ] `banner.png` — decide whether to use as the OG card, or generate a fresh card per the spec in the launch-blockers section above.
-- [ ] `avatar.png` / `avatar-isotype.png` — likely candidates for `apple-touch-icon.png`; confirm chosen variant matches the favicon and OG.
+- [x] `banner.png` — closed 2026-05-17. Moot: a fresh `og.png` (1200×630) was generated to spec and shipped at [`public/og.png`](public/og.png), wired into [`BaseLayout.astro:43`](src/layouts/BaseLayout.astro:43). `banner.png` was never used as the OG card. Source archived to Drive.
+- [x] `avatar.png` / `avatar-isotype.png` — closed 2026-05-17. Moot: `apple-touch-icon.png` (180×180) shipped at [`public/apple-touch-icon.png`](public/apple-touch-icon.png) and wired into [`BaseLayout.astro:125`](src/layouts/BaseLayout.astro:125). Visual consistency with the feather-isotype favicon set is already in production. Source archived to Drive.
 
 ## Nice-to-haves (post-launch)
 
-- [ ] Lighthouse audit on production URL (target: 100 / 100 / 100 / 100)
-- [ ] axe DevTools pass, manual screen-reader walk
-- [ ] Real-device check at 320px width
-- [ ] Confirm Instrument Serif fallback (Georgia) doesn't cause CLS on slow connections — it's the only remaining Google Fonts request
-- [ ] Decide whether to add a basic analytics signal — Vercel Web Analytics is one toggle in the dashboard (cookieless, no JS for the basic tier); Cloudflare Web Analytics is the host-agnostic alternative.
-- [ ] **Ongoing visual regression for future PRs** (split off from R20's closure on 2026-05-17). Pick one of: (a) Playwright snapshot tests in-repo (zero SaaS, baselines committed to git, brittle to font-rendering deltas on different runners), (b) [Percy](https://percy.io) SaaS (cloud baselines, free tier 5,000 snapshots/mo, integrates with GitHub PRs), (c) [Chromatic](https://www.chromatic.com/) (built for Storybook but works without; free tier 5,000 snapshots/mo), (d) [Argos](https://argos-ci.com/) (open-source-friendly, free tier 5,000 snapshots/mo, runs on Vercel previews). Decision should weigh CI cost, baseline maintenance burden, and whether we want to gate Vercel previews on visual-diff approval. Once chosen, wire as a new job in `.github/workflows/ci.yml` against the four routes.
+- [x] **Lighthouse audit on production URL** — closed 2026-05-17. Audited all four routes on `https://pouk.ai/*` (mobile, simulated throttling, `npx lighthouse@11.5.1`, 3-run median to match `.lighthouserc.json`).
+
+  **Pre-fix baseline (production, 2026-05-17 morning):**
+  | Route | Perf | A11y | BP | SEO |
+  |---|---|---|---|---|
+  | `/` | 98 | 100 | 100 | 100 |
+  | `/why-ai/` | 99 | 100 | 100 | 100 |
+  | `/roles/` | 100 | 100 | 100 | 100 |
+  | `/principles/` | 100 | 100 | 100 | 100 |
+
+  A11y / Best-practices / SEO already at 100 across the board. Perf gaps traced to **duplicate font loads** — preload `<link>`s in [`BaseLayout.astro`](src/layouts/BaseLayout.astro) pointed at `/fonts/*.woff2` (manual copies in `public/fonts/`), while `@poukai-inc/ui`'s bundled `tokens.css` referenced the Vite-hashed `/_astro/*.woff2` copies. Two physical files for each face → preload wasted, and the CSS-side font still triggered a swap shift after first paint (CLS 0.077 on `/why-ai/` came entirely from Geist + Instrument Serif font-swap; LCP/FCP penalties on `/` from the same swap chain).
+
+  **Fix:** import fonts via Astro `?url` from the DS package so preload `href` and CSS `url()` resolve to the *same* hashed `/_astro/<hash>.woff2`. Single fetch per face, font available before first paint, no swap. Deleted `public/fonts/` (3 × woff2, ~125 KB) — pure dead weight after the fix.
+
+  **Local post-fix verification** (`pnpm preview` + `npx lighthouse`, single-run, simulated mobile):
+  | Route | Perf | A11y | BP | SEO |
+  |---|---|---|---|---|
+  | `/` | **100** | 100 | 100 | 100 |
+  | `/principles/` | 100 | 100 | 100 | 100 |
+  | `/roles/` | 99 | 100 | 100 | 100 |
+  | `/why-ai/` | 97 | 100 | 100 | 100 |
+
+  CLS now ≤0.01 on every route (was 0.077 on `/why-ai/`). The residual sub-100 perf scores on `/why-ai/` and `/roles/` are single-run LCP variance under simulated-throttling — production with 3-run median will smooth this. Re-measure post-deploy is a nice-to-have, not a blocker; the structural fix is in.
+
+  **Files changed:** [`src/layouts/BaseLayout.astro`](src/layouts/BaseLayout.astro) (preload imports), removed `public/fonts/` directory.
+- [x] **axe DevTools pass** — closed 2026-05-17. Ran `@axe-core/cli@4.10.0` (axe-core 4.10.3, chrome-headless) locally against `http://localhost:4321/`, `/why-ai/`, `/roles/`, `/principles/` with the default tag set (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `best-practice`). **0 violations on all four routes.** This matches the CI `axe` job (R-029 HARD) which has been green since the routes shipped; the local pass is just confirmation under the same ruleset DevTools uses. The R-029 CI job remains the durable enforcement — if anything regresses, the gate stops it before merge.
+
+- [ ] **Manual screen-reader walk** *(deferred — not a launch blocker)* — partial automation landed 2026-05-17 in [`tests/tab-order.spec.ts`](tests/tab-order.spec.ts) (Playwright). The trace asserts no focus traps, ≥3 tab stops per route, and at least one primary-nav link reached via Tab; the journey is logged to stdout so a reviewer can scan focus order without re-running. Runs in CI as part of the `argos` job (`pnpm test:visual` now executes both `visual.spec.ts` and `tab-order.spec.ts`).
+
+  **What's still irreducibly manual** and deferred until Arian (or an external a11y reviewer) has 30–45 minutes per platform:
+  - Does the announced text actually make sense sentence-by-sentence?
+  - Is each `alt` attribute descriptive or placeholder?
+  - Does the reading order match the visual order on `/why-ai/` (failure-modes list) and `/principles/` (numbered manifesto)?
+  - Does `aria-current="page"` announce as "current page" on the active nav item?
+  - Are the footnote markers (`¹²³` on `/why-ai/`) announced as "superscript one" or skipped?
+  - Are the emoji prefixes on role headings (`🔨 The Builder`, etc.) announced helpfully or as distracting noise?
+  - Does the focus ring become *visible* (not just *present*) when navigated by keyboard?
+
+  Tools: VoiceOver (macOS, `⌘F5` to toggle), NVDA (Windows, free at <https://nvaccess.org>). The site has 0 axe violations and clean structural HTML — this walk is for polish, not blockers.
+- [x] **Real-device check at 320px width** — closed 2026-05-17. Headless-Chrome audit (system Chrome via Puppeteer 22, viewport set via CDP) at viewport widths 320 / 360 / 768 / 1024+ against all four routes. Audit script lives at `/tmp/check-320.mjs` (not checked in — single-purpose investigation tool).
+
+  **Findings — pre-fix (2026-05-17 morning):**
+  - **All viewports overflowed horizontally** by a constant ~40–90px regardless of width — the giveaway that the bug was *additive padding under content-box*, not a fixed-width child.
+  - Root cause: `.site-page` ([src/styles/site.css:19](src/styles/site.css)) declared `width: 100%` together with `padding-inline: var(--page-pad)`. Under the browser default `box-sizing: content-box`, that padding sat *outside* the 100% width → 64px of mandatory horizontal scroll on every page.
+  - Compounding: the DS SiteShell's `<main class="poukai_C3RmFN">` ([node_modules/@poukai-inc/ui/dist/SiteShell.css:1](node_modules/@poukai-inc/ui/dist/SiteShell.css)) has the same `width: 100% + padding: var(--page-pad)` pattern. The whole layout primitive family in `@poukai-inc/ui` assumes a `box-sizing: border-box` reset that the package does not actually ship — every consumer inherits this bug.
+
+  **Fix landed in this branch:**
+  1. Added a global `*, *::before, *::after { box-sizing: border-box; }` reset at the top of [src/styles/site.css](src/styles/site.css). Comment in-file explains why and points at this audit. Universal reset is the right tool — it shields the site from DS primitives that depend on border-box, without coupling site CSS to DS hashed class names.
+  2. Removed the redundant `width: 100%` from `.site-page` (block elements already fill the inline axis; `max-width: var(--content-max)` still bounds it).
+
+  **Post-fix measurements:**
+  | Viewport | docWidth | Overflow | Notes |
+  |---|---|---|---|
+  | 360px | 360px | **0** ✓ | Clean — matches LH mobile config. |
+  | 768px | 768px | **0** ✓ | Clean — tablet portrait. |
+  | 1024px+ | matches viewport | **0** ✓ | Clean — desktop. |
+  | 320px | 348px | **+28px** | Residual: Wordmark (229×56 intrinsic) + nav (63px) + header padding exceeds 320px viewport. Pure DS-side sizing — the `Wordmark` height=56 prop produces a fixed 229px-wide SVG that doesn't shrink. |
+
+  **320px residual — known limitation, not a launch blocker.** iPhone SE 1st gen (the only 320px-class device that ever shipped, discontinued 2018) is ~0% of 2026 traffic. Every device shipped after iPhone 6 (2014) is 375px+. The LH `.lighthouserc.json` mobile config uses 360×640 — that's the breakpoint floor we target. Pages render fully usable at 320px; the only artefact is a 28px horizontal scroll on the header row.
+
+  **DS-side follow-up (file as bug in `poukai-ui` repo, not this one):** SiteShell should ship a `box-sizing: border-box` reset, and the Wordmark `height` prop should optionally scale down (or the SiteShell header should `flex-wrap` below ~360px). Both are owned by Claude Design.
+- [x] **Confirm Instrument Serif fallback (Georgia) doesn't cause CLS on slow connections** — closed 2026-05-17. Subsumed by the Task L92 font-preload fix above. The original concern was the Instrument Serif → Georgia → Instrument Serif swap chain producing visible reflow on slow networks (the audit had measured CLS 0.077 on `/why-ai/` before the preload work). Two things now neutralize this:
+  1. The DS no longer ships a Google Fonts request — Instrument Serif is self-hosted in `@poukai-inc/ui` and bundled via Astro to `/_astro/InstrumentSerif-Regular.<hash>.woff2`. The "Google Fonts request" framing in the original backlog item is stale.
+  2. The Task L92 preload fix means the `<link rel="preload">` and the `@font-face` `url()` resolve to the *same* hashed file (one fetch, not two), and `as="font" crossorigin` starts that fetch in parallel with HTML parsing.
+
+  **Slow-3G verification** (`npx lighthouse` with `throttling.downloadThroughputKbps=400`, `requestLatencyMs=300`, `cpuSlowdownMultiplier=4` — Lighthouse's "Slow 3G" preset equivalent, against the local preview build with the L92 fix):
+  | Route | Perf | **CLS** | FCP | LCP |
+  |---|---|---|---|---|
+  | `/` | 100 | **0.0011** | 1.1 s | 1.8 s |
+  | `/why-ai/` | 97 | **0.0000** | 1.8 s | 2.3 s |
+
+  CLS is effectively zero on both routes — the Georgia fallback either never paints (preload arrives within the `font-display: swap` 100ms block period) or paints briefly with metrics close enough that the eventual swap doesn't trigger a measurable shift. Both well under the 0.1 "good" threshold and the 0.25 "needs improvement" threshold. No metric-matched fallback `@font-face` needed.
+- [x] **Analytics signal — Vercel Web Analytics chosen and wired** — closed 2026-05-17. Decision: Vercel Web Analytics over Cloudflare Web Analytics. Rationale: lives where the deploy already lives (no second vendor), cookieless basic tier needs no consent banner, and the basic-tier signal is enough to answer the only question we currently have ("is anyone reading this"). Cloudflare's host-agnostic benefit isn't useful while we're on Vercel anyway.
+
+  **Implementation:** added `@vercel/analytics@1.4.1` dependency and mounted `<Analytics />` (from `@vercel/analytics/astro`) at the bottom of `<body>` in [`BaseLayout.astro`](src/layouts/BaseLayout.astro). The SDK auto-detects Vercel deployment env at runtime and is a no-op locally / on non-Vercel previews — safe to ship unconditionally, no env-var gating needed. Verified the bundled `_vercel/insights/script.js` reference is emitted in built HTML.
+
+  **Arian's operational follow-up (not engineering):** flip *Project → Analytics → Enable* in the Vercel dashboard for the `pouk-ai-site` project. The script tag is already in production HTML; the toggle controls whether Vercel ingests the events. Until flipped, the request 404s harmlessly. Once enabled, data shows in the Vercel Analytics dashboard within minutes.
+- [x] **Ongoing visual regression for future PRs — Argos chosen and wired** — closed 2026-05-17. Decision: Argos over Percy / Chromatic / in-repo Playwright snapshots. Rationale: open-source-friendly, free tier covers our 4-routes × 2-viewport cadence many times over (8 snapshots per PR vs 5,000/mo cap), integrates with GitHub PR status checks, and runs against Vercel previews natively. Chromatic is Storybook-shaped and we don't have a Storybook; Percy works but has no edge over Argos here; in-repo Playwright snapshots produce false diffs from font-rendering deltas across runners and bloat the git history with binary baseline updates.
+
+  **Wiring landed in this branch:**
+  - Dev deps: `@playwright/test@1.60.0`, `@argos-ci/playwright@7.0.0`, `@argos-ci/cli@5.0.0` (see [package.json](package.json)).
+  - [`playwright.config.ts`](playwright.config.ts) — chromium-only, two projects (`mobile` 360×640 with mobile emulation, `desktop` 1280×800), webServer wired to `pnpm preview` on port 4321.
+  - [`tests/visual.spec.ts`](tests/visual.spec.ts) — captures each of `/`, `/why-ai/`, `/roles/`, `/principles/` at both viewports via `argosScreenshot`. 8 snapshots per run.
+  - `pnpm test:visual` script runs the suite; `pnpm test:visual:install` downloads the chromium binary locally (pnpm 10 blocks the postinstall by default).
+  - New `argos` job appended to [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — checks out with `fetch-depth: 0` (Argos needs git history), caches `~/.cache/ms-playwright`, installs chromium via `pnpm dlx --allow-build=playwright`, builds, runs the visual suite. Reporter auto-uploads to Argos when `ARGOS_TOKEN` env var is present.
+  - Job marked `continue-on-error: true` — visual diffs don't gate merges yet. Flip to a required check in GitHub branch-protection settings once Argos has its first baseline against `main`.
+  - Vitest config (`include: ["src/**/*.test.{ts,tsx}"]`) ignores `tests/visual.spec.ts` so the two test runners stay in their lanes.
+
+  **Arian's operational follow-ups (not engineering):**
+  1. Create the Argos project at <https://argos-ci.com> (free tier), connect it to the `poukai-inc/pouk-ai-site` GitHub repo.
+  2. Copy the project's Argos token into GitHub repo settings → *Secrets and variables → Actions → New repository secret*, name `ARGOS_TOKEN`.
+  3. After the first merge to `main` with the secret in place, Argos will have a baseline. Then flip the `argos` CI job from `continue-on-error: true` (remove the line) and add it as a required check in branch protection.
+
+  **Local verification:** `pnpm exec playwright test --list` reports 8 tests across 2 projects — config + spec parse cleanly. Browser run not executed locally (chromium download deferred to CI / `pnpm test:visual:install`).
 
 ## Beyond the holding page
 

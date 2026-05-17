@@ -46,6 +46,8 @@ const ALLOW = new Set([
 const EXCEPTIONS = {
 	"@poukai-inc/ui@UNLICENSED":
 		"First-party proprietary DS package. UNLICENSED here means private/internal, not 'no license' in the OSS sense.",
+	"@vercel/analytics@MPL-2.0":
+		"Vercel Web Analytics client SDK. MPL-2.0 is per-file copyleft and only triggers on modification of MPL source files; we consume the package as-is, no source modification. Same rationale as the lightningcss entries below.",
 	"@img/sharp-libvips-darwin-arm64@LGPL-3.0-or-later":
 		"libvips native binary used by sharp via dynamic linking; LGPL explicitly permits this distribution shape. macOS arm64 only — Linux variants ship a different binary.",
 	"@img/sharp-libvips-darwin-x64@LGPL-3.0-or-later":
