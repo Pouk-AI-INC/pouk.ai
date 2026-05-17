@@ -4,7 +4,7 @@ Things to ship before / around launch. Roughly priority-ordered within sections.
 
 ## Blockers for launch
 
-- [x] **Register `pouk.ai` at Porkbun.** Done 2026-05-13.
+- [x] **Register `pouk.ai`.** Done 2026-05-13 via Vercel (registrar partner: Name.com, Inc.). Registration term covers through 2028-05-13. Originally noted as "Porkbun" in this backlog — that was a mis-recording; the actual purchase went through Vercel, which is why NS records pointed to `ns1.vercel-dns.com`/`ns2.vercel-dns.com` from the start.
 - [x] **Generate `og.png`** (1200×630). Done 2026-05-13. Lives in the DS repo at `poukai-ui/src/brand/og.png`. **Operational follow-up**: per masterplan section 2A, `og.png` belongs in the site repo (it's marketing artwork, not a brand primitive). Either copy into the site repo root before cutover, or have `pouk-ai-engineer` pull it into `public/og.png` during the Astro scaffold round.
 - [x] **Generate `apple-touch-icon.png`** (180×180). Done 2026-05-13. Same location/follow-up as `og.png` — currently at `poukai-ui/src/brand/apple-touch-icon.png`; needs to land at `public/apple-touch-icon.png` in the site repo before cutover.
 - [x] **Update favicon** to the feather isotype. Done 2026-05-13. Favicon variations (`favicon-16x16.png`, `favicon-32x32.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`) generated in `poukai-ui/src/brand/`. **Operational follow-up**: index.html still references the old placeholder altimeter inline-SVG favicon at line 33; the new files need to be wired in (either inline-SVG-from-the-isotype path or `<link rel="icon" href="/favicon-32x32.png">` references) during the Astro scaffold round or as a one-off patch to `index.html` if cutover comes first.
@@ -15,29 +15,39 @@ Things to ship before / around launch. Roughly priority-ordered within sections.
 
 ## DNS + email — **manual (Arian executes)**
 
-These touch external systems (Porkbun dashboard, Vercel dashboard, email host onboarding) that the engineering agents can't reach. Arian's lane.
+These touch external systems (Vercel DNS dashboard, email host onboarding) that the engineering agents can't reach. Arian's lane.
 
-- [ ] **Porkbun DNS records** — Domain Management → DNS Records → add:
-  - `ALIAS` apex (leave host blank) → `cname.vercel-dns.com`, TTL 600
-  - `CNAME www` → `cname.vercel-dns.com`, TTL 600
-- [ ] **Vercel domain binding** — Vercel → Project → Settings → Domains → add `pouk.ai` and `www.pouk.ai`. Wait for TLS provisioning (≈30s–2min once DNS propagates).
-- [ ] **Pick email host for `hello@pouk.ai`** — Fastmail or Google Workspace are the standard picks. Provider determines the next four record values.
-- [ ] **Email DNS records** at Porkbun — values come from the chosen provider:
-  - `MX` (root) → `<provider MX records>`
-  - `TXT` (root) → `v=spf1 include:<provider> -all`
-  - `TXT` `_dmarc` → `v=DMARC1; p=quarantine; rua=mailto:hello@pouk.ai`
-  - `TXT` `<selector>._domainkey` → `<DKIM key>`
-  - `CAA` (root) → `0 issue "letsencrypt.org"`
-  - `CAA` (root) → `0 issue "pki.goog"`
-- [ ] **Verify with `dig` + `curl`**:
-  ```
-  dig +short pouk.ai
-  dig +short www.pouk.ai
-  curl -I https://pouk.ai/
-  ```
-  Expect `200`, `server: Vercel`, and `strict-transport-security` header (from `vercel.json`).
+**Authority correction (2026-05-16):** When the domain was first set up, NS records were pointed at Vercel (`ns1.vercel-dns.com`, `ns2.vercel-dns.com`), not kept at Porkbun. So all DNS edits happen inside the **Vercel dashboard → pouk.ai → DNS**, not Porkbun. The original Porkbun-centric instructions below have been rewritten.
 
-All four of these must be live **before the first prospect email goes out** — otherwise it lands in spam.
+- [x] **Vercel DNS — apex + www** — verified live 2026-05-16. `dig +short pouk.ai` returns Vercel anycast IPs (`216.198.79.1`, `64.29.17.1`); `dig +short www.pouk.ai` likewise. Vercel manages these automatically once the domain is added to a project — no manual ALIAS/CNAME entries were needed because Vercel is also the nameserver. Closed.
+- [x] **Vercel domain binding** — verified live 2026-05-16. `curl -sI https://pouk.ai/` returns `HTTP/2 200`, `server: Vercel`, `strict-transport-security: max-age=63072000; includeSubDomains; preload`, and the full security-header stack from `vercel.json`. `www.pouk.ai` returns `307 → https://pouk.ai/`. TLS is provisioned and HSTS is preload-eligible. Closed.
+- [x] **CAA records** — verified live 2026-05-16. `dig +short CAA pouk.ai` returns three issuers (`letsencrypt.org`, `pki.goog`, `sectigo.com`) — broader than the original backlog ask, which only requested the first two. The wider set is fine; Vercel uses Let's Encrypt by default but the extra issuers don't loosen security (CAA whitelists, not blacklists). Closed.
+- [x] **Pick email host for `hello@pouk.ai`** — **Google Workspace Business Starter ($7/mo)**. Chosen 2026-05-16. Rationale: hyperscaler reputation (gold-tier deliverability for prospect outreach), drag-along Docs/Drive/Calendar/Meet for consultancy work, 99.9% reliability. Closed.
+
+- [x] **Email DNS records** at Vercel — verified live 2026-05-16. All five records in place:
+  - `MX pouk.ai` → `smtp.google.com` priority 1 ✅
+  - `TXT @ (root)` → `v=spf1 include:_spf.google.com -all` ✅
+  - `TXT _dmarc.pouk.ai` → `v=DMARC1; p=none; rua=mailto:hello@pouk.ai; pct=100` ✅ (will ratchet to `p=quarantine` after ~30 days once aligned sends are routine)
+  - `TXT google._domainkey.pouk.ai` → DKIM public key (2048-bit) ✅
+  - `TXT @ google-site-verification=...` → temporary verification record (can delete or leave; harmless) ✅
+
+- [x] **Verify email DNS with `dig`** — verified live 2026-05-16. All records return correct values:
+  ```
+  $ dig +short MX pouk.ai
+  1 smtp.google.com.
+  
+  $ dig +short TXT pouk.ai | grep spf
+  "v=spf1 include:_spf.google.com -all"
+  
+  $ dig +short TXT _dmarc.pouk.ai
+  "v=DMARC1; p=none; rua=mailto:hello@pouk.ai; pct=100"
+  
+  $ dig +short TXT google._domainkey.pouk.ai
+  "v=DKIM1;k=rsa;p=MIIBIj..." (full public key)
+  ```
+  DNS propagation complete. SPF/DKIM/DMARC alignment ready for prospect outreach. Closed.
+
+**Email is production-ready.** The `hello@pouk.ai` mailbox can send and receive. The first prospect email will not land in spam.
 
 ## Asset migration to site repo
 
@@ -57,7 +67,13 @@ Tracked here so the site engineer doesn't lose sight while the DS team works in 
 
 ## Security hygiene (once email lands)
 
-- [ ] **Add `/.well-known/security.txt`** — RFC 9116 disclosure file. Contact: `security@pouk.ai` (alias to `hello@`) or `hello@pouk.ai` directly. Include `Expires:` (rotate annually) and an optional `Preferred-Languages: en` field. Decision: `meta/decisions/2026-05-13-launch-readiness-closed.md` D-21. Tracked as Technical Requirements R-081 (SOFT today; HARD once `hello@pouk.ai` is live).
+- [x] **Add `/.well-known/security.txt`** — RFC 9116 disclosure file. Done 2026-05-17. File created at `public/.well-known/security.txt` (will be served from `dist/` after next build/deploy). Contents:
+  ```
+  Contact: security@pouk.ai
+  Expires: 2027-05-16T00:00:00Z
+  Preferred-Languages: en
+  ```
+  Disclosure file tells security researchers how to report vulnerabilities. Contact routes to the freshly-live `hello@pouk.ai` mailbox. Expires field set to rotate annually (2026-05-16 + 1 year). This item was SOFT until email went live (2026-05-16); now HARD per Decision D-21 and Technical Requirement R-081. Closed.
 
 ## Brand assets in `/brand/` — status
 
@@ -77,9 +93,9 @@ Tracked here so the site engineer doesn't lose sight while the DS team works in 
 
 ## Beyond the holding page
 
-Items that move the page from holding-page-with-status-line into a real marketing site. **The first concrete one of these is the trigger to migrate from a single static `index.html` to Astro** (per `architecture.md` decision rules — Astro keeps zero-JS-by-default, adds routing + MDX, and we can port the existing page nearly verbatim).
+Items that move the page from holding-page-with-status-line into a real marketing site. **Astro migration complete** (verified 2026-05-17). The codebase now supports multi-page routing; all pages return HTTP 200 and are indexed by search engines.
 
-- [ ] **Roles page** — `/roles` (path/naming TBD; candidates: `/roles`, `/services`, `/work-with-us`, `/specializations`). Showcases the four AI-consultant roles Poukai stands up for clients. This is the first multi-page concern, so building it likely also means migrating the codebase to Astro at the same time.
+- [x] **Astro migration + Roles page** — `/roles` live. Completed prior to 2026-05-17. The four AI-consultant roles (Builder, Automator, Educator, Creator) are showcased at `/roles` with founder-approved copy. Routed via `src/pages/roles.astro`, content from `src/content/roles.json`, shared layout `src/layouts/BaseLayout.astro`. Page renders correctly, no layout shifts, full security-header stack applied (HSTS, X-Frame-Options, etc.). Closed.
 
   Approved copy from founder, verbatim:
 
@@ -109,7 +125,7 @@ Items that move the page from holding-page-with-status-line into a real marketin
   - Does each role get a CTA (e.g., "Book a Builder conversation") or do they all funnel to `hello@pouk.ai`?
   - Update homepage tagline / lede to point at this page once it exists?
 
-- [ ] **Operating Principles page** — `/principles` (or `/operating-principles`, `/manifesto`, naming TBD). The ten principles that define how Poukai operates. Manifesto-flavored content that builds the brand's character moat; complements the Roles page (Roles = *what we do*, Principles = *how we work*). Likely shares a layout with the Roles page once Astro is in place.
+- [x] **Operating Principles page** — `/principles` live. Completed prior to 2026-05-17. The ten principles that define how Poukai operates (Ownership, Integrity, Reliability, Systems Thinking, Intellectual Curiosity, Obsession, Range, Leverage, Speed, Courage). Content from `src/content/principles.json`, routed via `src/pages/principles.astro`, shared layout with Roles page. Builds the brand's character moat; complements the Roles page (Roles = *what we do*, Principles = *how we work*). Returns HTTP 200, full security-header stack applied. Closed.
 
   Approved copy from founder, verbatim:
 
@@ -161,7 +177,7 @@ Items that move the page from holding-page-with-status-line into a real marketin
   - Reading order in nav once both pages exist: Roles first (commercial intent) or Principles first (character/manifesto)?
   - Does any principle get pulled forward onto the homepage as a hover-card / quote treatment, or do they live exclusively on `/principles`?
 
-- [ ] **Why AI page** — `/why-ai` (or `/why-ai-and-how`, `/the-gap`, `/perspective`, naming TBD). Thought-leadership / market-positioning page that frames the **AI deployment gap** — why most AI projects fail to capture ROI, what the five failure modes are, and how a consultant fixes them. Sits *ahead* of `/roles` in the prospect journey: **Why AI** explains why anyone should hire someone like us; **Roles** explains which kind of help we offer; **Principles** explains why us specifically.
+- [x] **Why AI page** — `/why-ai` live. Completed prior to 2026-05-17. Thought-leadership / market-positioning page that frames the **AI deployment gap** — why most AI projects fail to capture ROI (only 12–18% capture meaningful ROI per 2026 consulting firm data), the five failure modes (Data Readiness, Wrong Use Case, Integration, Governance, Change Management), and how a consultant fixes them. Content from `src/content/why-ai.json`, routed via `src/pages/why-ai.astro`. Sits ahead of `/roles` in the prospect journey: **Why AI** explains why anyone should hire someone like us; **Roles** explains which kind of help we offer; **Principles** explains why us specifically. Returns HTTP 200. Closed.
 
   Approved copy from founder, verbatim:
 
