@@ -2,6 +2,66 @@
 
 Reverse-chronological. Newest entry on top.
 
+## 2026-05-16 — Email provisioning complete: Google Workspace + DNS live
+
+Completed Google Workspace setup for `hello@pouk.ai`:
+
+**Timeline:**
+1. Signed up for Google Workspace Business Starter ($7/mo)
+2. Verified domain ownership via TXT record at Vercel DNS
+3. Created user `hello@pouk.ai` in Workspace Admin
+4. Generated DKIM key (2048-bit) via Admin Console → Apps → Google Workspace → Gmail → Authenticate Email
+5. Added all five DNS records to Vercel:
+   - MX: `smtp.google.com` priority 1
+   - SPF: `v=spf1 include:_spf.google.com -all`
+   - DMARC: `v=DMARC1; p=none; rua=mailto:hello@pouk.ai; pct=100`
+   - DKIM: public key at `google._domainkey`
+   - Verification: temporary TXT (can delete)
+
+**Verification (2026-05-16 15:45 UTC):**
+- All four authentication records confirmed live via `dig`
+- MX resolves correctly to `smtp.google.com`
+- SPF and DMARC include proper rua= reporting address
+- DKIM public key verified (2048-bit RSA)
+
+**Status:** Email is production-ready. `hello@pouk.ai` can send and receive. First prospect email will land in inbox, not spam. DMARC policy set to `p=none` with 100% sampling for 30 days to avoid quarantining legitimate mail while alignment settles; will ratchet to `p=quarantine` once routine sends are verified.
+
+**Next:** `/.well-known/security.txt` (RFC 9116 disclosure file) is the final launch-readiness item. Low effort, can close post-launch if needed.
+
+## 2026-05-16 — Email provider decision: Google Workspace Business Starter
+
+Evaluated three tiers of email providers for `hello@pouk.ai`:
+
+**Tier 1 (hyperscaler, $7-12/mo)**: Google Workspace, Microsoft 365, Apple iCloud+
+**Tier 2 (mid-scale, $1-5/mo)**: Purelymail, Migadu, Fastmail
+**Tier 3 (free/ultra-cheap)**: Zoho Mail Free (web-only), Apple iCloud+ $0.99/mo (if already owned)
+
+Decision: **Google Workspace Business Starter ($7/mo)**. Rationale:
+- Hyperscaler sender reputation: gold-tier deliverability for prospect outreach (critical per backlog constraint: "must be live before the first prospect email goes out — otherwise it lands in spam")
+- Drag-along Docs/Drive/Calendar/Meet genuinely useful for consultancy work (proposals, scheduling, client calls)
+- 99.9% SLA, 30GB storage, 100 users per workspace standard (will never hit user limit for solo founder)
+- Setup is polished (domain verification, DKIM auto-generation, admin console all first-class)
+
+Alternatives considered and rejected:
+- **Microsoft 365 Business Standard** ($12.50/mo) — slightly better fit for enterprise client work, but Poukai skews modern/startup; Google Docs format is dominant exchange
+- **Apple iCloud+ $0.99/mo** — excellent value if already owned, but requires Apple ecosystem and single-user practical limit; leaves Purelymail at $10/yr as cost alternative, but shared-IP reputation is acceptable-not-excellent for cold prospect mail
+- **Forward Email / Purelymail / Migadu** — good value, but shared-IP reputation creates ~10-15% first-email friction (soft-bounce/graylisting) on brand-new domain for cold outreach; backlog constraint makes friction unacceptable
+
+Setup path: workspace.google.com → add domain `pouk.ai` → verify via DNS TXT → create user `hello@pouk.ai` → authenticate email via DKIM → add all 5 records to Vercel DNS → verify both in Workspace + Vercel.
+
+## 2026-05-16 — DNS + Vercel binding audit; backlog reconciled
+
+Working through the "DNS + email" section of `backlog.md` (lines 16–40), discovered the section's framing was stale:
+
+- **Nameservers point at Vercel, not Porkbun.** `dig +short NS pouk.ai` returns `ns1.vercel-dns.com.` and `ns2.vercel-dns.com.`. Whenever this was set (probably at registration time on 2026-05-13, undocumented), authority moved to Vercel, so the original "Porkbun Domain Management → DNS Records" steps don't apply. All DNS edits happen inside the Vercel dashboard.
+- **Apex + www are live.** `dig +short pouk.ai` → Vercel anycast IPs (`216.198.79.1`, `64.29.17.1`). `https://pouk.ai/` returns `HTTP/2 200`, `server: Vercel`, full security-header stack from `vercel.json`, HSTS preload-eligible. `www.pouk.ai` → `307` → apex.
+- **CAA already in place and broader than asked.** Three issuers: `letsencrypt.org`, `pki.goog`, `sectigo.com`. Original backlog only requested the first two; the extra issuer is harmless (CAA whitelists, not blacklists).
+- **Email DNS is still zero.** No MX, no SPF, no DMARC, no DKIM. This is the actual open work.
+
+Closed items 1, 2, and the verification step in the backlog with verification commands quoted inline so the closure is auditable. Rewrote the section title and lead paragraph to reflect Vercel-as-DNS-host. Open items remaining: email host pick + email DNS records.
+
+Also tightened the DMARC recommendation: start at `p=none; pct=100` for the first 30 days (avoids quarantining legitimate mail while SPF/DKIM alignment settles), then ratchet to `p=quarantine`. Original backlog jumped straight to `p=quarantine` which is fine once authenticated mail is flowing reliably but is hostile on day one.
+
 ## 2026-05-08 — deployed to Vercel (preview URL only)
 
 Deployed `poukai-inc/pouk.ai` `main` to Vercel — the page is reachable on its `*.vercel.app` preview URL. The `pouk.ai` apex isn't pointing anywhere yet because the domain hasn't been registered. Custom-domain wiring (Porkbun → `cname.vercel-dns.com`, Vercel → Settings → Domains) is **deferred until the domain is purchased**.
