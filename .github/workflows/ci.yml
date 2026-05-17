@@ -1,0 +1,302 @@
+# pouk.ai — CI (build + supply-chain gates)
+#
+# Closes the supply-chain trio in meta/backlog.md R25:
+#   - R-048 (HARD): secret scan via gitleaks
+#   - R-049 (HARD): pnpm audit --prod --audit-level=high
+#   - R-064 (HARD): license allow-list check
+#
+# Also hardens R-054 (HARD) — build must exit 0 on every PR HEAD and on main.
+#
+# Also closes:
+#   - R22 / R-013 / R-056 (HARD) — `lighthouse` job runs lhci against a local
+#     `pnpm preview` server. Thresholds in `.lighthouserc.json` per R-013:
+#     Perf ≥ 95, A11y/BP/SEO = 1.0 on mobile, three runs per route for flake.
+#   - R23 / R-029 / R-057 (HARD) — `axe` job runs @axe-core/cli (the official
+#     axe runner; R-057 explicitly accepts "or equivalent") against the same
+#     local preview server. Fails on any WCAG 2.1 AA violation.
+#
+# Both lhci and axe run against `localhost:4321` (the `pnpm preview` server),
+# not Vercel's preview URL — that needs a `deployment_status` webhook from
+# Vercel's GitHub App, tracked separately. Local-preview catches the
+# overwhelming majority of regressions today; Vercel-URL is an iteration.
+#
+# Also closes R24 / R-058 (conditional HARD) via the `test` job: vitest runs
+# every test in `src/**/*.test.{ts,tsx}` with v8 coverage; per-file thresholds
+# are enforced at 80% lines/functions/branches/statements per R-058.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same PR. Main pushes always run to completion.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build (R-054)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          # Pinned to the engines.node range in package.json (>=20 <21).
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies (frozen lockfile)
+        env:
+          # NPM_TOKEN is required for @poukai-inc/ui from npm.pkg.github.com per .npmrc.
+          # Configure as a repository secret in the GitHub UI (Settings → Secrets and variables → Actions).
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (astro check && astro build)
+        run: pnpm build
+
+  audit:
+    name: audit — pnpm audit --prod (R-049)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: pnpm audit --prod --audit-level=high
+        # R-049 HARD: zero high or critical vulnerabilities at merge time.
+        # Moderate findings are allowed but must be acknowledged in the PR description.
+        run: pnpm audit --prod --audit-level=high
+
+  secret-scan:
+    name: secret-scan — gitleaks (R-048)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gitleaks needs the full history to scan past commits.
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE is only required for org-level use; this runs at the
+          # repo level on the free tier. If gitleaks-action prompts for it, the
+          # GITHUB_TOKEN scope above is sufficient for repo-private scanning.
+
+  license-check:
+    name: license-check — allow-list (R-064)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies (prod only)
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile --prod
+
+      - name: License allow-list
+        # R-064 HARD: every prod dep must be on the allow-list or carry a
+        # documented exception. See .github/scripts/license-check.mjs for the
+        # allow-list, the exception list (with per-package rationale), and the
+        # governance contract for adding either.
+        run: pnpm licenses list --prod --json | node .github/scripts/license-check.mjs
+
+  lighthouse:
+    name: lighthouse — lhci (R-013, R-056)
+    runs-on: ubuntu-latest
+    # Independent of the build job — surfaces its own build error if it can't
+    # produce dist/ — so a flaky lhci run doesn't mask a real build failure
+    # in the upstream `build` job, and vice versa.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (lhci serves dist/ via `pnpm preview`)
+        run: pnpm build
+
+      - name: Run lighthouse-ci
+        # R-013 HARD thresholds: Perf ≥ 95, A11y/BP/SEO = 1.0 on mobile.
+        # Three runs per route — lhci takes the median, which absorbs the 1–2
+        # point Performance flake D-14 warned about.
+        # Config: .lighthouserc.json at repo root. Pin lhci version explicitly;
+        # bumping is a deliberate change reviewed in its own PR.
+        run: pnpm dlx "@lhci/cli@0.14.0" autorun
+
+      - name: Upload Lighthouse reports
+        # R-056 HARD: CI artifact archive contains the Lighthouse JSON; the
+        # reviewer cites it in the review's "Build & metrics" block.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 30
+
+  axe:
+    name: axe — accessibility (R-029, R-057)
+    runs-on: ubuntu-latest
+    # Independent of lighthouse — distinct failure surface (a11y vs perf/SEO).
+    # Mixing them would hide one behind the other in a red run.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Start preview server
+        # R-057 wording allows "@axe-core/playwright (or equivalent axe-core
+        # runner)" — we use @axe-core/cli which is the official axe runner
+        # backed by puppeteer. Same WCAG ruleset, lighter dependency footprint
+        # than wiring up the Playwright test framework. Move to @axe-core/playwright
+        # if/when we add a Playwright suite for E2E coverage.
+        run: pnpm preview --port 4321 &
+        # Server runs as background process; killed when the job exits.
+
+      - name: Wait for preview server
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:4321/ > /dev/null; then
+              echo "preview ready on http://localhost:4321/"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::preview server did not start within 30s"
+          exit 1
+
+      - name: Run axe against all four routes
+        # R-029 HARD: zero axe violations on every preview deploy.
+        # --exit makes a violation non-zero exit (CI red).
+        # Default tag set: wcag2a, wcag2aa, wcag21a, wcag21aa, best-practice — matches
+        # what R-029's source masterplan §6.1 expects.
+        # --save dumps per-URL JSON into the artifact directory.
+        run: |
+          mkdir -p .axe-reports
+          pnpm dlx "@axe-core/cli@4.10.0" \
+            http://localhost:4321/ \
+            http://localhost:4321/why-ai/ \
+            http://localhost:4321/roles/ \
+            http://localhost:4321/principles/ \
+            --save .axe-reports \
+            --exit
+
+      - name: Upload axe reports
+        # R-057 HARD: CI artifact archive contains the axe JSON.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-reports
+          path: .axe-reports/
+          retention-days: 30
+
+  test:
+    name: test — vitest + coverage (R-058)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        # R-058 (conditional HARD): pnpm test must exit 0 when tests exist;
+        # per-file coverage ≥ 80% on lines/functions/branches/statements.
+        # Thresholds live in vitest.config.ts so they're versioned next to
+        # the runner config and the absence-of-tests case stays a NIT, not
+        # a CI failure (vitest passes through an empty test run with no
+        # files matched, and the coverage threshold only applies to tracked
+        # `src/components/**/*.{ts,tsx}` files that actually have tests).
+        run: pnpm test:coverage
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 30

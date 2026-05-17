@@ -94,6 +94,8 @@ const bugsinkScript = hasBugsinkConfig
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
+    {/* R-027 exception: <meta> attributes can't reference CSS custom properties, so the literal hex
+       is unavoidable here. Keep in sync with --bg-base in @poukai-inc/ui/tokens.css. */}
     <meta name="theme-color" content="#FFFFFF" />
 
     <title>{title}</title>

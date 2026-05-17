@@ -10,7 +10,13 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap(),
-    compress(),
+    // CSS is already minified by Vite's rollup pipeline (single-line, no whitespace).
+    // The double-pass through astro-compress's csso/lightningcss chokes on the
+    // already-minified Astro chunks and prints "Error: Cannot compress file …" to
+    // stderr for every CSS file without actually breaking the build. Disable the
+    // redundant pass; HTML/JS/Image compression still runs and is what we wanted
+    // astro-compress for in the first place. (Backlog R18.)
+    compress({ CSS: false }),
   ],
 
   build: {

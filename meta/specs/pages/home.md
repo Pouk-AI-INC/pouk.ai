@@ -3,7 +3,7 @@
 **Route**: `/`
 **Status**: Approved
 **Owner**: Arian (founder) · Author: pouk-ai-pm
-**Last updated**: 2026-05-13
+**Last updated**: 2026-05-17 (§8 ACs reworded per backlog R35/R36/R37)
 **Masterplan reference**: Sections 4.1 (site layout), 4.3 (zero-JS contract), 6 (cutover)
 **Decisions log**: D-11 (lede-extension), D-12 (status line) — both resolved via `meta/decisions/launch-readiness.md` on 2026-05-13.
 
@@ -62,12 +62,12 @@ The homepage is hardcoded prose in the page template — no JSON file. The four 
 ## 8. Acceptance criteria
 
 - [ ] Route renders at `/`.
-- [ ] All sections in the IA (1–3) are present.
+- [ ] All sections in the IA (1–3) are present: `SiteShell` (top nav + footer) and `Hero` render; **IA item 3 is a negative assertion — no sections render between the `Hero` and the `SiteShell` footer.**
 - [ ] `Hero` molecule renders with title, lede, status, and CTA slots populated.
 - [ ] `StatusBadge` renders with the pulse animation (CSS keyframes, no JS) and matches the current holding page's behavior.
 - [ ] **Status-line text is byte-identical** to the pre-cutover `index.html` status-line copy (per D-12 — parity AC).
 - [ ] Lede ends in **a single integrated link sentence** with `href="/why-ai"` (per D-11). The hand-off is part of the lede prose, not a separate line under the CTA. Final wording: Arian.
-- [ ] No separate tertiary "Read why AI projects fail →" line exists below the email CTA (rejected alternative).
+- [ ] **No anchor or text node renders between the email-CTA element and the `SiteShell` footer.** (Structural form of the "no tertiary line below the CTA" rejection — covers paraphrased variants of the rejected alternative, not just the literal "Read why AI projects fail →" string.)
 - [ ] Email link renders as `<a href="mailto:hello@pouk.ai">`.
 - [ ] No additional sections (services, about, testimonials, logo bar) are present.
 - [ ] Visual parity with the current `index.html` on `/` confirmed per masterplan section 6.1: "indistinguishable" on screenshot diff.
@@ -77,7 +77,7 @@ The homepage is hardcoded prose in the page template — no JSON file. The four 
 - [ ] `prefers-reduced-motion` honored — pulse and any entrance animations disabled per the current page's behavior.
 - [ ] `<title>`, `<meta description>`, OG image, and JSON-LD render correctly with values appropriate to the post-cutover page (canonical: `https://pouk.ai/`).
 - [ ] `SiteShell` top nav links to `/why-ai`, `/roles`, `/principles` work; wordmark links back to `/`.
-- [ ] Spec section 5 outcomes are met by the shipped copy (Arian-verified).
+- [ ] Spec section 5 content outcomes are met by the shipped copy, evidenced by **`meta/content/drafts/pages/home.md` carrying `status: Approved`** (the content draft is the tracked-approval artifact; "Arian-verified" without an artifact is unenforceable per the PM-agent DoD §7).
 
 ## 9. Open questions / dependencies
 
