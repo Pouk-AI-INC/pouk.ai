@@ -267,7 +267,7 @@ jobs:
             http://localhost:4321/why-ai/ \
             http://localhost:4321/roles/ \
             http://localhost:4321/principles/ \
-            --save .axe-reports \
+            --save .axe-reports/results.json \
             --exit
 
       - name: Upload axe reports
