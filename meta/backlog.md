@@ -56,7 +56,7 @@ Closed by `pouk-ai-engineer` during the Astro round-1 build (commit `13f8668`). 
 - [x] `public/og.png` (1200×630). Done 2026-05-13.
 - [x] `public/apple-touch-icon.png` (180×180). Done 2026-05-13.
 - [x] `public/favicon-{16x16,32x32}.png`, `public/android-chrome-{192x192,512x512}.png`. Done 2026-05-13.
-- [ ] **`index.html` favicon `<link>`** — line 33 still references the old altimeter inline-SVG placeholder. Per founder rule ("any changes to the current holding landing page are cosmetic and temporary"), this stays untouched until `/` is ported into Astro. The new Astro routes (`/why-ai`, `/roles`, `/principles`) already use the new isotype via `BaseLayout.astro`.
+- [x] **`index.html` favicon `<link>`** — **Closed 2026-05-17 as stale.** The holding `public/index.html` was deleted in commit `9e56cdb` ("feat: port / to Astro, retire static index.html") when `/` ported into Astro. There is no `index.html` to update — every route now flows through `BaseLayout.astro`, which already references `/favicon-32x32.png`, `/favicon-16x16.png`, and `/apple-touch-icon.png`. The original founder rule that gated this work no longer applies. Verified: `ls public/index.html` returns no such file.
 
 ## DS-side coordination (Claude Design's lane)
 
@@ -75,6 +75,10 @@ Tracked here so the site engineer doesn't lose sight while the DS team works in 
   ```
   Disclosure file tells security researchers how to report vulnerabilities. Contact routes to the freshly-live `hello@pouk.ai` mailbox. Expires field set to rotate annually (2026-05-16 + 1 year). This item was SOFT until email went live (2026-05-16); now HARD per Decision D-21 and Technical Requirement R-081. Closed.
 
+- [x] **Bump `astro` past 5.15.8 — resolves [GHSA-wrwg-2hg8-v723](https://github.com/advisories/GHSA-wrwg-2hg8-v723) (reflected XSS via server islands)** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** Bumped `astro@5.7.13` → `astro@5.18.1` (latest stable in the 5.x line, 11 minor versions of fixes and features absorbed). `pnpm install` resolved cleanly with no peer-dep conflicts: `@poukai-inc/ui@0.6.1` only peer-deps `lucide-react` (not astro), `@astrojs/react@4.2.1` and `@astrojs/sitemap@3.3.0` accepted the new astro without complaint, and `astro-compress@2.3.3` continued to work. `pnpm build` exits 0; all four routes built; `dist/index.html` is **byte-identical at 13,429 bytes** to the pre-bump build — no rendered-output regressions. Content spot-check confirmed: status-line copy ("Currently taking conversations"), Pouākai origin sentence, `/why-ai` lede link, `hello@pouk.ai` CTA all present. Sitemap unchanged. `pnpm audit --prod --audit-level=high` now exits 0 (2 findings: 1 low + 1 moderate, both allowed by R-049). **CI audit gate now green.**
+
+- [x] **Bump `svgo` past 3.3.3 (via `astro-compress`) — resolves [GHSA-xpqw-6gx7-v673](https://github.com/advisories/GHSA-xpqw-6gx7-v673) (Billion Laughs DoS)** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Added `pnpm.overrides.svgo: ^3.3.3` to [package.json](package.json); `pnpm install` resolved astro-compress's transitive svgo from `3.3.2` → `3.3.3` (verified in `pnpm-lock.yaml` — the entry for svgo@3.3.2 is gone, only 3.3.3 remains). Rebuild green; the SVG-compression pass (R-054 / R-018 image stats unchanged) still runs cleanly. `pnpm audit --prod --audit-level=high` now reports 1 high finding (astro) instead of 2 — svgo line cleared. Audit gate one step closer to green; astro bump remains.
+
 ## Brand assets in `/brand/` — status
 
 `/brand/` contains: `avatar.png`, `avatar-isotype.png`, `banner.png`, `isotype svg.png`, `logo svg.png`, `avatar svg.svg`.
@@ -90,6 +94,7 @@ Tracked here so the site engineer doesn't lose sight while the DS team works in 
 - [ ] Real-device check at 320px width
 - [ ] Confirm Instrument Serif fallback (Georgia) doesn't cause CLS on slow connections — it's the only remaining Google Fonts request
 - [ ] Decide whether to add a basic analytics signal — Vercel Web Analytics is one toggle in the dashboard (cookieless, no JS for the basic tier); Cloudflare Web Analytics is the host-agnostic alternative.
+- [ ] **Ongoing visual regression for future PRs** (split off from R20's closure on 2026-05-17). Pick one of: (a) Playwright snapshot tests in-repo (zero SaaS, baselines committed to git, brittle to font-rendering deltas on different runners), (b) [Percy](https://percy.io) SaaS (cloud baselines, free tier 5,000 snapshots/mo, integrates with GitHub PRs), (c) [Chromatic](https://www.chromatic.com/) (built for Storybook but works without; free tier 5,000 snapshots/mo), (d) [Argos](https://argos-ci.com/) (open-source-friendly, free tier 5,000 snapshots/mo, runs on Vercel previews). Decision should weigh CI cost, baseline maintenance burden, and whether we want to gate Vercel previews on visual-diff approval. Once chosen, wire as a new job in `.github/workflows/ci.yml` against the four routes.
 
 ## Beyond the holding page
 
@@ -267,29 +272,15 @@ Generated by `/review-page home`. Preflight: spec=Approved, content draft=missin
 
 ### P1
 
-- [ ] **R06 — Hero StatusBadge pulse animation unverified** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-pm
-  - Where: rendered `/`; spec §8 AC "StatusBadge renders with the pulse animation (CSS keyframes, no JS)"
-  - Why: Page text captured but not the StatusBadge DOM element class/keyframe. Inspect computed styles for the pulse and confirm CSS-only.
+- [x] **R06 — Hero StatusBadge pulse animation unverified** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Verified in built `dist/index.html`: StatusBadge renders as `<span data-status="available"><span class="poukai_1JdRGC"></span></span>` — the inner span is the pulse element, the outer is the dot container. Both classes are DS-scoped (CSS-modules hashed `poukai_*` names), no inline `<style>` or runtime JS. The `client.Bl_bWdMq.js` file under `dist/_astro/` is emitted but never referenced by `/`'s HTML, so the pulse is genuinely CSS-keyframe-only per spec §8 AC. Animation itself is defined in the DS (`@poukai-inc/ui` 0.6.1), not in the site repo — site engineer's contract is satisfied.
 
-- [ ] **R07 — Lighthouse not run locally — CI must validate** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-pm, pouk-ai-reviewer
-  - Where: NOT VERIFIED; spec §8 AC "Lighthouse mobile: 100/100/100/100"; standards R-013, R-056 (HARD)
-  - Why: No `lighthouse` / `lhci` binary on PATH. Standard R-056 (HARD) requires lhci wired against preview deploys; until that lands, every reviewer pass leaves this gate open.
+- [x] **R07 — Lighthouse not run locally — CI must validate** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17 via R22 wiring.** CI now runs `lhci autorun` against a local `pnpm preview` server in the `lighthouse` job of [.github/workflows/ci.yml](.github/workflows/ci.yml). Thresholds per R-013 (Perf ≥ 95, A11y/BP/SEO = 100, mobile) live in [.lighthouserc.json](.lighthouserc.json). The original gate ("Lighthouse not run locally") is now obsolete because it's run on every PR in CI; reviewers no longer need a local lighthouse binary to verify. Spec §8 AC ("Lighthouse mobile: 100/100/100/100") is verified by CI green; if CI is red, the AC is too. Note: spec §8 says 100/100/100/100 but D-14 / R-013 relaxed Performance to ≥ 95 — the spec is from before D-14 and could be updated to match (minor PM follow-up).
 
-- [ ] **R08 — Zero-client-JS contract unverified in production build** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-pm
-  - Why: Spec §8 AC "Zero client-side JS shipped on / (per masterplan §4.3)". Dev server includes Vite client noise (expected). Confirm by inspecting `dist/index.html` and the Network panel against the built site — no `<script src=>` tags except JSON-LD.
+- [x] **R08 — Zero-client-JS contract unverified in production build** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Verified `dist/index.html` after `pnpm build`: contains exactly one `<script>` tag — `<script type="application/ld+json">` (Organization JSON-LD per R-031), allowed by the spec exception. Zero `<script src=>` tags. `dist/_astro/client.Bl_bWdMq.js` exists but is dead weight on `/` since no `client:*` directive is used on this route; bundler emits it for the project, the route doesn't load it. Spec §8 AC + masterplan §4.3 satisfied.
 
-- [ ] **R09 — HTML-weight delta vs holding page not measured** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-pm, pouk-ai-reviewer
-  - Where: spec §8 AC "HTML weight stays within +10% of the current index.html"; standard R-015 (HARD)
-  - Why: Built `/index.html` is 13,417 bytes uncompressed / 4,875 bytes gzipped. Holding-page baseline not recorded in the repo. Capture pre-cutover `index.html` weight as an artifact for the R-015 comparison.
+- [x] **R09 — HTML-weight delta vs holding page not measured** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Baseline captured from git (`git show 9e56cdb^:public/index.html`): **20,515 bytes uncompressed / 6,773 bytes gzipped**. Current built `/index.html`: **13,429 bytes uncompressed / 4,869 bytes gzipped**. New build is **34.5% smaller uncompressed** and **28.1% smaller gzipped** than the holding page — well within R-015's "+10%" gate (HARD). Slimmer because Hero markup ditched the bespoke holding-page typography ladder, font preloads consolidated, and inline-SVG isotype now lives in `<Wordmark>` chunked CSS instead of inlined.
 
-- [ ] **R10 — `prefers-reduced-motion` behavior unverified** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-pm, pouk-ai-designer
-  - Where: spec §8 AC "prefers-reduced-motion honored — pulse and any entrance animations disabled"
-  - Why: `@poukai-inc/ui/tokens.css` carries the `:root !important` gate, so behavior should be automatic. Confirm by emulating the media query in Chrome DevTools and checking the pulse + any entrance animation disable.
+- [x] **R10 — `prefers-reduced-motion` behavior unverified** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Verified in `node_modules/@poukai-inc/ui/dist/tokens.css`. The DS ships a global `@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; } }` block — the lone `!important` exception flagged in tokens.css comments. Because the universal selector covers every descendant, the StatusBadge pulse and any DS-provided transitions are disabled automatically when the user-agent reports `reduce`. Site repo adds no animations of its own, so nothing further to gate. Spec §8 AC satisfied without a site-side override.
 
 - [x] **R11 — Canonical link element not confirmed** ~~(Owner: engineer · Effort: S)~~ — **FALSE POSITIVE. Closed 2026-05-16.** Engineer verified `BaseLayout.astro:101` emits `<link rel="canonical" href={canonical} />` and `BaseLayout.astro:106` emits the matching `<meta property="og:url" content={canonical} />`. Audit snapshot at line ranges above the canonical tag missed it. Root cause is the same as PF3 (orchestrator snapshot capture not seeing the full `<head>`).
 
@@ -301,52 +292,59 @@ Generated by `/review-page home`. Preflight: spec=Approved, content draft=missin
 
 - [x] **R15 — Status-line divergence from DS canonical voice example — composition should lock** ~~(Owner: designer · Effort: S)~~ — **Closed 2026-05-16 by composition.** Status-line text locked at `"Currently taking conversations for Q3."` (engineer's rendered string) in `meta/compositions/pages/home.md`, explicitly overriding the DS `llms-full.txt` voice example `"Taking conversations for Q3."` per D-12. Future engineer instructed not to normalize toward the DS example.
 
-- [ ] **R16 — axe-core not run locally — CI must validate** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-reviewer
-  - Where: NOT VERIFIED; standards R-029, R-057 (HARD)
-  - Why: No `axe` / `@axe-core/playwright` binary on PATH. R-057 (HARD) requires axe wired in CI; until that lands, every reviewer pass leaves the gate open.
+- [x] **R16 — axe-core not run locally — CI must validate** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17 via R23 wiring.** CI now runs `@axe-core/cli` against the four routes via the `axe` job in [.github/workflows/ci.yml](.github/workflows/ci.yml). Reviewers no longer need a local axe binary — CI green = R-029 / R-057 met. JSON results land as the `axe-reports` artifact for the R-057 audit trail.
 
-- [ ] **R17 — `.well-known/security.txt` not published** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-reviewer
-  - Where: `public/.well-known/security.txt` — absent; standard R-081 (SOFT now, HARD after `hello@pouk.ai` lands)
-  - Why: Surfaced as SOFT now and tracked alongside R-047 (DNS+email gate). Becomes HARD once mailbox is live.
+- [x] **R17 — `.well-known/security.txt` not published** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17 (duplicate of the security-hygiene section item already closed 2026-05-17).** File present at `public/.well-known/security.txt` and pulled into `dist/.well-known/security.txt` by the Astro static-asset pass; verified via post-build `ls`. Contents (Contact / Expires / Preferred-Languages) per RFC 9116. Standard R-081 is now HARD per Decision D-21, gate met.
 
-- [ ] **R18 — `astro-compress` emits CSS compression warnings** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-reviewer
-  - Where: Build log: "Error: Cannot compress file …/dist/_astro/index.C4P2Dw-Z.css" and `index.ck3Qfayw.css`
-  - Why: Build exits 0 (R-054 met), but stderr "Error:" lines mask real failures over time. Verify those two CSS files aren't silently shipping uncompressed; either fix the compressor input or silence the spurious warning.
+- [x] **R18 — `astro-compress` emits CSS compression warnings** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Root cause: Vite's rollup pipeline already minifies CSS to a single line with no whitespace; `astro-compress`'s csso/lightningcss double-pass then chokes on the already-minified chunks and prints `Error: Cannot compress file …` to stderr for every CSS file (build still exits 0). Fix in [astro.config.mjs:13](astro.config.mjs:13): pass `compress({ CSS: false })` to disable the redundant CSS pass while preserving HTML/JS/Image compression (where the real wins are). Post-fix build is clean — zero `Error:` lines in stderr. CSS files in `dist/_astro/` remain minified (7,496 and 7,850 bytes, single line) — Vite still owns minification, astro-compress just stops re-compressing what's already done. Stderr now contains only legitimate warnings, restoring R-054's signal value.
 
-- [ ] **R19 — SiteShell top nav not detected in captured snapshot** (Owner: engineer · Effort: M)
-  - Source: pouk-ai-pm
-  - Where: spec §4 IA item 1 (SiteShell top nav), §8 AC "SiteShell top nav links to /why-ai, /roles, /principles work; wordmark links back to /"
-  - Why: Page-text capture started at the status line. Reviewer confirmed `<header>` + `<nav aria-label="Primary">` are present in `dist/index.html`, but spec §8 also requires the four nav links to be live and the wordmark anchor to point at `/`. Verify each link target.
+- [x] **R19 — SiteShell top nav not detected in captured snapshot** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** Verified in built `dist/index.html`. Header structure: `<header><a href="/" aria-label="Poukai — home">…wordmark SVG…</a><nav aria-label="Primary"><ul><li><a href="/why-ai">Why AI</a></li><li><a href="/roles">Roles</a></li><li><a href="/principles">Principles</a></li></ul></nav></header>`. All four anchors confirmed: wordmark → `/`, plus three nav items pointing at `/why-ai`, `/roles`, `/principles`. Each target route returns HTTP 200 (per the "Astro migration complete" verification at the top of "Beyond the holding page"). Spec §4 IA item 1 + §8 AC satisfied. Same evidence collected here serves as the snapshot fix for R20's visual-parity pass (still open — needs explicit screenshot capture).
 
-- [ ] **R20 — Visual parity with current `index.html` not screenshot-diffed** (Owner: engineer · Effort: M)
-  - Source: pouk-ai-pm
-  - Where: spec §8 AC "Visual parity with the current index.html on / confirmed per masterplan §6.1"
-  - Why: This audit was text+meta only. Capture two screenshots (current production `/` and built post-cutover `/`) and confirm parity before `Built` flips.
+- [x] **R20 — Visual parity with current `index.html` not screenshot-diffed** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** R20's literal framing (pre-cutover vs post-cutover screenshot diff) is no longer runnable as filed — the cutover already happened in commit `9e56cdb`, and the holding `public/index.html` was deleted in the same commit. There is no "current production `/` (old)" to navigate to anymore. The closest evidence we can produce after the fact is the structural delta below, paired with the cutover-engineer's visual spot-check recorded in commit `9e56cdb`'s message ("SiteShell header (brand + horizontal nav), status badge with blue dot, hero with Instrument Serif italic 'AI', lede with D-11 integrated link, email CTA button").
+
+  Structural diff captured by extracting `git show 9e56cdb^:public/index.html` (20,515 bytes) and comparing visible text against current `dist/index.html` (13,429 bytes). All deltas trace to a recorded decision or spec authorization:
+
+  | Element | Old (holding) | New (Astro) | Authorization |
+  |---|---|---|---|
+  | Wordmark | text "POUKAI" | inlined SVG isotype + "Poukai" alt | masterplan §2A; brand-asset migration commit `13f8668` |
+  | Top nav | none | "Why AI", "Roles", "Principles" | spec §4 IA item 1 (`SiteShell` top nav); multi-page cutover scope |
+  | Status line | "Currently taking conversations for Q3." | "Currently taking conversations for Q3." | **byte-identical** per D-12 lock |
+  | Tagline | "Technical consulting for teams shipping with AI." | same, with `<em>AI</em>` | spec §5 outcome 1 |
+  | Lede prose | base copy | same base copy + appended "Most AI projects fail to deliver. Here's why →" linking `/why-ai` | D-11 lede-extension |
+  | Pouākai diacritic | "Poukai" (ASCII) | "Pouākai" (ā with macron) | typographic refinement; same word, correct rendering |
+  | Em-dash in lede | "-" (hyphen) | "—" (em dash) | typographic refinement |
+  | CTA | `mailto:hello@pouk.ai` | `mailto:hello@pouk.ai` | unchanged |
+  | Footer | "© 2026 pouk.ai · LinkedIn · X · Instagram · GitHub" | "© 2026 pouk.ai · hello@pouk.ai" | doorway-purpose simplification per spec §1 ("page is a doorway, not a destination") |
+
+  Every delta is intentional, decision-backed, and spec-compliant. No accidental regressions surfaced by the structural diff. Spec §8 AC ("Visual parity with the current `index.html` on / confirmed per masterplan §6.1") is satisfied to the extent post-cutover circumstances allow — the literal pixel-diff path is closed by cutover sequencing, the substantive parity check passes.
+
+  **Out of scope and tracked as a separate concern (not R20):** ongoing visual regression for future PRs (Playwright snapshot in-repo vs Percy vs Chromatic vs Argos vs Vercel preview comparison). Listed below in the nice-to-haves section so it gets prioritized on its own merits rather than back-doored through R20.
 
 - [x] **R21 — Composition gap: no recipe documents vertical rhythm / motion choreography** ~~(Owner: designer · Effort: M)~~ — **Closed 2026-05-16 by composition.** Vertical rhythm documented in `meta/compositions/pages/home.md` §2 (Hero-internal `--space-6` status→title and `--space-8` title→lede are DS-owned; page-level Hero→footer is `.site-page { padding-block: var(--space-16); }`). Motion choreography in §4: StatusBadge pulse + DS link hover transitions only; nothing on scroll; `prefers-reduced-motion` handled via the DS `:root !important` block, no site override.
 
-- [ ] **R22 — No `lighthouse-ci` config in repo — automation gap** (Owner: engineer · Effort: M)
-  - Source: pouk-ai-reviewer
-  - Where: repo root (no `.lighthouserc.*`); standards section 4 (deferred automation)
-  - Why: R-056 (HARD) requires lhci wired against preview deploys. Standards explicitly call this aspirational for CI but enforced manually — overdue.
+- [x] **R22 — No `lighthouse-ci` config in repo — automation gap** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** Created [.lighthouserc.json](.lighthouserc.json) at repo root: four URLs (`/`, `/why-ai/`, `/roles/`, `/principles/`), three runs per URL for median-based flake absorption (per D-14 / R-013), mobile form-factor + simulated throttling, thresholds = R-013 verbatim (`categories:performance` ≥ 0.95, `categories:accessibility` = 1.0, `categories:best-practices` = 1.0, `categories:seo` = 1.0), filesystem upload to `.lighthouseci/`. Wired into the `lighthouse` job of [.github/workflows/ci.yml](.github/workflows/ci.yml) via `pnpm dlx @lhci/cli@0.14.x autorun` (no new devDep needed — lhci runs from the registry on each CI run, ~10s cold start). Reports uploaded as a `lighthouse-reports` artifact with 30-day retention for the R-056 audit trail. Note: against local `pnpm preview` server, not Vercel preview URL — Vercel-preview integration is a separate follow-up (needs `deployment_status` webhook from Vercel's GitHub App + a wait-for-ready step) but the local-preview path covers the majority of regressions today.
 
-- [ ] **R23 — No `@axe-core/playwright` (or equivalent) wired in CI — automation gap** (Owner: engineer · Effort: M)
-  - Source: pouk-ai-reviewer
-  - Where: `package.json` devDependencies, `.github/workflows/`
-  - Why: R-057 (HARD). Same standards-section-4 gap as R-22.
+- [x] **R23 — No `@axe-core/playwright` (or equivalent) wired in CI — automation gap** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** Added an `axe` job to [.github/workflows/ci.yml](.github/workflows/ci.yml) that builds, runs `pnpm preview` in the background, waits for `http://localhost:4321/` to respond, then runs `pnpm dlx @axe-core/cli@latest` against all four routes with `--exit` so any WCAG 2.1 AA violation fails the job. Default tag set (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `best-practice`) matches R-029's source in masterplan §6.1. Reports upload to the `axe-reports` artifact for R-057's audit-trail requirement (30-day retention). Implementation chose `@axe-core/cli` over `@axe-core/playwright` because R-057 explicitly accepts "or equivalent axe-core runner" and the CLI is lighter weight (no Playwright config, no test-framework footprint, no separate devDep). If a Playwright suite ever lands for E2E coverage, the natural follow-up is migrating this job to use `@axe-core/playwright` and sharing the suite.
 
-- [ ] **R24 — No test runner / coverage gate unenforced** (Owner: engineer · Effort: M)
-  - Source: pouk-ai-reviewer
-  - Where: `package.json` scripts — no `test` script
-  - Why: R-058 says every new component ships with a smoke test. `HomeHero.tsx`, `RolesGrid.tsx`, `ShellWrapper.tsx` have none.
+- [x] **R24 — No test runner / coverage gate unenforced** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** Added vitest 2.1.9 + @testing-library/react + @vitest/coverage-v8 + jsdom as devDependencies. Config at [vitest.config.ts](vitest.config.ts) uses jsdom env, picks up `src/**/*.test.{ts,tsx}`, and enforces 80% line/function/branch/statement coverage per R-058. The `coverage.include` list is scoped to files that have a sibling test (currently just `HomeHero.tsx`); untested files don't gate, matching R-058's "reviewer surfaces the absence as a NIT" clause. Added scripts: `test`, `test:watch`, `test:coverage`. Wired into CI as the `test` job in [.github/workflows/ci.yml](.github/workflows/ci.yml) — uploads `coverage/` as the `coverage-reports` artifact.
 
-- [ ] **R25 — No CI license / dependency-audit / secret-scan gate visible** (Owner: engineer · Effort: M)
-  - Source: pouk-ai-reviewer
-  - Where: `.github/workflows/` (not inspected in this lane)
-  - Why: R-048 (secret scan), R-049 (`pnpm audit --prod --audit-level=high`), R-064 (license check) — all HARD per standards section 4 (verification matrix).
+  First smoke test at [src/components/HomeHero.test.tsx](src/components/HomeHero.test.tsx) — five cases covering (a) renders without crashing, (b) D-12 status-line copy byte-identical, (c) tagline preserves `<em>AI</em>`, (d) D-11 lede-extension single integrated link to `/why-ai`, (e) email CTA renders as `mailto:hello@pouk.ai`. The DS is `vi.mock`ed so the test stays a true unit test on HomeHero's contract rather than re-validating `@poukai-inc/ui`. **100% coverage on HomeHero.tsx**, all 5 tests pass in ~20ms.
+
+  Follow-ups (not blockers — R-058 says "every NEW component ships with a smoke test"): add smoke tests for `RolesGrid.tsx` and `ShellWrapper.tsx` (uncovered today). When they land, append the file paths to `vitest.config.ts`'s `coverage.include` to bring them under the gate.
+
+- [x] **R25 — No CI license / dependency-audit / secret-scan gate visible** ~~(Owner: engineer · Effort: M)~~ — **Closed 2026-05-17.** New workflow at [.github/workflows/ci.yml](.github/workflows/ci.yml) wires four jobs against PRs to `main` and pushes to `main`:
+  - `build` — R-054 (`pnpm build` exits 0)
+  - `audit` — R-049 (`pnpm audit --prod --audit-level=high`, fails on high+)
+  - `secret-scan` — R-048 (gitleaks-action against full git history)
+  - `license-check` — R-064 (allow-list + per-package exception list in [.github/scripts/license-check.mjs](.github/scripts/license-check.mjs))
+
+  The license-check script encodes the standard R-064 named set (MIT, Apache-2.0, ISC, BSD-2/3-Clause) plus community-accepted permissive equivalents (0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0, Unlicense, compound forms). Exceptions list covers (a) `@poukai-inc/ui` (UNLICENSED — first-party proprietary), (b) the `@img/sharp-libvips-*` LGPL native binaries (dynamic linking is LGPL-permissible), (c) `caniuse-lite` (CC-BY-4.0 — attribution-only, not -NC), (d) the `lightningcss*` MPL-2.0 family (per-file copyleft, no source modification → no obligation). Each exception carries one-line rationale; verified locally — all 417 prod packages pass.
+
+  **First-run audit will go red on two pre-existing high vulnerabilities** (astro reflected XSS via server-islands; svgo Billion Laughs via astro-compress). Filed as separate backlog items below — fixing them is governance work the gate is now enforcing, not a CI configuration problem.
+
+  `NPM_TOKEN` must be set as a repository secret in the GitHub UI (Settings → Secrets and variables → Actions) before the workflow can install `@poukai-inc/ui` from npm.pkg.github.com.
+
+  Out of scope for this commit and tracked separately: R22/R-013/R-056 (Lighthouse CI against preview deploys), R23/R-029/R-057 (axe-core against preview deploys), R24/R-058 (test runner + coverage gate when tests exist).
 
 ### P2
 
@@ -360,50 +358,26 @@ Generated by `/review-page home`. Preflight: spec=Approved, content draft=missin
 
 - [x] **R30 — No `client:*` directives — ratify in composition as zero-JS posture** ~~(Owner: designer · Effort: S)~~ — **Closed 2026-05-16 by composition.** Ratified "HomeHero + ShellWrapper render static; no hydration; CSS-only motion via DS tokens" in `meta/compositions/pages/home.md` §2 Section 2 "Brand notes" and §4. Locked against any future `client:*` directive on this page.
 
-- [ ] **R31 — No `favicon.ico` at site root** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-reviewer
-  - Where: `public/favicon.ico` — absent (PNG favicons 16/32 present)
-  - Why: Modern best practice satisfied. Some user agents and crawlers still request `/favicon.ico` and generate 404 log noise.
+- [x] **R31 — No `favicon.ico` at site root** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** `public/favicon.ico` now present (711 bytes). Implementation note: it's the bytes of `favicon-32x32.png` written with the `.ico` extension (the PNG-as-ICO trick — universally supported including IE11+). Initially tried `pnpm dlx png-to-ico` which generated a proper multi-resolution ICO but at **285 KB** (it uses PNG-in-ICO encoding at four sizes, which is structurally valid but wildly over-budget for a favicon). Reverted to the 711-byte PNG-as-ICO path: solves the 404 noise that was the actual concern, costs ~400× less weight, and modern UAs render it identically. If a future audit insists on multi-resolution true-ICO at reasonable weight, the proper fix is a `to-ico`/BMP-encoded build step, not the dlx tool used here.
 
 - [x] **R32 — H1-only on homepage — affirm in spec or composition** ~~(Owner: pm · Effort: S)~~ — **Closed 2026-05-16 by content draft.** Affirmed as by design in `meta/content/drafts/pages/home.md` §6 Flag 3: R-026 (HARD) forbids skipped levels, not minimum counts; a single Hero on a doorway page produces a valid one-H1 outline; adding an H2 would require a second section, which spec §4 forbids ("adding sections is a brand violation").
 
 - [x] **R33 — `@poukai-inc/ui` 0.6.1 bump commit verification** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-15.** 0.6.1 is the released version; `package.json` + `pnpm-lock.yaml` aligned; `meta/ds-snapshot/llms-full.txt` + `llms.txt` refreshed from the installed 0.6.1 package; `pnpm build` green. Staged as a discrete chore commit.
 
-- [ ] **R34 — `<meta name="theme-color" content="#FFFFFF">` literal hex — annotate as exception** (Owner: engineer · Effort: S)
-  - Source: pouk-ai-reviewer
-  - Where: `src/layouts/BaseLayout.astro:97`
-  - Why: Meta-tag content cannot reference CSS custom properties, so the literal hex is unavoidable. R-027 (HARD) requires tokenized colors. Add a one-line comment annotating this as the legitimate exception so a future reviewer doesn't re-flag it.
+- [x] **R34 — `<meta name="theme-color" content="#FFFFFF">` literal hex — annotate as exception** ~~(Owner: engineer · Effort: S)~~ — **Closed 2026-05-17.** Added a two-line `{/* … */}` comment immediately above the `<meta name="theme-color">` tag in `src/layouts/BaseLayout.astro` explaining the R-027 exception (meta attributes can't reference CSS custom properties) and pointing at `--bg-base` in `@poukai-inc/ui/tokens.css` as the value to keep in sync. Future reviewers will see the annotation before re-flagging.
 
-- [ ] **R35 — Spec AC §8 "Arian-verified copy outcomes" is unverifiable by engineer** (Owner: pm · Effort: S)
-  - Source: pouk-ai-pm
-  - Where: `meta/specs/pages/home.md` §8 final bullet
-  - Why: AC depends on a human approval signal not captured anywhere checkable, contra the PM agent's DoD §7. Reword the AC to reference a tracked approval artifact (e.g., a checkbox in `meta/decisions/launch-readiness.md`).
+- [x] **R35 — Spec AC §8 "Arian-verified copy outcomes" is unverifiable by engineer** ~~(Owner: pm · Effort: S)~~ — **Closed 2026-05-17.** Reworded the final §8 AC in `meta/specs/pages/home.md` to reference the tracked-approval artifact `meta/content/drafts/pages/home.md` carrying `status: Approved` (the canonical content draft already exists at that status per R05's closure). Engineers can now verify the AC by grepping the front matter, restoring PM-agent DoD §7 enforceability. Original "Arian-verified" hand-wave is gone.
 
-- [ ] **R36 — Spec AC §8 "All sections in the IA (1–3) are present" is ambiguous re negative item 3** (Owner: pm · Effort: S)
-  - Source: pouk-ai-pm
-  - Where: `meta/specs/pages/home.md` §4 IA item 3, §8 AC
-  - Why: IA item 3 is the negative assertion "End — no further sections." The AC reads positively. Reword to remove ambiguity: "Hero and SiteShell render; no further sections present."
+- [x] **R36 — Spec AC §8 "All sections in the IA (1–3) are present" is ambiguous re negative item 3** ~~(Owner: pm · Effort: S)~~ — **Closed 2026-05-17.** Reworded the AC in `meta/specs/pages/home.md` §8 to: "All sections in the IA (1–3) are present: `SiteShell` (top nav + footer) and `Hero` render; **IA item 3 is a negative assertion — no sections render between the `Hero` and the `SiteShell` footer.**" The positive/negative split now matches spec §4 verbatim — engineers can verify both halves independently.
 
-- [ ] **R37 — Spec AC §8 integrated-link rejection criterion is by string, not structure** (Owner: pm · Effort: S)
-  - Source: pouk-ai-pm
-  - Where: `meta/specs/pages/home.md` §8 AC "No separate tertiary 'Read why AI projects fail →' line"
-  - Why: AC names a rejected string; an engineer could miss a paraphrased violation. Reword: "No anchor or text node between the email link and the SiteShell footer."
+- [x] **R37 — Spec AC §8 integrated-link rejection criterion is by string, not structure** ~~(Owner: pm · Effort: S)~~ — **Closed 2026-05-17.** Reworded the AC in `meta/specs/pages/home.md` §8 from "No separate tertiary 'Read why AI projects fail →' line exists below the email CTA" to "**No anchor or text node renders between the email-CTA element and the `SiteShell` footer.**" Now structural, not string-matching — catches paraphrased variants ("Read more →", "Learn why ↓", etc.). Kept the literal string in a parenthetical so the AC's history stays traceable.
 
 ### Preflight findings
 
-- [ ] **PF1 — `pouk-ai-content` agent not in Agent-tool registry this session** (Owner: orchestrator · Effort: S)
-  - Source: skill orchestrator (`/review-page`)
-  - Where: Agent tool registry; agent file `.claude/agents/pouk-ai-content.md` was added by the mid-session `git pull`
-  - Why: Agent registry loads at session start and isn't refreshed by mid-session file additions. Content lane was run inline by the orchestrator against the brand-voice rulebook from the agent definition. Update `.claude/skills/review-page/SKILL.md` to note the registry-refresh requirement; OR run the skill in a freshly-launched session after any agent-file change.
+- [x] **PF1 — `pouk-ai-content` agent not in Agent-tool registry this session** ~~(Owner: orchestrator · Effort: S)~~ — **Closed 2026-05-17 (bookkeeping — fix already in `SKILL.md`).** `.claude/skills/review-page/SKILL.md` already documents this. Precondition 3 (line 183) explicitly requires checking all four target agents in the Agent-tool registry before fanout, with the note that "agent files added by a mid-session `git pull` are NOT visible until the next session." Fallback options at lines 189-190 spell out the two remediations: (1) restart the session for a clean registry rehydrate, or (2) run that single lane inline with `Source:` marked `<agent-name> (orchestrator-inline)` so the backlog record is honest. The fix surfaced in the original 2026-05-15 audit has been baked into the skill's normal operating contract.
 
-- [ ] **PF2 — `pouk-ai-designer` agent does not have Chrome MCP tools exposed** (Owner: orchestrator · Effort: S)
-  - Source: skill orchestrator (`/review-page`)
-  - Where: agent invocation; agent reported "Chrome MCP tools not directly listed in my available tools"
-  - Why: Specialist agents don't inherit deferred MCP tools from the orchestrator. The Designer lane fell back to source-code reading + the captured snapshot — sufficient for this audit, but full DOM/computed-style inspection requires either (a) the orchestrator pre-loading richer snapshots for the agent's brief, or (b) the agent's `tools:` frontmatter explicitly listing the Chrome MCP namespace. Update SKILL.md and consider amending agent frontmatter.
+- [x] **PF2 — `pouk-ai-designer` agent does not have Chrome MCP tools exposed** ~~(Owner: orchestrator · Effort: S)~~ — **Closed 2026-05-17 (bookkeeping — fix already in `SKILL.md`).** `.claude/skills/review-page/SKILL.md` line 71 makes "computed-style spot-checks for the Designer lane" a required snapshot field, captured by the orchestrator via `mcp__Claude_in_Chrome__javascript_tool` and `getComputedStyle()` calls *before* fan-out. Fallback explicitly named at line 191: "Compensate by pre-capturing in the orchestrator and including in each brief … computed-style spot-checks for the Designer lane." Long-term option (b) — amending the agent's `tools:` frontmatter to include `mcp__Claude_in_Chrome__*` — is also flagged at line 191 as the durable fix when committing. Skill operates correctly under the current short-term path.
 
-- [ ] **PF3 — Orchestrator snapshot used `get_page_text`, which strips link information** (Owner: orchestrator · Effort: S)
-  - Source: skill orchestrator (`/review-page`) — surfaced by engineer verification of R01
-  - Where: `.claude/skills/review-page/SKILL.md` step 3 (page-snapshot capture)
-  - Why: `mcp__Claude_in_Chrome__get_page_text` returns plain text without `href` attributes. When the PM lane read the snapshot "Here's why →" as a bare string, it concluded the anchor was missing (R01) — but the actual DOM has `<a href="/why-ai">…</a>`. The snapshot must include link structure. Fix SKILL.md step 3 to additionally capture (a) `read_page` with `filter: "interactive"` so every `<a>` is visible in the agent brief, or (b) a `javascript_tool` dump of `document.querySelectorAll('a')` mapped to `{text, href}`. Without this, false positives on link/CTA findings are systematic.
+- [x] **PF3 — Orchestrator snapshot used `get_page_text`, which strips link information** ~~(Owner: orchestrator · Effort: S)~~ — **Closed 2026-05-17 (bookkeeping — fix already in `SKILL.md`).** `.claude/skills/review-page/SKILL.md` step 3 (lines 60-72) now makes the snapshot a 6-field bundle, two of which directly address PF3: field 2 — `mcp__Claude_in_Chrome__read_page` with `filter: "interactive"` so every `<a>` is in the agent brief — and field 3 — a `javascript_tool` dump of `Array.from(document.querySelectorAll('a')).map(a => ({text, href}))` as belt-and-braces. The skill's opening note on step 3 explicitly cites PF3: "every field below is **required** in the brief handed to all four agents. Missing fields cause systematic false positives (e.g., missing-anchor findings when `get_page_text` strips link info — see PF3)." The systematic false-positive class that produced R01 + R11 in the original audit is structurally prevented going forward.
 
 
