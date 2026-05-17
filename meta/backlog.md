@@ -116,7 +116,18 @@ Tracked here so the site engineer doesn't lose sight while the DS team works in 
   **Files changed:** [`src/layouts/BaseLayout.astro`](src/layouts/BaseLayout.astro) (preload imports), removed `public/fonts/` directory.
 - [x] **axe DevTools pass** — closed 2026-05-17. Ran `@axe-core/cli@4.10.0` (axe-core 4.10.3, chrome-headless) locally against `http://localhost:4321/`, `/why-ai/`, `/roles/`, `/principles/` with the default tag set (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `best-practice`). **0 violations on all four routes.** This matches the CI `axe` job (R-029 HARD) which has been green since the routes shipped; the local pass is just confirmation under the same ruleset DevTools uses. The R-029 CI job remains the durable enforcement — if anything regresses, the gate stops it before merge.
 
-- [ ] **Manual screen-reader walk** — separate from the axe pass; can't be automated. Needs a human pass with VoiceOver (macOS, ⌘F5) and ideally NVDA (Windows) across all four routes, focusing on: nav landmark order, skip-link behavior, heading hierarchy (`h1` → `h2` → `h3`), `aria-current` on active nav item, focus-visible rings on the CTA, image `alt` text on the avatar isotype + OG card, and the principles page numbering announcement. Assign to Arian or external a11y reviewer.
+- [ ] **Manual screen-reader walk** *(deferred — not a launch blocker)* — partial automation landed 2026-05-17 in [`tests/tab-order.spec.ts`](tests/tab-order.spec.ts) (Playwright). The trace asserts no focus traps, ≥3 tab stops per route, and at least one primary-nav link reached via Tab; the journey is logged to stdout so a reviewer can scan focus order without re-running. Runs in CI as part of the `argos` job (`pnpm test:visual` now executes both `visual.spec.ts` and `tab-order.spec.ts`).
+
+  **What's still irreducibly manual** and deferred until Arian (or an external a11y reviewer) has 30–45 minutes per platform:
+  - Does the announced text actually make sense sentence-by-sentence?
+  - Is each `alt` attribute descriptive or placeholder?
+  - Does the reading order match the visual order on `/why-ai/` (failure-modes list) and `/principles/` (numbered manifesto)?
+  - Does `aria-current="page"` announce as "current page" on the active nav item?
+  - Are the footnote markers (`¹²³` on `/why-ai/`) announced as "superscript one" or skipped?
+  - Are the emoji prefixes on role headings (`🔨 The Builder`, etc.) announced helpfully or as distracting noise?
+  - Does the focus ring become *visible* (not just *present*) when navigated by keyboard?
+
+  Tools: VoiceOver (macOS, `⌘F5` to toggle), NVDA (Windows, free at <https://nvaccess.org>). The site has 0 axe violations and clean structural HTML — this walk is for polish, not blockers.
 - [x] **Real-device check at 320px width** — closed 2026-05-17. Headless-Chrome audit (system Chrome via Puppeteer 22, viewport set via CDP) at viewport widths 320 / 360 / 768 / 1024+ against all four routes. Audit script lives at `/tmp/check-320.mjs` (not checked in — single-purpose investigation tool).
 
   **Findings — pre-fix (2026-05-17 morning):**
